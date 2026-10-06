@@ -1,0 +1,2 @@
+[console_scripts]
+cryptoaudit = cryptoaudit.cli.main:app

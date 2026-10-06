@@ -1,0 +1,12 @@
+rule_id: CR3
+name: Static or Reused IV / Nonce
+category: STATIC_OR_REUSED_IV_NONCE
+severity: HIGH
+description: Detects static or hardcoded Initialization Vectors (IVs) or nonces in symmetric encryption.
+rule_version: 1.0.0
+
+targeted_apis:
+  - AES.new
+  - Cipher
+
+remediation: Generate a fresh, unpredictable, cryptographically secure IV or nonce for every encryption operation using os.urandom() or secrets.token_bytes().

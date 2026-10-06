@@ -1,0 +1,16 @@
+rule_id: CR4
+name: Weak KDF Parameters or Static Salt
+category: WEAK_KDF_PARAMETERS_OR_STATIC_SALT
+severity: HIGH
+description: Detects weak key derivation function (KDF) configurations, hardcoded static salts, or direct fast hash key derivation.
+rule_version: 1.0.0
+
+min_iterations: 600000
+
+targeted_apis:
+  - hashlib.pbkdf2_hmac
+  - PBKDF2HMAC
+  - hashlib.md5
+  - hashlib.sha256
+
+remediation: Use PBKDF2-HMAC-SHA256 with at least 600,000 iterations or Argon2id with a unique, cryptographically random salt (os.urandom(16)) per password derivation.

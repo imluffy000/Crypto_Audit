@@ -1,0 +1,28 @@
+rule_id: CR5
+name: Weak Randomness for Security-Sensitive Tokens
+category: WEAK_RANDOMNESS_SECURITY_TOKENS
+severity: HIGH
+description: Detects standard pseudo-random number generators (random module) used for generating security-sensitive tokens or secrets.
+rule_version: 1.0.0
+
+targeted_apis:
+  - random.random
+  - random.randint
+  - random.randrange
+  - random.choice
+  - random.choices
+  - random.sample
+  - random.getrandbits
+
+context_keywords:
+  - token
+  - session
+  - secret
+  - api_key
+  - auth
+  - password_reset
+  - reset_code
+  - security_code
+  - verification_code
+
+remediation: Use cryptographically secure random number generators such as Python's secrets module (secrets.token_hex, secrets.token_bytes, secrets.choice) or os.urandom().
