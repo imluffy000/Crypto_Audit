@@ -1,4 +1,21 @@
-# React + Vite
+# CryptoAudit
+
+CryptoAudit is a frontend prototype for reviewing repositories for cryptographic security issues.
+
+## Preview
+
+Open the [CryptoAudit preview](https://imluffy000.github.io/Crypto_Audit/). GitHub Actions publishes the preview whenever changes are pushed to `main`.
+
+The current preview uses mock sign-in and repository data. GitHub and Google OAuth, private repository access, and the audit backend are not connected yet.
+
+## Run locally
+
+```sh
+npm install
+npm run dev
+```
+
+Create a production build with `npm run build`.
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 

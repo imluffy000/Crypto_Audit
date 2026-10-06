@@ -13,7 +13,7 @@ import ComingSoon from './pages/ComingSoon';
 function App() {
   return (
     <CryptoAuditProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
@@ -116,7 +116,7 @@ function App() {
           />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </CryptoAuditProvider>
   );
 }
