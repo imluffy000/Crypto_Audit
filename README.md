@@ -11,11 +11,12 @@ The current preview uses mock sign-in and repository data. GitHub and Google OAu
 ## Run locally
 
 ```sh
+cd frontend
 npm install
 npm run dev
 ```
 
-Create a production build with `npm run build`.
+Create a production build with `cd frontend && npm run build`.
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
