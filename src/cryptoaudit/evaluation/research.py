@@ -131,8 +131,10 @@ def _insights(f: ResearchFindings) -> List[str]:
         if a.verified_but_still_flagged.total and a.verified_but_still_flagged.successes:
             insights.append(f"{tool}: still flags {_pct(a.verified_but_still_flagged)} of verified repairs (e.g. legacy-read code paths).")
     if f.hardest_rules:
-        hardest = f.hardest_rules[0]
-        insights.append(f"Hardest category: {hardest} with verified rate {_pct(f.verified_by_rule[hardest])}.")
+        lowest = f.verified_by_rule[f.hardest_rules[0]].rate
+        tied = [rule for rule in f.hardest_rules if f.verified_by_rule[rule].rate == lowest]
+        label = "Hardest category" if len(tied) == 1 else "Hardest categories (tied)"
+        insights.append(f"{label}: {', '.join(tied)} with verified rate {lowest:.0%}.")
     if f.compatibility_breaks.total:
         insights.append(
             f"Security-correct, functional repairs broke legacy compatibility in {_pct(f.compatibility_breaks)} of applicable cases."

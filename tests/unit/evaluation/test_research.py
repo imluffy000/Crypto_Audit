@@ -73,3 +73,13 @@ def test_empty_input():
     findings = analyze([], [])
     assert findings.total_outcomes == 0 and findings.hardest_rules == []
     assert "not enough data" in to_markdown(findings)
+
+
+def test_tied_hardest_categories_are_all_reported():
+    tied = [
+        _outcome(StrategyId.S2, "CR1", Verdict.FAILED, P, F, P, P, True),
+        _outcome(StrategyId.S2, "CR2", Verdict.FAILED, P, F, P, P, True),
+        _outcome(StrategyId.S2, "CR5", Verdict.VERIFIED, P, P, P, NA, True),
+    ]
+    insight = next(i for i in analyze(tied, []).insights if i.startswith("Hardest"))
+    assert insight.startswith("Hardest categories (tied): CR1, CR2")
