@@ -1,0 +1,7 @@
+case_id: cr1_password_md5
+rule_id: CR1
+title: MD5 password storage
+description: Passwords are stored as unsalted MD5 digests.
+module_file: module.py
+target_python: "3.11"
+allowed_libraries: [hashlib, hmac, secrets, os, base64, binascii]

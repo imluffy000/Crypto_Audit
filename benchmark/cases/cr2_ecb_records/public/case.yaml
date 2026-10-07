@@ -1,0 +1,7 @@
+case_id: cr2_ecb_records
+rule_id: CR2
+title: AES-ECB record encryption
+description: Customer records are encrypted with AES in ECB mode.
+module_file: module.py
+target_python: "3.11"
+allowed_libraries: [cryptography, os, secrets, hmac, hashlib]

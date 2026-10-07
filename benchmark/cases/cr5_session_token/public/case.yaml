@@ -1,0 +1,7 @@
+case_id: cr5_session_token
+rule_id: CR5
+title: Session tokens from the random module
+description: Session tokens are generated with the Mersenne Twister PRNG.
+module_file: module.py
+target_python: "3.11"
+allowed_libraries: [secrets, string, os]

@@ -1,0 +1,9 @@
+# CANARY: cryptoaudit-hidden-oracle-cr1_password_md5
+case_id: cr1_password_md5
+checks:
+  V1: v1_functional.py
+  V2: v2_security.py
+  V3: v3_compat.py
+v3:
+  applicable: true
+  gating: true
