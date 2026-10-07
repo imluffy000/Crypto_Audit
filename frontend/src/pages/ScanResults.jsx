@@ -11,6 +11,7 @@ import DataTable from '../components/ui/DataTable';
 import FilterBar, { SearchBar, Select } from '../components/ui/FilterBar';
 import StatusIndicator from '../components/ui/StatusIndicator';
 import { Alert, EmptyState, ErrorState, LoadingState } from '../components/ui/States';
+import { useToast } from '../components/ui/toastContext';
 import { scanService } from '../services/scanService';
 import { formatDateTime, humanize, pluralize, RULE_NAMES, SEVERITY_ORDER, VERDICT_ORDER } from '../utils/format';
 
@@ -189,10 +190,12 @@ function ScanResults() {
   const [findings, setFindings] = useState(null);
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
+  const notify = useToast();
 
   useEffect(() => {
     let cancelled = false;
     let timer;
+    let watchedLive = false; // only announce the outcome of scans this page saw running
     const poll = async () => {
       try {
         const next = await scanService.getScan(scanId);
@@ -201,12 +204,29 @@ function ScanResults() {
         setError('');
         if (next.status === 'COMPLETED') {
           const list = await scanService.getFindings(scanId);
-          if (!cancelled) setFindings(list);
+          if (cancelled) return;
+          setFindings(list);
+          if (watchedLive) {
+            notify({
+              tone: 'success',
+              title: 'Scan complete',
+              message: list.length
+                ? `${pluralize(list.length, 'finding')} in ${next.repository}.`
+                : `No CR1–CR5 misuse found in ${next.repository}.`,
+            });
+          }
+        } else if (next.status === 'FAILED') {
+          if (watchedLive) {
+            notify({ tone: 'danger', title: 'Scan failed', message: next.error?.message || 'The scan stopped before it finished.' });
+          }
         } else if (!FINISHED.includes(next.status)) {
+          watchedLive = true;
           timer = setTimeout(poll, POLL_MS);
         }
       } catch (err) {
-        if (!cancelled) setError(err.message);
+        if (cancelled) return;
+        setError(err.message);
+        notify({ tone: 'danger', title: 'Could not load this scan', message: err.message });
       }
     };
     poll();
@@ -214,7 +234,7 @@ function ScanResults() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [scanId, attempt]);
+  }, [scanId, attempt, notify]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
@@ -242,7 +262,11 @@ function ScanResults() {
         meta={meta}
         actions={
           scan?.status === 'COMPLETED' ? (
-            <Button icon={Download} href={scanService.reportUrl(scanId)}>
+            <Button
+              icon={Download}
+              href={scanService.reportUrl(scanId)}
+              onClick={() => notify({ tone: 'info', title: 'Downloading report', message: `${scan.repository} · Markdown` })}
+            >
               Download report
             </Button>
           ) : null

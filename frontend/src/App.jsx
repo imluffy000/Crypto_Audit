@@ -13,8 +13,8 @@ import LatestFindings from './pages/LatestFindings';
 
 function App() {
   return (
-    <CryptoAuditProvider>
-      <ToastProvider>
+    <ToastProvider>
+      <CryptoAuditProvider>
       <HashRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -95,8 +95,8 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </HashRouter>
-      </ToastProvider>
-    </CryptoAuditProvider>
+      </CryptoAuditProvider>
+    </ToastProvider>
   );
 }
 

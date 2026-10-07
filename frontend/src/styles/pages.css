@@ -579,3 +579,7 @@ button.tree-row:disabled {
 .table-scroll + .muted {
   margin-top: var(--space-3);
 }
+
+.ai-error {
+  margin-top: var(--space-3);
+}

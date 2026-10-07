@@ -7,6 +7,7 @@ import DataTable from '../components/ui/DataTable';
 import FilterBar, { SearchBar, Select } from '../components/ui/FilterBar';
 import StatusIndicator from '../components/ui/StatusIndicator';
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/States';
+import { useToast } from '../components/ui/toastContext';
 import { scanService } from '../services/scanService';
 import { formatDateTime, pluralize } from '../utils/format';
 
@@ -17,17 +18,22 @@ function Reports() {
   const [status, setStatus] = useState('all');
 
   const [reloadKey, setReloadKey] = useState(0);
+  const notify = useToast();
 
   useEffect(() => {
     let active = true;
     scanService
       .listScans()
       .then((list) => active && setScans(list))
-      .catch((err) => active && setError(err.message));
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message);
+        notify({ tone: 'danger', title: 'Could not load your scans', message: err.message });
+      });
     return () => {
       active = false;
     };
-  }, [reloadKey]);
+  }, [reloadKey, notify]);
 
   const reload = useCallback(() => {
     setError('');
@@ -55,7 +61,12 @@ function Reports() {
       align: 'end',
       render: (scan) =>
         scan.status === 'COMPLETED' ? (
-          <Button size="sm" variant="ghost" icon={Download} href={scanService.reportUrl(scan.scan_id)} aria-label={`Download Markdown report for ${scan.repository}`}>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={Download}
+            href={scanService.reportUrl(scan.scan_id)}
+            onClick={() => notify({ tone: 'info', title: 'Downloading report', message: `${scan.repository} · Markdown` })} aria-label={`Download Markdown report for ${scan.repository}`}>
             Report
           </Button>
         ) : null,

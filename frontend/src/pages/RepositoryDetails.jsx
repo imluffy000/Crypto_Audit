@@ -58,12 +58,14 @@ function RepositoryDetails() {
       navigate(`/scans/${scanId}`);
     } catch (err) {
       setError(err.message);
+      notify({ tone: 'danger', title: 'Scan could not be started', message: err.message });
       setStarting(false);
     }
   };
 
   const clearSelection = () => {
     setSelectedRepository(null);
+    notify({ tone: 'info', title: 'Selection cleared', message: 'Choose another repository to scan.' });
     navigate('/repositories/github');
   };
 

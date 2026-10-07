@@ -8,6 +8,7 @@ import Badge from '../components/ui/Badge';
 import DataTable from '../components/ui/DataTable';
 import StatusIndicator from '../components/ui/StatusIndicator';
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/States';
+import { useToast } from '../components/ui/toastContext';
 import { useAuth } from '../context/AppContext';
 import { authService } from '../services/authService';
 import { scanService } from '../services/scanService';
@@ -67,6 +68,7 @@ function EnvironmentList({ health }) {
 
 function Dashboard() {
   const { user } = useAuth();
+  const notify = useToast();
   const [scans, setScans] = useState(null);
   const [latest, setLatest] = useState(null);
   const [health, setHealth] = useState(null);
@@ -84,7 +86,11 @@ function Dashboard() {
         setScans(list);
         setLatest(details.filter((scan) => scan.summary));
       })
-      .catch((err) => active && setError(err.message));
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message);
+        notify({ tone: 'danger', title: 'Could not load your scans', message: err.message });
+      });
     authService
       .health()
       .then((data) => active && setHealth(data))
@@ -92,7 +98,7 @@ function Dashboard() {
     return () => {
       active = false;
     };
-  }, [reloadKey]);
+  }, [reloadKey, notify]);
 
   const reload = useCallback(() => {
     setError('');

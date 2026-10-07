@@ -5,6 +5,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import PageHeader from '../components/ui/PageHeader';
 import Button from '../components/ui/Button';
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/States';
+import { useToast } from '../components/ui/toastContext';
 import { scanService } from '../services/scanService';
 
 // /findings shows the findings of the most recent completed scan.
@@ -13,17 +14,22 @@ function LatestFindings() {
   const [error, setError] = useState('');
 
   const [reloadKey, setReloadKey] = useState(0);
+  const notify = useToast();
 
   useEffect(() => {
     let active = true;
     scanService
       .listScans()
       .then((scans) => active && setTarget(scans.find((scan) => scan.status === 'COMPLETED')?.scan_id || null))
-      .catch((err) => active && setError(err.message));
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message);
+        notify({ tone: 'danger', title: 'Could not load your scans', message: err.message });
+      });
     return () => {
       active = false;
     };
-  }, [reloadKey]);
+  }, [reloadKey, notify]);
 
   const reload = useCallback(() => {
     setError('');

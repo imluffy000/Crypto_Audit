@@ -631,6 +631,10 @@
 .toast-title {
   font-weight: 600;
 }
+.toast-count {
+  color: var(--text-3);
+  font-weight: 500;
+}
 .toast-message {
   color: var(--text-2);
   overflow-wrap: anywhere;

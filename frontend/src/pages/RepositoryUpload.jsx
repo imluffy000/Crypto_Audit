@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, ExternalLink, FolderGit2, Globe, Lock, RotateCw, Upload } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
@@ -22,6 +22,8 @@ import { useAuth } from '../context/AppContext';
 const TABS_ID = 'repository-source';
 
 function GitHubRepositories({ onSelect, selectingId, manageUrl, repoAccess }) {
+  const notify = useToast();
+  const refreshing = useRef(false);
   const [repos, setRepos] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -35,15 +37,30 @@ function GitHubRepositories({ onSelect, selectingId, manageUrl, repoAccess }) {
     let active = true;
     repositoryService
       .getGitHubRepositories()
-      .then((list) => active && setRepos(list))
-      .catch((err) => active && setError(err.message))
-      .finally(() => active && setLoading(false));
+      .then((list) => {
+        if (!active) return;
+        setRepos(list);
+        if (refreshing.current) {
+          notify({ tone: 'success', title: 'Repository list refreshed', message: `${pluralize(list.length, 'repository', 'repositories')} available.` });
+        }
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message);
+        notify({ tone: 'danger', title: 'Could not load repositories', message: err.message });
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoading(false);
+        refreshing.current = false;
+      });
     return () => {
       active = false;
     };
-  }, [reloadKey]);
+  }, [reloadKey, notify]);
 
   const load = useCallback(() => {
+    refreshing.current = true;
     setLoading(true);
     setError('');
     setReloadKey((key) => key + 1);
@@ -177,6 +194,7 @@ function GitHubRepositories({ onSelect, selectingId, manageUrl, repoAccess }) {
 }
 
 function LocalReview({ onReview }) {
+  const notify = useToast();
   const [files, setFiles] = useState([]);
   const [query, setQuery] = useState('');
   const [extension, setExtension] = useState('all');
@@ -189,7 +207,17 @@ function LocalReview({ onReview }) {
       <Alert tone="info" title="Local files can be reviewed, not scanned">
         Scans fetch code from GitHub so every result is tied to a commit. Use this to inspect a project's structure before pushing it.
       </Alert>
-      <FileUpload onFilesSelected={setFiles} />
+      <FileUpload
+        onFilesSelected={(selected) => {
+          setFiles(selected);
+          const check = validateRepositoryFiles(selected.map((file, index) => normalizeFileEntry(file, index)));
+          notify(
+            check.invalidFiles
+              ? { tone: 'warning', title: `${pluralize(selected.length, 'file')} loaded`, message: `${pluralize(check.invalidFiles, 'file')} need attention (size, type or path).` }
+              : { tone: 'success', title: `${pluralize(selected.length, 'file')} loaded`, message: 'All files passed the checks.' },
+          );
+        }}
+      />
 
       {normalizedFiles.length ? (
         <section className="stack" aria-labelledby="local-summary">
@@ -286,6 +314,7 @@ function RepositoryUpload() {
     setSelectingId(repo.id);
     try {
       setSelectedRepository(await repositoryService.getGitHubRepository(repo));
+      notify({ tone: 'success', title: 'Repository loaded', message: `${repo.fullName} is ready to review.` });
       navigate('/repositories/review');
     } catch (error) {
       notify({ tone: 'danger', title: `Could not open ${repo.fullName}`, message: error.message });
@@ -297,6 +326,7 @@ function RepositoryUpload() {
     const repo = await repositoryService.uploadRepository(normalizedFiles);
     const topFolder = tree.children.length === 1 && tree.children[0].type === 'folder' ? tree.children[0] : null;
     setSelectedRepository({ ...repo, name: topFolder?.name || repo.name, tree: topFolder || { ...tree, name: repo.name } });
+    notify({ tone: 'info', title: 'Local files ready to review', message: 'Scanning needs a GitHub repository.' });
     navigate('/repositories/review');
   };
 

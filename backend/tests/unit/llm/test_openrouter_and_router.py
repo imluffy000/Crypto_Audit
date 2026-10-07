@@ -136,3 +136,29 @@ def test_s3_records_the_provider_that_generated_the_candidate(tmp_path):
     assert result.generation.provider == "openrouter"
     assert result.generation.model == "qwen/qwen-2.5-coder-32b-instruct"
     assert result.generation.num_ctx == 32768
+
+
+def test_openrouter_omits_seed_below_one(monkeypatch):
+    calls = fake_openrouter(monkeypatch)
+    OpenRouterClient("sk-or-test").generate(LLMRequest(model="m", system="s", prompt="p", seed=0))
+    assert "seed" not in json.loads(calls[0].data.decode())
+
+
+def test_openrouter_provider_errors_are_readable(monkeypatch):
+    raw = json.dumps(
+        {
+            "errors": [{"message": "AiError: Bad input: Error: oneOf at '/' not met, 0 matches: '/seed' must be >= 1 (a8c4-0960)", "code": 5006}],
+            "success": False,
+        }
+    )
+    body = json.dumps({"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": raw, "provider_name": "X"}}})
+
+    def urlopen(req, timeout):
+        raise urllib.error.HTTPError(req.full_url, 400, "err", {}, io.BytesIO(body.encode()))
+
+    monkeypatch.setattr("urllib.request.urlopen", urlopen)
+    with pytest.raises(CryptoAuditError) as excinfo:
+        OpenRouterClient("sk-or-test").generate(LLMRequest(model="m", system="s", prompt="p", seed=3))
+    message = excinfo.value.message
+    assert message.startswith("OpenRouter error (HTTP 400): Provider returned error: AiError: Bad input")
+    assert "'/seed' must be >= 1" in message and "a8c4-0960" not in message and "{" not in message

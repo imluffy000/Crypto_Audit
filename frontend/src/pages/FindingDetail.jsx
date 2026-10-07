@@ -10,6 +10,7 @@ import Badge, { SeverityBadge } from '../components/ui/Badge';
 import Panel from '../components/ui/Panel';
 import Tabs, { TabPanel } from '../components/ui/Tabs';
 import { Alert, ErrorState, LoadingState } from '../components/ui/States';
+import { useToast } from '../components/ui/toastContext';
 import { scanService } from '../services/scanService';
 import { humanize, RULE_NAMES } from '../utils/format';
 
@@ -94,6 +95,7 @@ function FindingDetail() {
   const [error, setError] = useState('');
 
   const [reloadKey, setReloadKey] = useState(0);
+  const notify = useToast();
 
   useEffect(() => {
     let current = true;
@@ -105,11 +107,15 @@ function FindingDetail() {
         const preferred = data.runs.find((run) => run.targets_finding && run.verdict !== 'NO_CANDIDATE') || data.runs[0];
         setActive(preferred?.strategy_id || null);
       })
-      .catch((err) => current && setError(err.message));
+      .catch((err) => {
+        if (!current) return;
+        setError(err.message);
+        notify({ tone: 'danger', title: 'Could not load this finding', message: err.message });
+      });
     return () => {
       current = false;
     };
-  }, [scanId, findingId, reloadKey]);
+  }, [scanId, findingId, reloadKey, notify]);
 
   const reload = useCallback(() => {
     setError('');

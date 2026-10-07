@@ -61,6 +61,7 @@ function CodeViewer({ code, path, title, language, marks = {}, markers = {}, con
     try {
       await navigator.clipboard.writeText(code || '');
       setCopied(true);
+      notify({ tone: 'success', title: 'Code copied', message: path ? `${title ? `${title} · ` : ''}${path}` : undefined });
       setTimeout(() => setCopied(false), 1500);
     } catch {
       notify({ tone: 'danger', title: 'Could not copy', message: 'Clipboard access was blocked by the browser.' });

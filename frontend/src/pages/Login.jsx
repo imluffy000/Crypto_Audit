@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { Ban, Eye, KeyRound } from 'lucide-react';
 import AuthLayout from '../layouts/AuthLayout';
 import BrandMark from '../components/BrandMark';
 import Button from '../components/ui/Button';
 import { Alert } from '../components/ui/States';
+import { useToast } from '../components/ui/toastContext';
 import { useAuth } from '../context/AppContext';
 import { authService } from '../services/authService';
 
@@ -36,25 +37,51 @@ function Login() {
   const [health, setHealth] = useState(null);
   const [serverError, setServerError] = useState('');
   const [redirecting, setRedirecting] = useState(false);
+  const notify = useToast();
+  const announced = useRef(new Set());
+  const errorCode = searchParams.get('error');
+
+  // Each problem is announced once per page view (StrictMode runs effects twice in development).
+  const announce = (key, toast) => {
+    if (announced.current.has(key)) return;
+    announced.current.add(key);
+    notify(toast);
+  };
 
   useEffect(() => {
     authService
       .health()
-      .then(setHealth)
-      .catch((error) => setServerError(error.message));
+      .then((data) => {
+        setHealth(data);
+        if (!data.github_configured) {
+          announce('not-configured', { tone: 'warning', title: 'GitHub sign-in is not configured', message: 'Add the OAuth App credentials to backend/.env and restart the server.' });
+        }
+      })
+      .catch((error) => {
+        setServerError(error.message);
+        announce('server', { tone: 'danger', title: 'Server unavailable', message: error.message });
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (errorCode) {
+      announce(`error-${errorCode}`, { tone: 'danger', title: 'Sign-in failed', message: ERROR_MESSAGES[errorCode] || `GitHub sign-in did not complete (${errorCode}).` });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errorCode]);
 
   if (!authLoading && user) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const errorCode = searchParams.get('error');
   const signInError = errorCode ? ERROR_MESSAGES[errorCode] || `Sign-in failed (${errorCode}).` : '';
   const checking = !health && !serverError;
   const canSignIn = Boolean(health?.github_configured);
 
   const signIn = (selectAccount = false) => {
     setRedirecting(true);
+    notify({ tone: 'info', title: 'Redirecting to GitHub', message: selectAccount ? 'Choose the account to use on the next page.' : 'Approve access on the next page.' });
     loginWithGithub({ selectAccount });
   };
 
