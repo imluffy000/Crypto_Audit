@@ -1,5 +1,7 @@
 # CryptoAudit Phase 1 Implementation Documentation
 
+> Historical record of the Phase 1 analyzer. Module paths have since moved (`analyzer/` → `analysis/` + `rules/`, `core/` → `models/`, `config/`, `utils/`); see [../architecture/system-design.md](../architecture/system-design.md).
+
 ## Overview
 
 CryptoAudit is a Python-focused cryptographic misuse analysis framework. Phase 1 provides the foundational project structure, core domain models, Python AST parser, import and call analyzers, context evaluator, and the CR1 rule detector vertical slice.
