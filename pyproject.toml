@@ -20,9 +20,18 @@ dependencies = [
 dev = [
     "pytest==9.1.1",
     "cryptography==50.0.2",
+    "fastapi==0.142.2",
+    "httpx==0.28.1",
 ]
 # Libraries the benchmark programs and their hidden oracles import (also installed in the sandbox image).
 benchmark = [
+    "cryptography==50.0.2",
+]
+# Website backend: REST API, GitHub App sign-in and repository fetching.
+web = [
+    "fastapi==0.142.2",
+    "uvicorn==0.54.0",
+    "httpx==0.28.1",
     "cryptography==50.0.2",
 ]
 # External baseline scanners used for S1 hints and V0 re-scans.
