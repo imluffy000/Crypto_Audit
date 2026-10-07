@@ -38,8 +38,7 @@ function CapabilitySlide({ id }) {
             </h2>
           </div>
           <p className="slide-lead reveal" style={{ '--i': 2 }}>
-            CryptoAudit looks beyond whether your code works. It analyzes how cryptography is implemented and identifies security-sensitive
-            misuse.
+            CryptoAudit checks how cryptography is used, not just whether it runs.
           </p>
         </header>
 

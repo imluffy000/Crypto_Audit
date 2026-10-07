@@ -24,7 +24,7 @@ function FindingSlide({ id, analyzeTo }) {
             <h2 id="cta-title" className="cta-title">
               Ready to audit your code?
             </h2>
-            <p className="cta-text">Connect a repository and start your first cryptographic security analysis.</p>
+            <p className="cta-text">Connect a repository and run your first analysis.</p>
             <Link className="brand-btn brand-btn-primary brand-btn-lg" to={analyzeTo}>
               Analyze Your Repository
               <ArrowRight size={18} className="btn-arrow" aria-hidden="true" />

@@ -18,8 +18,7 @@ function HeroSlide({ id, analyzeTo, onHowItWorks }) {
             Find the cryptographic <span className="title-mark">weaknesses</span> hiding in your code.
           </h1>
           <p className="hero-lead reveal" style={{ '--i': 2 }}>
-            CryptoAudit analyzes your repositories for cryptographic misuse, insecure implementations, and risky patterns — then explains
-            the issue and recommends how to fix it.
+            Spot cryptographic misuse in your repositories, with a clear fix for every finding.
           </p>
           <div className="hero-actions reveal" style={{ '--i': 3 }}>
             <Link className="brand-btn brand-btn-primary brand-btn-lg" to={analyzeTo}>

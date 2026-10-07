@@ -99,9 +99,9 @@ html.home-snap {
 .slide-title {
   margin-top: 16px;
   font-size: clamp(2.5rem, min(5vw, 8.5vh), 5rem);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   text-wrap: balance;
 }
 
@@ -148,9 +148,9 @@ html.home-snap {
 .hero-title {
   margin-top: 20px;
   font-size: clamp(3rem, min(6vw, 9.6vh), 6.25rem);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 0.98;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.03em;
   text-wrap: balance;
 }
 
@@ -273,7 +273,7 @@ html.home-snap {
   grid-row: 1 / span 2;
   color: var(--brand-primary);
   font-size: clamp(2.75rem, min(5vw, 8vh), 4.5rem);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 0.85;
   letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
@@ -660,9 +660,9 @@ html.home-snap {
 
 .cta-title {
   font-size: clamp(2rem, min(3.4vw, 6vh), 3.25rem);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.02;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 .cta-text {
