@@ -17,9 +17,9 @@ GIT_REF = re.compile(r"^[A-Za-z0-9._/-]{1,200}$")
 class SnapshotLimits:
     """Bounds for ingesting a remote repository."""
 
-    max_download_bytes: int = 50 * 1024 * 1024  # compressed tarball
-    max_unpacked_bytes: int = 500 * 1024 * 1024  # sum of all member sizes in the archive
-    max_python_files: int = 500
+    max_download_bytes: int = 500 * 1024 * 1024  # compressed tarball of one commit (no git history)
+    max_unpacked_bytes: int = 4 * 1024 * 1024 * 1024  # sum of all member sizes in the archive
+    max_python_files: int = 5000
     max_file_bytes: int = MAX_SOURCE_BYTES
 
 

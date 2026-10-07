@@ -290,12 +290,22 @@ def test_scan_input_validation_and_limits(env):
     client, services, github, _ = env
     sign_in(client)
     assert client.post("/api/scans", json={"owner": "alice", "name": "../etc"}).status_code == 400
-    github.repo["size"] = 10_000_000
-    assert client.post("/api/scans", json={"owner": "alice", "name": "app"}).status_code == 413
-    github.repo["size"] = 40
     stages = [StageProgress(stage=s, label=s.value) for s in ScanStage]
     services.store.create_scan(1, "alice/app", "main", stages)  # an already-queued scan
     assert client.post("/api/scans", json={"owner": "alice", "name": "app"}).status_code == 429
+
+
+def test_size_limit_applies_to_downloaded_commit_not_git_history(env):
+    client, services, github, _ = env
+    sign_in(client)
+    github.repo["size"] = 10_000_000  # GitHub's size includes history: must not block the scan
+    scan_id = start_scan(client)
+    assert client.get(f"/api/scans/{scan_id}").json()["status"] == "COMPLETED"
+
+    services.limits = SnapshotLimits(max_download_bytes=100)  # the archive itself is larger than this
+    big = start_scan(client)
+    scan = client.get(f"/api/scans/{big}").json()
+    assert scan["status"] == "FAILED" and scan["error"]["code"] == "LIMIT_EXCEEDED"
 
 
 def test_failed_fetch_is_reported(env):

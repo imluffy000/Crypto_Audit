@@ -39,14 +39,51 @@ def snapshot() -> RepositorySnapshot:
     return RepositorySnapshot(full_name="alice/app", ref="main", commit="abc1234", modules=modules)
 
 
-def make_scanner(events=None, skipped=None):
+def make_scanner(events=None, skipped=None, parallelism=1, progress_interval=0.0):
     analyzer = AnalyzerEngine()
     pipeline = RepairPipeline(
         analyzer=analyzer,
         strategies=[TemplateRepairStrategy()],
         validator=ValidationPipeline(ForbiddenSandbox(), ScannerValidator(analyzer)),
     )
-    return RepositoryScanner(pipeline, on_progress=(events.append if events is not None else None), skipped_strategies=skipped)
+    return RepositoryScanner(
+        pipeline,
+        on_progress=(events.append if events is not None else None),
+        skipped_strategies=skipped,
+        parallelism=parallelism,
+        progress_interval=progress_interval,
+    )
+
+
+def many_files_snapshot(count=40) -> RepositorySnapshot:
+    source = (FIXTURES / "cr5" / "vulnerable.py").read_text(encoding="utf-8")
+    modules = [ModuleInput(module_name=f"pkg/m{i:03d}.py", source=source) for i in range(count)]
+    return RepositorySnapshot(full_name="alice/big", ref="main", modules=modules)
+
+
+def without_timings(value):
+    """Scan results are deterministic apart from measured durations."""
+    if isinstance(value, dict):
+        return {k: without_timings(v) for k, v in value.items() if not k.startswith("duration")}
+    if isinstance(value, list):
+        return [without_timings(v) for v in value]
+    return value
+
+
+def test_parallel_scan_matches_sequential_scan():
+    sequential = make_scanner(parallelism=1).run(many_files_snapshot)
+    parallel = make_scanner(parallelism=8).run(many_files_snapshot)
+    assert without_timings(parallel.model_dump(mode="json")) == without_timings(sequential.model_dump(mode="json"))
+    assert [f.path for f in parallel.files] == sorted(f.path for f in parallel.files)
+
+
+def test_progress_is_throttled_but_never_drops_stage_changes():
+    events = []
+    make_scanner(events, progress_interval=60.0).run(many_files_snapshot)
+    assert len(events) <= 2 * len(ScanStage)  # no per-file updates inside the interval
+    seen = {(s.stage, s.status) for event in events for s in event}
+    for stage in ScanStage:
+        assert (stage, StageStatus.RUNNING) in seen and (stage, StageStatus.DONE) in seen
 
 
 @pytest.fixture(scope="module")

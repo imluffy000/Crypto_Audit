@@ -1,6 +1,7 @@
 """GitHub API access for the web flow: OAuth App sign-in, repositories, trees, tarballs. Read-only use."""
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+import io
+from typing import Any, BinaryIO, Dict, List, Optional, Sequence, Tuple
 from urllib.parse import urlencode
 
 import httpx
@@ -162,9 +163,14 @@ class GitHubClient:
         return entries, bool(data.get("truncated"))
 
     def download_tarball(self, owner: str, name: str, ref: str, max_bytes: int) -> bytes:
-        """Stream the repository tarball, aborting once it exceeds max_bytes."""
+        """Download the repository tarball into memory (small repositories and tests)."""
+        buffer = io.BytesIO()
+        self.download_tarball_to(owner, name, ref, max_bytes, buffer)
+        return buffer.getvalue()
+
+    def download_tarball_to(self, owner: str, name: str, ref: str, max_bytes: int, sink: BinaryIO) -> int:
+        """Stream the repository tarball into sink, aborting once it exceeds max_bytes. Returns bytes written."""
         _check_repo_ref(owner, name, ref)
-        chunks: List[bytes] = []
         total = 0
         try:
             with self._http.stream("GET", f"/repos/{owner}/{name}/tarball/{ref}") as response:
@@ -177,10 +183,10 @@ class GitHubClient:
                         raise CryptoAuditError(
                             ErrorCode.LIMIT_EXCEEDED, f"Repository archive exceeds {max_bytes // (1024 * 1024)} MB"
                         )
-                    chunks.append(chunk)
+                    sink.write(chunk)
         except httpx.HTTPError as exc:
             raise CryptoAuditError(ErrorCode.EXTERNAL_SERVICE_ERROR, f"Repository download failed: {type(exc).__name__}") from exc
-        return b"".join(chunks)
+        return total
 
 
 class GitHubOAuth:

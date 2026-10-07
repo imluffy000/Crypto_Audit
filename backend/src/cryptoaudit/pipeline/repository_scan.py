@@ -3,11 +3,15 @@ Repository scan: fetch -> parse -> analyze -> context -> repair -> validate -> e
 
 Used by the website. Repository code is analysed and repaired but never executed: user
 repositories have no hidden oracle, so executable gates are NOT_RUN and the sandbox is never
-invoked. Progress is reported per stage through a callback.
+invoked. Progress is reported per stage through a (throttled) callback. Repair and validation run
+per file in a thread pool: both are dominated by subprocess (scanners) and HTTP (LLM) waits.
 """
 
 import ast
+import threading
+import time
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from cryptoaudit.models.experiment import Verdict
@@ -35,6 +39,9 @@ from cryptoaudit.utils.errors import CryptoAuditError
 
 ProgressCallback = Callable[[List[StageProgress]], None]
 
+# Minimum seconds between RUNNING progress callbacks (stage changes are always reported).
+PROGRESS_INTERVAL = 0.5
+
 # Most useful first when choosing the verdict to show for a finding.
 VERDICT_RANK = {Verdict.VERIFIED: 0, Verdict.UNVERIFIED: 1, Verdict.FAILED: 2, Verdict.NO_CANDIDATE: 3}
 
@@ -45,11 +52,17 @@ class RepositoryScanner:
         pipeline: RepairPipeline,
         on_progress: Optional[ProgressCallback] = None,
         skipped_strategies: Optional[Dict[str, str]] = None,
+        parallelism: int = 1,
+        progress_interval: float = PROGRESS_INTERVAL,
     ) -> None:
         self.pipeline = pipeline
         self.on_progress = on_progress
         self.skipped_strategies = dict(skipped_strategies or {})
+        self.parallelism = max(1, parallelism)
+        self.progress_interval = progress_interval
         self.stages = [StageProgress(stage=stage, label=STAGE_LABELS[stage]) for stage in ScanStage]
+        self._lock = threading.Lock()
+        self._last_emit = 0.0
 
     # -- progress -------------------------------------------------------------------------
 
@@ -57,10 +70,25 @@ class RepositoryScanner:
         return next(s for s in self.stages if s.stage is stage)
 
     def _update(self, stage: ScanStage, status: StageStatus, detail: str = "", current: int = 0, total: int = 0) -> None:
-        progress = self._stage(stage)
-        progress.status, progress.detail, progress.current, progress.total = status, detail, current, total
-        if self.on_progress is not None:
-            self.on_progress([s.model_copy() for s in self.stages])
+        with self._lock:
+            progress = self._stage(stage)
+            changed = progress.status is not status
+            progress.status, progress.detail, progress.current, progress.total = status, detail, current, total
+            now = time.monotonic()
+            # Large repositories produce thousands of per-file updates: report status changes immediately,
+            # in-stage progress at most every progress_interval seconds.
+            if self.on_progress is None or (not changed and now - self._last_emit < self.progress_interval):
+                return
+            self._last_emit = now
+            snapshot = [s.model_copy() for s in self.stages]
+        self.on_progress(snapshot)
+
+    def _map(self, fn, items: list) -> list:
+        """Apply fn to items, in parallel when configured; results keep the input order."""
+        if self.parallelism == 1 or len(items) < 2:
+            return [fn(item) for item in items]
+        with ThreadPoolExecutor(max_workers=self.parallelism, thread_name_prefix="cryptoaudit-file") as pool:
+            return list(pool.map(fn, items))
 
     # -- run ------------------------------------------------------------------------------
 
@@ -146,13 +174,21 @@ class RepositoryScanner:
             return {}
         by_name = {m.module_name: m for m in modules}
         total = len(requests) * len(self.pipeline.strategies)
-        done = 0
         candidates: Dict[str, List[Candidate]] = defaultdict(list)
-        for path, request in requests.items():
+        counter = {"done": 0}
+
+        def repair_file(path: str) -> Tuple[str, List[Candidate]]:
+            produced: List[Candidate] = []
             for strategy in self.pipeline.strategies:
-                candidates[path].append(candidate_stage(strategy, request, by_name[path], self.pipeline.integrity))
-                done += 1
-                self._update(ScanStage.REPAIR, StageStatus.RUNNING, f"{strategy.strategy_id.value} on {path}", done, total)
+                produced.append(candidate_stage(strategy, requests[path], by_name[path], self.pipeline.integrity))
+                with self._lock:
+                    counter["done"] += 1
+                    done_now = counter["done"]
+                self._update(ScanStage.REPAIR, StageStatus.RUNNING, f"{strategy.strategy_id.value} on {path}", done_now, total)
+            return path, produced
+
+        for path, produced in self._map(repair_file, list(requests)):
+            candidates[path] = produced
         produced = sum(c.repair.produced for cs in candidates.values() for c in cs)
         detail = f"{produced} candidate(s) from {', '.join(s.strategy_id.value for s in self.pipeline.strategies)}"
         if self.skipped_strategies:
@@ -165,18 +201,27 @@ class RepositoryScanner:
             return {}, {}
         by_name = {m.module_name: m for m in modules}
         total = sum(len(c) for c in candidates.values())
-        done = 0
+        counter = {"done": 0}
         validated: Dict[str, list] = defaultdict(list)
         baselines: Dict[str, dict] = {}
-        for path, file_candidates in candidates.items():
+
+        def validate_file(path: str):
             module = by_name[path]
             rule_ids = sorted({f.rule_id for f in findings_by_file[path]})
-            baselines[path] = self.pipeline.validator.scanner_validator.scan(module.source, path, rule_ids)
-            for candidate in file_candidates:
+            baseline = self.pipeline.validator.scanner_validator.scan(module.source, path, rule_ids)
+            items = []
+            for candidate in candidates[path]:
                 report, outcome = validation_stage(self.pipeline.validator, candidate, module, rule_ids, None, None)
-                validated[path].append((candidate, report, outcome))
-                done += 1
-                self._update(ScanStage.VALIDATE, StageStatus.RUNNING, f"{candidate.repair.strategy_id.value} on {path}", done, total)
+                items.append((candidate, report, outcome))
+                with self._lock:
+                    counter["done"] += 1
+                    done_now = counter["done"]
+                self._update(ScanStage.VALIDATE, StageStatus.RUNNING, f"{candidate.repair.strategy_id.value} on {path}", done_now, total)
+            return path, baseline, items
+
+        for path, baseline, items in self._map(validate_file, list(candidates)):
+            baselines[path] = baseline
+            validated[path] = items
         self._update(ScanStage.VALIDATE, StageStatus.DONE, f"{total} candidate(s) validated", total, total)
         return validated, baselines
 

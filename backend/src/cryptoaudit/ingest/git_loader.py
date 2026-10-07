@@ -1,10 +1,13 @@
 """
-Remote repository ingestion. Python sources are read from the GitHub tarball in memory:
-nothing from the archive is written to disk and nothing is executed.
+Remote repository ingestion. The downloaded tarball is buffered in an anonymous temporary file
+(so large repositories do not sit in memory); Python sources are read from it in memory. Nothing
+from the archive is ever extracted to disk, and nothing is executed.
 """
 
 import io
 import tarfile
+import tempfile
+from typing import BinaryIO, Union
 
 from cryptoaudit.ingest.filters import SnapshotLimits, is_excluded, safe_relative_path
 from cryptoaudit.ingest.github_client import GitHubClient
@@ -12,12 +15,15 @@ from cryptoaudit.models.scan import ModuleInput, RepositorySnapshot, SkippedFile
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 
-def read_python_modules(archive: bytes, limits: SnapshotLimits) -> RepositorySnapshot:
-    """Extract .py files from a GitHub tarball (top-level 'owner-repo-sha/' directory is stripped)."""
-    snapshot = RepositorySnapshot(full_name="", ref="", archive_bytes=len(archive))
+def read_python_modules(archive: Union[bytes, BinaryIO], limits: SnapshotLimits) -> RepositorySnapshot:
+    """Read .py files from a GitHub tarball (top-level 'owner-repo-sha/' directory is stripped)."""
+    fileobj = io.BytesIO(archive) if isinstance(archive, (bytes, bytearray)) else archive
+    fileobj.seek(0, io.SEEK_END)
+    snapshot = RepositorySnapshot(full_name="", ref="", archive_bytes=fileobj.tell())
+    fileobj.seek(0)
     unpacked = 0
     try:
-        with tarfile.open(fileobj=io.BytesIO(archive), mode="r:*") as tar:
+        with tarfile.open(fileobj=fileobj, mode="r:*") as tar:
             for member in tar:
                 unpacked += max(member.size, 0)
                 if unpacked > limits.max_unpacked_bytes:
@@ -59,6 +65,7 @@ def read_python_modules(archive: bytes, limits: SnapshotLimits) -> RepositorySna
 
 
 def fetch_repository(client: GitHubClient, owner: str, name: str, ref: str, limits: SnapshotLimits) -> RepositorySnapshot:
-    archive = client.download_tarball(owner, name, ref, limits.max_download_bytes)
-    snapshot = read_python_modules(archive, limits)
+    with tempfile.TemporaryFile(prefix="cryptoaudit-archive-") as archive:
+        client.download_tarball_to(owner, name, ref, limits.max_download_bytes, archive)
+        snapshot = read_python_modules(archive, limits)
     return snapshot.model_copy(update={"full_name": f"{owner}/{name}", "ref": ref})

@@ -53,8 +53,8 @@ def start_scan(
         raise CryptoAuditError(ErrorCode.RATE_LIMITED, "A scan is already running; wait for it to finish")
     with services.github(session.access_token) as client:
         repo = client.get_repo(body.owner, body.name)
-    if repo.size_kb > services.settings.max_repo_mb * 1024:
-        raise CryptoAuditError(ErrorCode.LIMIT_EXCEEDED, f"Repository is larger than {services.settings.max_repo_mb} MB")
+    # No pre-check on repo.size_kb: GitHub's figure includes the full git history. The size limit is
+    # enforced while streaming the archive of the selected commit.
     ref = body.ref or repo.default_branch
     scan_id = services.store.create_scan(session.user.id, repo.full_name, ref, initial_stages())
     services.executor.submit(run_scan, services, scan_id, session.access_token, repo.owner, repo.name, ref)

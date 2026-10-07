@@ -90,6 +90,25 @@ Your repositories have no hidden security-property tests (those exist only for t
 **Unverified is the best possible verdict for repository code**. The website says so on every
 result. Scanner results (V0) are shown for comparison but never decide the verdict.
 
+## Large repositories
+
+All limits are settings in `backend/.env` (defaults shown):
+
+| Setting | Default | Notes |
+|---|---|---|
+| `CRYPTOAUDIT_MAX_REPO_MB` | 500 | Compressed archive of the scanned commit. Git history is not downloaded, so this is usually much smaller than the size GitHub shows. |
+| `CRYPTOAUDIT_MAX_UNPACKED_MB` | 4096 | Everything in the archive, including non-Python files. |
+| `CRYPTOAUDIT_MAX_PYTHON_FILES` | 5000 | Files beyond the limit are listed as skipped. |
+| `CRYPTOAUDIT_MAX_FILE_KB` | 1024 | Larger `.py` files (usually generated code) are skipped and listed. |
+| `CRYPTOAUDIT_SCAN_PARALLELISM` | 4 | Files repaired and validated concurrently within one scan. |
+| `CRYPTOAUDIT_SCAN_WORKERS` | 2 | Scans running at the same time. |
+
+The archive is buffered in a temporary file (not memory) and read without extracting it. Analysis
+covers every Python file and is fast; time is spent on files **with findings**, where each repair
+candidate is re-scanned (V0). On big repositories, turning Semgrep off
+(`CRYPTOAUDIT_ENABLE_SEMGREP=false`) and raising `CRYPTOAUDIT_SCAN_PARALLELISM` help most; the LLM
+strategies (S3/S4) are bounded by how fast the local model generates.
+
 ## Security notes
 
 - Sign-in uses the GitHub OAuth web flow with a single-use `state` bound to both the server and an

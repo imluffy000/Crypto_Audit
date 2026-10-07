@@ -46,9 +46,12 @@ class Settings(BaseSettings):
     cookie_secure: bool = False  # set true when served over HTTPS
     session_ttl_hours: float = 8.0
     web_db: Path = Path("data/web/cryptoaudit.sqlite")
-    scan_workers: int = 2
-    max_repo_mb: int = 50
-    max_python_files: int = 500
+    scan_workers: int = 2  # scans running at the same time (across users)
+    scan_parallelism: int = 4  # files repaired/validated concurrently within one scan
+    max_repo_mb: int = 500  # compressed archive of the scanned commit (git history is not downloaded)
+    max_unpacked_mb: int = 4096  # total size of everything in the archive, including non-Python files
+    max_python_files: int = 5000
+    max_file_kb: int = 1024  # larger .py files (usually generated code) are skipped and listed
 
     @property
     def github_configured(self) -> bool:

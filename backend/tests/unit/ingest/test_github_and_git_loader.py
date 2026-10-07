@@ -110,6 +110,23 @@ def test_unpacked_size_limit():
     assert excinfo.value.code is ErrorCode.LIMIT_EXCEEDED
 
 
+def test_reads_from_file_objects():
+    import tempfile
+
+    with tempfile.TemporaryFile() as handle:
+        handle.write(make_tarball({"pkg/a.py": "x = 1\n"}))
+        snapshot = read_python_modules(handle, SnapshotLimits())
+    assert [m.module_name for m in snapshot.modules] == ["pkg/a.py"] and snapshot.archive_bytes > 0
+
+
+def test_download_streams_into_sink():
+    archive = make_tarball({"a.py": "x = 1\n"})
+    transport = github_transport({("GET", "/repos/alice/app/tarball/main"): (200, archive)})
+    sink = io.BytesIO()
+    written = GitHubClient("t", transport=transport).download_tarball_to("alice", "app", "main", 10_000, sink)
+    assert written == len(archive) and sink.getvalue() == archive
+
+
 def test_invalid_archive():
     with pytest.raises(CryptoAuditError) as excinfo:
         read_python_modules(b"not a tarball", SnapshotLimits())

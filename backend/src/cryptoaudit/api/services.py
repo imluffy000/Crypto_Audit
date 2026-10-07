@@ -83,6 +83,8 @@ def default_services(settings: Optional[Settings] = None, github_transport: Opti
         executor=ThreadPoolExecutor(max_workers=max(1, settings.scan_workers), thread_name_prefix="cryptoaudit-scan"),
         limits=SnapshotLimits(
             max_download_bytes=settings.max_repo_mb * 1024 * 1024,
+            max_unpacked_bytes=settings.max_unpacked_mb * 1024 * 1024,
             max_python_files=settings.max_python_files,
+            max_file_bytes=settings.max_file_kb * 1024,
         ),
     )

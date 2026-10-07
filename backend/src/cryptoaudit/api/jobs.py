@@ -23,7 +23,12 @@ def run_scan(services: Services, scan_id: str, access_token: str, owner: str, na
         llm_ok = services.llm is not None and services.llm_available()
         strategy_ids, skipped = select_web_strategies(llm_ok, f"Ollama model '{services.settings.llm_model}' is not available")
         pipeline = services.pipeline_factory(strategy_ids)
-        scanner = RepositoryScanner(pipeline, on_progress=lambda stages: store.update_progress(scan_id, stages), skipped_strategies=skipped)
+        scanner = RepositoryScanner(
+            pipeline,
+            on_progress=lambda stages: store.update_progress(scan_id, stages),
+            skipped_strategies=skipped,
+            parallelism=services.settings.scan_parallelism,
+        )
 
         def fetch():
             with services.github(access_token) as client:
