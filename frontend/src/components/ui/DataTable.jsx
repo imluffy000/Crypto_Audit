@@ -15,8 +15,10 @@ function compare(a, b) {
  * Columns: { key, header, render(row), sortValue?(row), align?, primary?, className? }.
  * The `primary` column links to `rowHref(row)` so every row is reachable by keyboard; on narrow screens rows
  * turn into stacked cards labelled by their column headers.
+ * `onRowIntent(row)` runs when the pointer or keyboard focus reaches a row, so the page can start loading
+ * what that row opens before it is clicked.
  */
-function DataTable({ columns, rows, rowKey, rowHref, caption, initialSort, pageSize = 20, empty, dense = false }) {
+function DataTable({ columns, rows, rowKey, rowHref, onRowIntent, caption, initialSort, pageSize = 20, empty, dense = false }) {
   const navigate = useNavigate();
   const [sort, setSort] = useState(initialSort || null);
   const [page, setPage] = useState(0);
@@ -75,7 +77,13 @@ function DataTable({ columns, rows, rowKey, rowHref, caption, initialSort, pageS
           </thead>
           <tbody>
             {visible.map((row) => (
-              <tr key={rowKey(row)} className={rowHref ? 'is-clickable' : undefined} onClick={(event) => onRowClick(event, row)}>
+              <tr
+                key={rowKey(row)}
+                className={rowHref ? 'is-clickable' : undefined}
+                onClick={(event) => onRowClick(event, row)}
+                onMouseEnter={onRowIntent ? () => onRowIntent(row) : undefined}
+                onFocus={onRowIntent ? () => onRowIntent(row) : undefined}
+              >
                 {columns.map((col) => (
                   <td
                     key={col.key}

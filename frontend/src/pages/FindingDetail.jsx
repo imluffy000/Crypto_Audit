@@ -177,6 +177,15 @@ function FindingDetail() {
     };
   }, [scanId, findingId, reloadKey, notify]);
 
+  // Load the neighbouring findings in the background, so the previous / next buttons open instantly.
+  useEffect(() => {
+    const index = siblings.findIndex((item) => item.finding_id === findingId);
+    if (index < 0) return;
+    [siblings[index - 1], siblings[index + 1]].filter(Boolean).forEach((item) => {
+      scanService.getFinding(scanId, item.finding_id).catch(() => {});
+    });
+  }, [siblings, scanId, findingId]);
+
   const reload = useCallback(() => {
     setError('');
     setDetail(null);

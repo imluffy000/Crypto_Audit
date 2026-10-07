@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-
-const EXIT_MS = 160;
+import { useLayoutEffect } from 'react';
 
 // Views that are one page with several URLs (repository tabs) do not animate between themselves.
 export function pageKey(pathname) {
@@ -9,30 +7,15 @@ export function pageKey(pathname) {
 }
 
 /**
- * Delays a route change long enough for the current page to fade out, then shows the new one
- * (which fades in via CSS). Returns the location to render and whether the old page is leaving.
+ * Route changes switch pages immediately (the new page fades in briefly via CSS, nothing waits for the
+ * old one). This hook returns the key that restarts that fade and scrolls to the top on a new page.
  */
 export function usePageTransition(location) {
-  const [shown, setShown] = useState(location);
-  const [leaving, setLeaving] = useState(false);
-  const changed = pageKey(location.pathname) !== pageKey(shown.pathname);
+  const key = pageKey(location.pathname);
 
-  // Same page, new URL (a tab, a query string): swap immediately. State updates during render
-  // are React's documented way to adjust state to a changed prop.
-  if (!changed && location !== shown) setShown(location);
-  if (!changed && leaving) setLeaving(false);
-  if (changed && !leaving) setLeaving(true);
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [key]);
 
-  useEffect(() => {
-    if (!leaving) return undefined;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const timer = window.setTimeout(() => {
-      setShown(location);
-      setLeaving(false);
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }, reduced ? 0 : EXIT_MS);
-    return () => window.clearTimeout(timer);
-  }, [leaving, location]);
-
-  return { shown, leaving };
+  return key;
 }

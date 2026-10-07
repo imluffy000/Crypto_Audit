@@ -20,10 +20,15 @@ export const authService = {
 
   currentUser: async () => toUser(await api.get('/auth/me')),
 
+  // Whatever happens, forget cached data: the next person to sign in must not see this account's scans.
   logout: async () => {
-    await api.post('/auth/logout');
+    try {
+      await api.post('/auth/logout');
+    } finally {
+      api.invalidate();
+    }
     return true;
   },
 
-  health: () => api.get('/health'),
+  health: () => api.get('/health', { ttl: 30_000 }),
 };

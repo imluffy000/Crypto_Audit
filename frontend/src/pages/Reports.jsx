@@ -123,6 +123,12 @@ function Reports() {
             rows={filtered}
             rowKey={(scan) => scan.scan_id}
             rowHref={(scan) => `/scans/${scan.scan_id}`}
+            onRowIntent={(scan) => {
+              // A finished scan's page needs the scan and its findings; load both ahead of the click.
+              if (scan.status !== 'COMPLETED') return;
+              scanService.getScan(scan.scan_id).catch(() => {});
+              scanService.getFindings(scan.scan_id).catch(() => {});
+            }}
             initialSort={{ key: 'created', direction: 'desc' }}
             empty={<EmptyState compact title="No scans match" description="Try a different search or status." />}
           />

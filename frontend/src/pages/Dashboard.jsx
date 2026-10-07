@@ -172,7 +172,14 @@ function Dashboard() {
                     </Button>
                   }
                 />
-                <DataTable caption="Recent scans" columns={columns} rows={scans.slice(0, 6)} rowKey={(scan) => scan.scan_id} rowHref={(scan) => `/scans/${scan.scan_id}`} pageSize={null} />
+                <DataTable caption="Recent scans" columns={columns} rows={scans.slice(0, 6)} rowKey={(scan) => scan.scan_id} rowHref={(scan) => `/scans/${scan.scan_id}`}
+                  onRowIntent={(scan) => {
+                    if (scan.status !== 'COMPLETED') return;
+                    scanService.getScan(scan.scan_id).catch(() => {});
+                    scanService.getFindings(scan.scan_id).catch(() => {});
+                  }}
+                  pageSize={null}
+                />
 
                 <SectionHeader title="Findings by rule" description="From the latest completed scan of each repository." />
                 {Object.keys(stats.byRule).length ? (

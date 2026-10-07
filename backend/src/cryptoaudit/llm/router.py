@@ -1,5 +1,6 @@
 """Chooses the LLM backend for each call: the first configured backend that is available."""
 
+import threading
 import time
 from dataclasses import dataclass
 from typing import Callable, List, Optional
@@ -30,6 +31,7 @@ class RoutingLLMClient:
         self.backends = backends
         self._cached: Optional[LLMBackend] = None
         self._cached_at = 0.0
+        self._refreshing = threading.Event()
 
     def active(self) -> Optional[LLMBackend]:
         now = time.monotonic()
@@ -39,6 +41,24 @@ class RoutingLLMClient:
         self._cached_at = now
         return self._cached
 
+    def peek(self) -> Optional[LLMBackend]:
+        """
+        The last known available backend, without waiting on the network. When that knowledge is
+        stale (or missing) a refresh runs in the background. Used for status reporting only; calls
+        that generate text go through active(), which checks before answering.
+        """
+        if time.monotonic() - self._cached_at >= AVAILABILITY_CACHE_SECONDS and not self._refreshing.is_set():
+            self._refreshing.set()
+
+            def refresh() -> None:
+                try:
+                    self.active()
+                finally:
+                    self._refreshing.clear()
+
+            threading.Thread(target=refresh, name="llm-availability", daemon=True).start()
+        return self._cached
+
     def available(self) -> bool:
         return self.active() is not None
 
@@ -46,8 +66,8 @@ class RoutingLLMClient:
         backend = self.active()
         return backend.context_window if backend else None
 
-    def describe(self) -> str:
-        backend = self.active()
+    def describe(self, wait: bool = True) -> str:
+        backend = self.active() if wait else self.peek()
         if backend is not None:
             return f"{backend.name}:{backend.model}"
         return " / ".join(f"{b.name}:{b.model}" for b in self.backends) or "none"

@@ -65,6 +65,21 @@ def create_app(services: Optional[Services] = None) -> FastAPI:
     @app.get("/api/health", response_model=HealthOut, tags=["system"])
     def health() -> HealthOut:
         settings = services.settings
+        # Report LLM status without waiting on the network: the router answers from its last check
+        # and refreshes in the background, so this endpoint (and the sign-in page) stays instant.
+        peek = getattr(services.llm, "peek", None)
+        if peek is not None:
+            backend = peek()
+            return HealthOut(
+                status="ok",
+                version=__version__,
+                github_configured=services.auth is not None,
+                manage_access_url=services.auth.manage_access_url if services.auth else None,
+                repo_access=settings.github_repo_access,
+                llm_model=services.llm.describe(wait=False),
+                llm_available=backend is not None,
+                llm_provider=settings.llm_provider,
+            )
         return HealthOut(
             status="ok",
             version=__version__,
@@ -78,6 +93,9 @@ def create_app(services: Optional[Services] = None) -> FastAPI:
 
     for router in (auth.router, repos.router, scan.router, findings.router, reports.router):
         app.include_router(router, prefix="/api")
+
+    if hasattr(services.llm, "peek"):
+        services.llm.peek()  # start the first LLM availability check in the background
 
     interrupted = services.store.fail_interrupted_scans()
     if interrupted:

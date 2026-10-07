@@ -2,7 +2,7 @@ import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-d
 import { CryptoAuditProvider } from './context/AppContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ToastProvider from './components/ui/ToastProvider';
-import { pageKey, usePageTransition } from './hooks/usePageTransition';
+import { usePageTransition } from './hooks/usePageTransition';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -13,14 +13,14 @@ import FindingDetail from './pages/FindingDetail';
 import Reports from './pages/Reports';
 import Findings from './pages/Findings';
 
-/** All routes. The outgoing page fades out before the next one fades in (see usePageTransition). */
+/** All routes. Each page appears immediately with a short fade-in (see usePageTransition). */
 function AppRoutes() {
   const location = useLocation();
-  const { shown, leaving } = usePageTransition(location);
+  const pageKey = usePageTransition(location);
 
   return (
-    <div key={pageKey(shown.pathname)} className={`route-stage${leaving ? ' is-leaving' : ''}`}>
-      <Routes location={shown}>
+    <div key={pageKey} className="route-stage">
+      <Routes location={location}>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
 

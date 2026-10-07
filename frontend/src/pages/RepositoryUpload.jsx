@@ -60,6 +60,7 @@ function GitHubRepositories({ onSelect, selectingId, manageUrl, repoAccess }) {
   }, [reloadKey, notify]);
 
   const load = useCallback(() => {
+    repositoryService.forgetGitHubRepositories();
     refreshing.current = true;
     setLoading(true);
     setError('');

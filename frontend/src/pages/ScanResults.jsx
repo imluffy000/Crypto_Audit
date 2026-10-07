@@ -177,6 +177,7 @@ function FindingsTable({ scanId, findings, strategies }) {
         rows={filtered}
         rowKey={(item) => item.finding_id}
         rowHref={(item) => `/scans/${scanId}/findings/${item.finding_id}`}
+        onRowIntent={(item) => scanService.getFinding(scanId, item.finding_id).catch(() => {})}
         initialSort={{ key: 'severity', direction: 'desc' }}
         empty={<EmptyState compact title="No findings match" description="Try a different search or clear the filters." />}
       />

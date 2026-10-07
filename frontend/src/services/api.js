@@ -33,8 +33,37 @@ async function request(path, { method = 'GET', body } = {}) {
   return data;
 }
 
+/*
+ * In-memory response cache, so revisiting a page or stepping between findings answers immediately.
+ * It lives only for this browser tab and is cleared on sign-out and account switch, so one account's
+ * data is never shown to another.
+ *   ttl: milliseconds a response stays fresh (Infinity for data that cannot change, e.g. a finished scan)
+ *   keep(data): whether this particular response may be cached at all (e.g. not a scan still running)
+ * Identical requests already in flight share one network call.
+ */
+const cache = new Map();
+const inflight = new Map();
+
+function cachedGet(path, { ttl = 0, keep = () => true } = {}) {
+  const hit = cache.get(path);
+  if (hit && Date.now() - hit.at < ttl) return Promise.resolve(hit.data);
+  if (inflight.has(path)) return inflight.get(path);
+  const pending = request(path)
+    .then((data) => {
+      if (ttl > 0 && keep(data)) cache.set(path, { data, at: Date.now() });
+      return data;
+    })
+    .finally(() => inflight.delete(path));
+  inflight.set(path, pending);
+  return pending;
+}
+
 export const api = {
-  get: (path) => request(path),
+  get: (path, options) => cachedGet(path, options),
   post: (path, body) => request(path, { method: 'POST', body }),
   url: (path) => `${API_BASE_URL}/api${path}`,
+  /** Forget cached responses: all of them, or those whose path starts with `prefix`. */
+  invalidate: (prefix = '') => {
+    [...cache.keys()].filter((key) => key.startsWith(prefix)).forEach((key) => cache.delete(key));
+  },
 };

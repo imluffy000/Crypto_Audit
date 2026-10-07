@@ -34,8 +34,11 @@ export const repositoryService = {
     items: files,
   }),
 
+  /** Drop the cached repository list and trees, so the next load asks GitHub again. */
+  forgetGitHubRepositories: () => api.invalidate('/repos'),
+
   getGitHubRepositories: async () => {
-    const repos = await api.get('/repos');
+    const repos = await api.get('/repos', { ttl: 60_000 });
     return repos.map((repo) => ({
       id: repo.id,
       fullName: repo.full_name,
@@ -52,7 +55,7 @@ export const repositoryService = {
   },
 
   getGitHubRepository: async (repo) => {
-    const result = await api.get(`/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}/tree`);
+    const result = await api.get(`/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}/tree`, { ttl: 60_000 });
     return {
       id: repo.id,
       name: repo.name,

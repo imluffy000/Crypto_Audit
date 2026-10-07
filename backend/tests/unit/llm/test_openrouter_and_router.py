@@ -162,3 +162,28 @@ def test_openrouter_provider_errors_are_readable(monkeypatch):
     message = excinfo.value.message
     assert message.startswith("OpenRouter error (HTTP 400): Provider returned error: AiError: Bad input")
     assert "'/seed' must be >= 1" in message and "a8c4-0960" not in message and "{" not in message
+
+
+def test_router_peek_never_waits_on_a_slow_availability_check():
+    import threading
+    import time
+
+    release = threading.Event()
+
+    def slow_check():
+        release.wait(5)  # stands in for a network probe that takes a while
+        return True
+
+    slow = LLMBackend("ollama", FakeClient("ollama"), "ollama-model", 8192, slow_check, True)
+    router = RoutingLLMClient([slow])
+
+    started = time.monotonic()
+    assert router.peek() is None  # nothing known yet: answers at once and checks in the background
+    assert time.monotonic() - started < 0.5
+    assert router.describe(wait=False) == "ollama:ollama-model"
+
+    release.set()
+    deadline = time.monotonic() + 5
+    while router.peek() is None and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert router.peek() is slow  # the background check filled in the answer

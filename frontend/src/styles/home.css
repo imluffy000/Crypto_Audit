@@ -866,13 +866,6 @@ html.home-snap {
   translate: 0 0;
 }
 
-/* ---------- Leaving the page ---------- */
-.route-stage.is-leaving .home-nav,
-.route-stage.is-leaving .slide-nav {
-  opacity: 0;
-  transition: opacity 160ms ease-in;
-}
-
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .reveal,

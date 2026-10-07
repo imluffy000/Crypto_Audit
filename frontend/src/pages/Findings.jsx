@@ -206,6 +206,7 @@ function Findings() {
             rows={filtered}
             rowKey={(row) => `${row.scanId}-${row.finding_id}`}
             rowHref={(row) => `/scans/${row.scanId}/findings/${row.finding_id}`}
+            onRowIntent={(row) => scanService.getFinding(row.scanId, row.finding_id).catch(() => {})}
             initialSort={{ key: 'severity', direction: 'desc' }}
             empty={<EmptyState compact title="No findings match" description="Try a different search or clear the filters." />}
           />

@@ -469,32 +469,21 @@
 }
 
 /* ---------- Route transitions ---------- */
-/* Only page content moves, so fixed chrome (the app sidebar, the home navbar) stays put. */
+/* The new page shows at once and fades in briefly; only page content moves, so fixed chrome
+   (the app sidebar, the home navbar) stays put. */
 .route-stage .page-anim {
-  animation: page-in 380ms var(--brand-ease, ease) backwards;
-}
-
-.route-stage.is-leaving .page-anim {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition:
-    opacity 160ms ease-in,
-    transform 160ms ease-in;
+  animation: page-in 180ms ease-out backwards;
 }
 
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .route-stage .page-anim {
     animation: none;
-  }
-
-  .route-stage.is-leaving .page-anim {
-    transform: none;
   }
 }
