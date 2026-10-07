@@ -10,7 +10,8 @@ experiment database and research analysis. See [docs/architecture/system-design.
 and [docs/architecture/data-flow.md](docs/architecture/data-flow.md).
 
 ```sh
-pip install -e ".[dev,scanners]"
+pip install -e ".[dev,web,scanners]"
+uv tool install semgrep==1.163.0   # optional baseline scanner, kept in its own environment
 cryptoaudit repair path/to/file.py -s S1,S2
 cryptoaudit bench run -s S1,S2,S3,S4
 cryptoaudit bench report
