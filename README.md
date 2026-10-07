@@ -2,6 +2,20 @@
 
 CryptoAudit is a frontend prototype for reviewing repositories for cryptographic security issues.
 
+## Research pipeline (Python)
+
+The `cryptoaudit` Python package implements the full pipeline: deterministic CR1–CR5 detection,
+bounded context, S1–S4 candidate repairs, sandboxed V0–V3 validation, aggregation, an append-only
+experiment database and research analysis. See [docs/architecture.md](docs/architecture.md).
+
+```sh
+pip install -e ".[dev,scanners]"
+cryptoaudit repair path/to/file.py -s S1,S2
+cryptoaudit bench run -s S1,S2,S3,S4
+cryptoaudit bench report
+python -m pytest
+```
+
 ## Preview
 
 Open the [CryptoAudit preview](https://imluffy000.github.io/Crypto_Audit/). GitHub Actions publishes the preview whenever changes are pushed to `main`.
