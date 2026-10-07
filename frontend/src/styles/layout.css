@@ -100,9 +100,19 @@
   text-decoration: none;
 }
 
+.nav-link svg {
+  color: var(--text-2);
+}
+
 .nav-link.is-active {
   background: var(--accent-subtle);
-  color: var(--accent-text);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.nav-link.is-active svg {
+  color: var(--accent);
 }
 
 .sidebar-footer {

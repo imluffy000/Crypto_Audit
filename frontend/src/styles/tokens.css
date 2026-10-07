@@ -1,8 +1,14 @@
 /*
- * CryptoAudit design tokens.
- * One accent (blue) for interaction; semantic colours carry meaning only:
- * green = success/verified, amber = warning/unverified, red = critical/failed, blue = info.
- * Light by default; dark follows the operating system.
+ * CryptoAudit design tokens — light, muted palette.
+ *
+ *   Primary background  #EEF4EE   Secondary cream  #F7F1DE   Cards    #FFFFFF
+ *   Primary teal        #10B59F   Hover teal       #079681   Borders  #DCE4DE
+ *   Primary text        #343936   Secondary text   #68716C   Highlight yellow #FFF2B8
+ *
+ * Teal is reserved for CTAs, active states, icons and important accents. Text on teal uses the
+ * primary text colour (4.5:1); teal is never used for body text on light backgrounds (too low
+ * contrast), so links and active labels stay dark with a teal underline, icon or indicator.
+ * Semantic colours are muted to sit inside the palette; only VERIFIED uses the success colour.
  */
 :root {
   --font-sans: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -26,9 +32,9 @@
   --space-10: 40px;
   --space-12: 48px;
 
-  --radius-sm: 4px;
-  --radius: 6px;
-  --radius-lg: 8px;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
 
   --content-max: 1200px;
   --sidebar-width: 232px;
@@ -37,113 +43,73 @@
   --duration: 180ms;
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --surface-2: #f2f4f7;
-  --surface-3: #e8ebf0;
-  --border: #e0e4ea;
-  --border-strong: #c9d0d9;
-  --text: #14181f;
-  --text-2: #475161;
-  --text-3: #677180;
-  --overlay: rgba(15, 20, 28, 0.45);
-  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
-  --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.12);
+  /* Palette */
+  --color-bg: #eef4ee;
+  --color-cream: #f7f1de;
+  --color-teal: #10b59f;
+  --color-teal-hover: #079681;
+  --color-text: #343936;
+  --color-text-2: #68716c;
+  --color-card: #ffffff;
+  --color-border: #dce4de;
+  --color-highlight: #fff2b8;
 
-  --accent: #2557d6;
-  --accent-hover: #1d47b3;
-  --accent-subtle: #ebf1fd;
-  --accent-text: #1f4cbf;
-  --on-accent: #ffffff;
-  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px #2557d6;
+  /* Surfaces and text */
+  --bg: var(--color-bg);
+  --surface: var(--color-card);
+  --surface-2: var(--color-cream); /* table headers, code headers, quiet panels */
+  --surface-3: #e5ede6; /* hover on light surfaces: the background, one step deeper */
+  --border: var(--color-border);
+  --border-strong: #c8d3cb;
+  --text: var(--color-text);
+  --text-2: var(--color-text-2);
+  --text-3: var(--color-text-2);
+  --overlay: rgba(52, 57, 54, 0.32);
+  --shadow-sm: 0 1px 2px rgba(52, 57, 54, 0.05);
+  --shadow-md: 0 6px 20px rgba(52, 57, 54, 0.08);
 
-  --success: #17784a;
-  --success-subtle: #e7f4ed;
-  --success-border: #b6dcc6;
-  --warning: #8f5300;
-  --warning-subtle: #fdf3e1;
-  --warning-border: #efd29b;
-  --danger: #bf3120;
-  --danger-subtle: #fcedeb;
-  --danger-border: #f0bdb5;
-  --info: #1d65ad;
-  --info-subtle: #e8f1fa;
-  --info-border: #b9d3ec;
-  --neutral-subtle: #eef0f3;
-  --neutral-border: #d9dee5;
+  /* Accent (teal) */
+  --accent: var(--color-teal);
+  --accent-hover: var(--color-teal-hover);
+  --accent-subtle: #e2f4ef; /* teal tint for active backgrounds */
+  --accent-text: var(--color-text); /* text that needs emphasis stays dark; teal goes on the indicator */
+  --on-accent: var(--color-text);
+  --on-accent-hover: #ffffff;
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--color-teal);
 
-  --code-bg: #fbfbfc;
-  --code-gutter: #f4f5f7;
-  --code-line-number: #8a929e;
-  --code-added: #e3f3ea;
-  --code-added-strong: #c4e6d2;
-  --code-removed: #fbe9e6;
-  --code-removed-strong: #f4cbc4;
-  --code-flagged: #fdf1d9;
-  --syn-keyword: #1f4cbf;
-  --syn-string: #0f6a45;
-  --syn-comment: #6e7781;
-  --syn-number: #8f5300;
-  --syn-builtin: #8a3b12;
-  --syn-decorator: #8f5300;
+  /* Semantic (muted) */
+  --success: #2b7a57;
+  --success-subtle: #e3f1e8;
+  --success-border: #bddbc9;
+  --warning: #85600a;
+  --warning-subtle: var(--color-highlight);
+  --warning-border: #ecd77f;
+  --danger: #b0442f;
+  --danger-subtle: #fbebe6;
+  --danger-border: #eec4b9;
+  --info: #3f6a86;
+  --info-subtle: #e6eef2;
+  --info-border: #c6d6e0;
+  --neutral-subtle: #f1f4f1;
+  --neutral-border: var(--color-border);
+
+  /* Code */
+  --code-bg: #fcfdfb;
+  --code-gutter: #f6f8f5;
+  --code-line-number: #8a938d;
+  --code-added: #e3f1e8;
+  --code-added-strong: #c9e5d4;
+  --code-removed: #fbebe6;
+  --code-removed-strong: #f3d2c8;
+  --code-flagged: var(--color-highlight);
+  --syn-keyword: #0b7d6d;
+  --syn-string: #5d6b1f;
+  --syn-comment: #858e88;
+  --syn-number: #9a5b12;
+  --syn-builtin: #7a4a8c;
+  --syn-decorator: #9a5b12;
 
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e1116;
-    --surface: #151a21;
-    --surface-2: #1a2028;
-    --surface-3: #222933;
-    --border: #262d37;
-    --border-strong: #353d4a;
-    --text: #e6e9ee;
-    --text-2: #aab2be;
-    --text-3: #868f9c;
-    --overlay: rgba(0, 0, 0, 0.6);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.45);
-
-    --accent: #3a6ad9;
-    --accent-hover: #4a7ae6;
-    --accent-subtle: rgba(76, 130, 247, 0.14);
-    --accent-text: #8fb0fa;
-    --on-accent: #ffffff;
-    --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px #6b98f8;
-
-    --success: #4cc38a;
-    --success-subtle: rgba(76, 195, 138, 0.12);
-    --success-border: rgba(76, 195, 138, 0.35);
-    --warning: #e3a842;
-    --warning-subtle: rgba(227, 168, 66, 0.12);
-    --warning-border: rgba(227, 168, 66, 0.35);
-    --danger: #f27a69;
-    --danger-subtle: rgba(242, 122, 105, 0.12);
-    --danger-border: rgba(242, 122, 105, 0.38);
-    --info: #6aaee9;
-    --info-subtle: rgba(106, 174, 233, 0.12);
-    --info-border: rgba(106, 174, 233, 0.35);
-    --neutral-subtle: #20262f;
-    --neutral-border: #353d4a;
-
-    --code-bg: #11151b;
-    --code-gutter: #141920;
-    --code-line-number: #5f6874;
-    --code-added: rgba(76, 195, 138, 0.11);
-    --code-added-strong: rgba(76, 195, 138, 0.26);
-    --code-removed: rgba(242, 122, 105, 0.12);
-    --code-removed-strong: rgba(242, 122, 105, 0.28);
-    --code-flagged: rgba(227, 168, 66, 0.13);
-    --syn-keyword: #8fb0fa;
-    --syn-string: #7fd8b0;
-    --syn-comment: #7a8390;
-    --syn-number: #e3a842;
-    --syn-builtin: #f0a17a;
-    --syn-decorator: #e3a842;
-
-    color-scheme: dark;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

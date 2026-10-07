@@ -13,7 +13,7 @@ Every file in `frontend/src/` and what it does. The website uses React 19, Vite,
 | Code viewing | `components/code/` | Code viewer and diff viewer |
 | Services | `services/` | The only code that talks to the backend; every call goes to `/api` |
 | State | `context/`, `hooks/` | Signed-in user, selected repository, sign-in / switch / sign-out |
-| Styles | `styles/` | Design tokens, base, components, layout, code and page CSS (light and dark) |
+| Styles | `styles/` | Design tokens (light, muted palette with teal accents), base, components, layout, code and page CSS |
 | Utilities | `utils/` | Formatting, syntax highlighting, diff parsing, local file helpers |
 
 `utils/sizeUtils.js` is a legacy helper that no page imports.

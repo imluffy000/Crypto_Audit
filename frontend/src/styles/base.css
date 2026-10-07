@@ -74,13 +74,16 @@ svg {
 }
 
 a {
-  color: var(--accent-text);
+  color: var(--text);
   text-decoration: none;
 }
 
+/* Links stay dark for contrast; teal shows up as the underline. */
 a:hover {
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 code,
@@ -98,7 +101,8 @@ pre,
 }
 
 ::selection {
-  background: var(--accent-subtle);
+  background: var(--color-highlight);
+  color: var(--text);
 }
 
 .visually-hidden {

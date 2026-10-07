@@ -300,9 +300,11 @@ Crypto_Audit/
 The website is a React 19 single-page app (Vite, React Router, `lucide-react` icons, plain CSS).
 It talks to the backend only through `src/services/`, and every call goes to `/api`.
 
-- **Design system:** colour, type and spacing tokens in `src/styles/tokens.css`, one accent colour,
-  semantic success/warning/danger/info colours, light and dark themes that follow the operating
-  system, and reduced-motion support.
+- **Design system:** colour, type and spacing tokens in `src/styles/tokens.css`. A light, muted
+  palette: background `#EEF4EE`, cream `#F7F1DE`, cards `#FFFFFF`, borders `#DCE4DE`, text
+  `#343936` / `#68716C`, highlight `#FFF2B8`, and teal `#10B59F` (hover `#079681`) reserved for calls
+  to action, active states, icons and key accents. Muted semantic colours, no gradients, minimal
+  shadows, reduced-motion support.
 - **Pages:** dashboard metrics from your own scans; repositories, findings and scan history with
   search, filters, sorting and pagination; a finding view with the original and repaired code side by
   side or as a unified diff, the validation gates, a scanners-versus-validation comparison and the
