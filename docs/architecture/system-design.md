@@ -16,46 +16,49 @@ How data moves between stages and across the information boundary is described i
 ## Repository layout
 
 ```
-.github/workflows/          ci.yml (Python tests), deploy.yml (frontend Pages)
-benchmark/
-├── cases/<rule>/<id>/      PUBLIC: vulnerable module.py + case.yaml
-├── expected/<rule>/<id>/   HIDDEN: oracle.yaml + V1/V2/V3 check files
-├── artifacts/<rule>/<id>/  HIDDEN: legacy data persisted by the original code
-└── results/                local run output (git-ignored)
-configs/rules.yaml          CR1–CR5 rule configuration
-prompts/repair/             versioned LLM prompts (s3_v1.yaml, s4_v1.yaml)
-docker/                     sandbox/ (validation runtime), api + web images, docker-compose, nginx
-docs/                       architecture/, development/
-frontend/                   React/Vite UI
-src/cryptoaudit/
-├── cli/          main.py: analyze, repair, bench list|run|report, serve
-├── api/          app, services, jobs, dependencies, schemas, routes/ (auth, repos, scan, findings, reports)
-├── ingest/       file_loader, directory_loader, filters, benchmark_loader (public views only),
-│                 github_client (GitHub App API), git_loader (in-memory tarball ingestion)
-├── analysis/     ast_parser, import_analyzer, call_analyzer, context_analyzer, literals, analyzer
-├── rules/        base, registry, cr1_weak_hash … cr5_insecure_random
-├── models/       finding, analysis, enums, context, scan, repair, validation, benchmark, experiment
-├── context/      context_builder, context_budget, extractor, symbol_resolver, call_graph
-├── llm/          client (protocol), ollama_client, schemas
-├── repair/       base, registry, request, edits, s1_hint, s2_template, s3_llm, s4_migration,
-│                 prompt_builder, parser
-├── validation/   v0_scanner, v1_functional, v2_security, v3_compatibility, gates, runner,
-│   │             checks, integrity, oracle (hidden loader)
-│   ├── sandbox/  runners (Docker / local), harness (runs inside the sandbox)
-│   └── scanners/ bandit, semgrep, process
-├── pipeline/     orchestrator, stages, pipeline_result, factory, benchmark_runner
-├── reporting/    console_report, json_report, markdown_report, research
-├── storage/      sqlite (append-only experiment DB), jsonl (export), web_store (sessions, scan jobs)
-├── config/       settings (CRYPTOAUDIT_* environment variables)
-└── utils/        errors, hashing
-tests/
-├── unit/<package>/         mirrors src/cryptoaudit
-├── integration/            analysis, validation (oracle validity) pipelines
-├── e2e/                    full scan → repair → validate → store
-└── fixtures/               analyzer fixtures, context fixtures, reference repairs (tests only)
+.github/workflows/              ci.yml (backend tests), deploy.yml (frontend Pages)
+docker/                         sandbox/ (validation runtime), api + web images, docker-compose, nginx
+docs/                           architecture/, development/
+frontend/                       React/Vite website (services call /api)
+backend/                        Python package and everything it needs; run commands from here
+├── pyproject.toml, uv.lock, README.md, .env.example
+├── benchmark/
+│   ├── cases/<rule>/<id>/      PUBLIC: vulnerable module.py + case.yaml
+│   ├── expected/<rule>/<id>/   HIDDEN: oracle.yaml + V1/V2/V3 check files
+│   ├── artifacts/<rule>/<id>/  HIDDEN: legacy data persisted by the original code
+│   └── results/                local run output (git-ignored)
+├── configs/rules.yaml          CR1–CR5 rule configuration
+├── prompts/                    versioned LLM prompts: repair/ (s3_v1, s4_v1), explanation/ (explain_v1)
+├── src/cryptoaudit/
+│   ├── cli/          main.py: analyze, repair, bench list|run|report, serve
+│   ├── api/          app, services, jobs, dependencies, schemas, routes/ (auth, repos, scan, findings, reports)
+│   ├── ingest/       file_loader, directory_loader, filters, benchmark_loader (public views only),
+│   │                 github_client (GitHub App API), git_loader (in-memory tarball ingestion)
+│   ├── analysis/     ast_parser, import_analyzer, call_analyzer, context_analyzer, literals, analyzer
+│   ├── rules/        base, registry, cr1_weak_hash … cr5_insecure_random
+│   ├── models/       finding, analysis, enums, context, scan, repair, validation, benchmark, experiment, explanation
+│   ├── context/      context_builder, context_budget, extractor, symbol_resolver, call_graph
+│   ├── llm/          client (protocol), ollama_client, schemas, prompt_loader
+│   ├── repair/       base, registry, request, edits, s1_hint, s2_template, s3_llm, s4_migration,
+│   │                 prompt_builder, parser
+│   ├── validation/   v0_scanner, v1_functional, v2_security, v3_compatibility, gates, runner,
+│   │   │             checks, integrity, oracle (hidden loader)
+│   │   ├── sandbox/  runners (Docker / local), harness (runs inside the sandbox)
+│   │   └── scanners/ bandit, semgrep, process
+│   ├── pipeline/     orchestrator, stages, pipeline_result, factory, benchmark_runner, repository_scan
+│   ├── reporting/    console_report, json_report, markdown_report, research, explanation, ai_explanation
+│   ├── storage/      sqlite (append-only experiment DB), jsonl (export), web_store (sessions, scan jobs)
+│   ├── config/       settings (CRYPTOAUDIT_* environment variables / .env)
+│   └── utils/        errors, hashing
+├── tests/
+│   ├── unit/<package>/         mirrors src/cryptoaudit
+│   ├── integration/            analysis, validation (oracle validity) pipelines
+│   ├── e2e/                    full scan → repair → validate → store
+│   └── fixtures/               analyzer fixtures, context fixtures, reference repairs (tests only)
+└── data/                       local runtime output (git-ignored)
 ```
 
-Runtime output (`data/`, e.g. `data/experiments/experiments.sqlite`) is git-ignored.
+Runtime output (`backend/data/`, e.g. the web store and experiment databases) is git-ignored.
 
 ## Components
 
@@ -109,10 +112,12 @@ reports, candidate code and diff. The store rejects UPDATE/DELETE.
 
 ## Usage
 
+From `backend/`:
+
 ```sh
 pip install -e ".[dev,web,scanners]"
 uv tool install semgrep==1.163.0                              # isolated: conflicts with web deps
-docker build -t cryptoaudit-sandbox:latest docker/sandbox     # isolated validation runtime
+docker build -t cryptoaudit-sandbox:latest ../docker/sandbox  # isolated validation runtime
 ollama pull codellama:7b-instruct                             # for S3/S4 (CRYPTOAUDIT_LLM_MODEL to change)
 
 cryptoaudit analyze path/to/file.py

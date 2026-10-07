@@ -7,7 +7,7 @@ services:
     build:
       context: ..
       dockerfile: docker/api.Dockerfile
-    env_file: ../.env
+    env_file: ../backend/.env
     environment:
       CRYPTOAUDIT_PUBLIC_URL: http://localhost:8080
       CRYPTOAUDIT_LLM_BASE_URL: http://ollama:11434

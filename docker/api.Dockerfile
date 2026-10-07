@@ -8,10 +8,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 WORKDIR /app
-COPY pyproject.toml README.md ./
-COPY src ./src
-COPY configs ./configs
-COPY prompts ./prompts
+COPY backend/pyproject.toml backend/README.md ./
+COPY backend/src ./src
+COPY backend/configs ./configs
+COPY backend/prompts ./prompts
 # Editable install keeps configs/ and prompts/ resolvable at the repository paths under /app.
 RUN pip install -e ".[web,scanners]" && useradd --uid 10001 --create-home cryptoaudit && mkdir -p /app/data && chown cryptoaudit /app/data
 

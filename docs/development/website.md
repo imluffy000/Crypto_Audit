@@ -32,19 +32,22 @@ the website's “Grant repositories” button links to the installation page.
 ## 2. Configure
 
 ```sh
+cd backend
 cp .env.example .env
 python -c "import secrets; print(secrets.token_urlsafe(48))"   # paste as CRYPTOAUDIT_SESSION_SECRET
 ```
 
 Fill in `CRYPTOAUDIT_GITHUB_CLIENT_ID`, `CRYPTOAUDIT_GITHUB_CLIENT_SECRET` and
-`CRYPTOAUDIT_GITHUB_APP_SLUG`. `.env` is git-ignored — never commit it.
+`CRYPTOAUDIT_GITHUB_APP_SLUG` in `backend/.env`. `.env` is git-ignored — never commit it.
 
 ## 3. Run (development)
 
 ```sh
+cd backend
 pip install -e ".[web,scanners]"
-cryptoaudit serve                      # API on http://127.0.0.1:8000 (run from the repo root so .env is found)
+cryptoaudit serve                      # API on http://127.0.0.1:8000 (run from backend/ so .env is found)
 
+# second terminal, from the repository root
 cd frontend && npm install && npm run dev   # website on http://localhost:5173 (proxies /api to :8000)
 ```
 
@@ -81,7 +84,7 @@ result. Scanner results (V0) are shown for comparison but never decide the verdi
 - Sign-in uses the GitHub App web flow with a single-use `state` bound to both the server and an
   HttpOnly browser cookie. Sessions are HttpOnly, SameSite=Lax cookies; set
   `CRYPTOAUDIT_COOKIE_SECURE=true` behind HTTPS.
-- Access tokens are encrypted at rest in `data/web/cryptoaudit.sqlite`; session IDs are stored hashed.
+- Access tokens are encrypted at rest in `backend/data/web/cryptoaudit.sqlite`; session IDs are stored hashed.
 - Repository archives are size-limited and read in memory (only `.py` files, no symlinks, no path
   traversal). One active scan per user.
 - The API binds to `127.0.0.1` by default. Put it behind a reverse proxy with HTTPS before exposing it.

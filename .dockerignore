@@ -7,5 +7,5 @@
 **/*.egg-info
 .venv
 venv
-data
-benchmark/results
+backend/data
+backend/benchmark/results
