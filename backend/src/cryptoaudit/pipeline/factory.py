@@ -64,7 +64,7 @@ def build_llm(settings: Settings) -> RoutingLLMClient:
                 send_num_ctx=True,
             )
         )
-    if settings.llm_provider in ("openrouter", "auto") and settings.openrouter_api_key is not None:
+    if settings.llm_provider in ("openrouter", "auto") and settings.openrouter_api_key and settings.openrouter_api_key.get_secret_value().strip():
         openrouter = OpenRouterClient(
             settings.openrouter_api_key.get_secret_value(),
             base_url=settings.openrouter_base_url,

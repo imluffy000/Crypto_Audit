@@ -110,6 +110,7 @@ def test_router_with_nothing_available_raises_clear_error():
 def test_build_llm_respects_provider_setting():
     assert [b.name for b in build_llm(Settings(llm_provider="ollama")).backends] == ["ollama"]
     assert [b.name for b in build_llm(Settings(llm_provider="auto")).backends] == ["ollama"]  # no key: no fallback
+    assert [b.name for b in build_llm(Settings(llm_provider="auto", openrouter_api_key="  ")).backends] == ["ollama"]
     auto = build_llm(Settings(llm_provider="auto", openrouter_api_key="sk-or-x"))
     assert [b.name for b in auto.backends] == ["ollama", "openrouter"]
     hosted = build_llm(Settings(llm_provider="openrouter", openrouter_api_key="sk-or-x"))
