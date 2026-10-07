@@ -1,5 +1,4 @@
 import { useId } from 'react';
-import SecurityStatusCard from './SecurityStatusCard';
 
 // Ciphertext-like rows engraved on the dark slab. Purely decorative.
 const HEX_ROWS = [
@@ -13,12 +12,12 @@ const HEX_ROWS = [
 ];
 
 /**
- * CryptoAudit's abstract identity artwork: a layered composition of an organic blob, a dark
- * "ciphertext" slab, a lime circle with scan rings and a few product-UI fragments.
- * Decorative only (hidden from assistive technology). `cards={false}` gives the bare artwork for
- * empty states and onboarding; `compact` drops the secondary shapes for small spaces.
+ * CryptoAudit's abstract identity artwork: an organic blob, a dark "ciphertext" slab, a lime circle
+ * with a rotating scan ring and a few secondary shapes. Product-UI fragments (AnalysisCard,
+ * AlgorithmBadge) are passed as children and positioned by the caller. Decorative only: hidden
+ * from assistive technology. `compact` drops the secondary shapes for small spaces.
  */
-function CryptoSecurityGraphic({ cards = true, compact = false, className = '' }) {
+function CryptoAuditGraphic({ compact = false, className = '', children }) {
   const id = useId().replace(/:/g, '');
   const slabClip = `slab-${id}`;
   const dots = `dots-${id}`;
@@ -64,38 +63,14 @@ function CryptoSecurityGraphic({ cards = true, compact = false, className = '' }
 
         {/* 4. Secondary shapes */}
         <rect className="art-secondary" x="44" y="452" width="200" height="128" rx="34" fill="#FEF7E5" stroke="#D9E2DC" />
-        <circle className="art-secondary" cx="482" cy="206" r="30" fill="none" stroke="#0F766E" strokeWidth="2" />
-        <circle cx="482" cy="206" r="9" fill="#14B8A6" />
+        <g className="art-orbit">
+          <circle className="art-secondary" cx="482" cy="206" r="30" fill="none" stroke="#0F766E" strokeWidth="2" />
+          <circle cx="482" cy="206" r="9" fill="#14B8A6" />
+        </g>
       </svg>
-
-      {cards ? (
-        <>
-          <SecurityStatusCard
-            className="graphic-card card-algorithm"
-            eyebrow="Algorithm"
-            title="AES-256-GCM"
-            status={{ tone: 'success', label: 'Recommended' }}
-          />
-          <SecurityStatusCard
-            className="graphic-card card-scan"
-            eyebrow="Cryptographic scan"
-            rows={[
-              ['127', 'files analyzed'],
-              ['23', 'crypto operations'],
-            ]}
-            status={{ tone: 'live', caption: 'Status', label: 'Analysis complete' }}
-          />
-          <SecurityStatusCard
-            className="graphic-card card-warning"
-            eyebrow="CR5 · Static analysis"
-            title="Weak RNG"
-            detail="random.randint() · tokens.py:42"
-            status={{ tone: 'warning', label: 'Review required' }}
-          />
-        </>
-      ) : null}
+      {children}
     </div>
   );
 }
 
-export default CryptoSecurityGraphic;
+export default CryptoAuditGraphic;

@@ -1,12 +1,17 @@
 # Frontend routes, pages and API calls
 
-The website uses hash routes (`frontend/src/App.jsx`). Every route except `/login` is wrapped in
-`ProtectedRoute`, which waits for `GET /api/auth/me` and sends signed-out users to the login page.
-`/` goes to `/login` (which forwards signed-in users to the dashboard) and unknown routes go to
-`/dashboard`.
+The website uses hash routes (`frontend/src/App.jsx`). Every route except `/` and `/login` is
+wrapped in `ProtectedRoute`, which waits for `GET /api/auth/me` and sends signed-out users to the
+login page. `/` is the public home page, `/login` forwards signed-in users to the dashboard, and
+unknown routes go to `/dashboard`.
+
+Changing page fades the old page out (160 ms) and the new one in (`hooks/usePageTransition.js`).
+Only the page content moves, so the app sidebar stays still; the repository tabs count as one page
+and switch without a transition.
 
 | Route | Page | Purpose |
 |---|---|---|
+| `/` | `Home.jsx` | Four-slide product page: overview, detection, how it works, example finding + call to action |
 | `/login` | `Login.jsx` | Sign in with GitHub, or with a different GitHub account |
 | `/dashboard` | `Dashboard.jsx` | Metrics from your scans, recent scans, findings by rule, environment |
 | `/repositories/github`, `/repositories/upload`, `/repository/add` | `RepositoryUpload.jsx` | Choose a GitHub repository, or review local files (the tab follows the URL) |
@@ -20,7 +25,10 @@ The website uses hash routes (`frontend/src/App.jsx`). Every route except `/logi
 
 ```mermaid
 flowchart LR
-    root["/#/"] --> login
+    home["/<br/>Home.jsx"] -- "Sign In" --> login
+    home -- "Analyze Repository (signed out)" --> login
+    home -- "Analyze Repository (signed in)" --> repos
+    home -- "Dashboard (signed in)" --> dash
     login["/login<br/>Login.jsx"] -- "Continue with GitHub" --> oauth[["/api/auth/github/login"]]
     login -- "Use a different GitHub account" --> oauthsel[["/api/auth/github/login?select_account=true"]]
     oauth & oauthsel -. "GitHub → callback → session cookie" .-> dash
@@ -49,12 +57,13 @@ flowchart LR
     reports -.-> e6[("GET /api/scans<br/>GET /api/reports/{id}.md")]
     latest -.-> e8[("GET /api/scans<br/>GET /api/scans/{id}/findings (latest per repo)")]
     login -.-> e7[("GET /api/health<br/>GET /api/auth/me")]
+    home -.-> e9[("GET /api/auth/me")]
 
     menu["Sidebar account menu"] -- "Switch account" --> sw[["POST /api/auth/logout →<br/>/api/auth/github/login?select_account=true"]]
     menu -- "Sign out" --> so[["POST /api/auth/logout → /login"]]
 
     classDef page fill:#ebf1fd,stroke:#2557d6,color:#0f2a6b
     classDef api fill:#eef2f7,stroke:#8a96a8,color:#1b2430
-    class login,dash,repos,review,scan,finding,reports,latest page
-    class e1,e2,e3,e4,e5,e6,e7,e8 api
+    class home,login,dash,repos,review,scan,finding,reports,latest page
+    class e1,e2,e3,e4,e5,e6,e7,e8,e9 api
 ```

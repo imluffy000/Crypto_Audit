@@ -39,7 +39,7 @@ function DashboardLayout({ children, width = 'default' }) {
       </Drawer>
 
       <main id="main-content" className={`app-main width-${width}`} tabIndex={-1}>
-        <div className="app-content">{children}</div>
+        <div className="app-content page-anim">{children}</div>
       </main>
     </div>
   );

@@ -263,7 +263,7 @@ validation reports.
 Crypto_Audit/
 ├── frontend/                React 19 + Vite website
 │   └── src/
-│       ├── pages/           Login, Dashboard, Repositories, Review, Scan results, Finding, Scans
+│       ├── pages/           Home, Login, Dashboard, Repositories, Review, Scan results, Finding, Scans
 │       ├── components/      domain components (code compare, gates, stages, explanation, tree)
 │       │   ├── ui/          design-system components (Button, DataTable, Tabs, Toast, …)
 │       │   └── code/        code viewer and diff viewer

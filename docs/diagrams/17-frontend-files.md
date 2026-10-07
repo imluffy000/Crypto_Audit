@@ -9,11 +9,12 @@ Every file in `frontend/src/` and what it does. The website uses React 19, Vite,
 |---|---|---|
 | Pages | `pages/` | One per route; compose components and call services |
 | Domain components | `components/` | CryptoAudit-specific UI (code compare, gates, verdicts, tree, explanation) |
+| Brand and public pages | `components/brand/`, `components/home/`, `components/auth/` | Logo, abstract artwork, product-UI fragments, home slides, GitHub sign-in button |
 | Design system | `components/ui/` | Generic, reusable building blocks with no API knowledge |
 | Code viewing | `components/code/` | Code viewer and diff viewer |
 | Services | `services/` | The only code that talks to the backend; every call goes to `/api` |
 | State | `context/`, `hooks/` | Signed-in user, selected repository, sign-in / switch / sign-out |
-| Styles | `styles/` | Design tokens (light, muted palette with teal accents), base, components, layout, code and page CSS |
+| Styles | `styles/` | Design tokens (light, muted palette with teal accents), base, components, layout, code and page CSS; `brand.css` holds the public-page palette, artwork and route transitions, with `home.css` and `auth.css` for the two public pages |
 | Utilities | `utils/` | Formatting, syntax highlighting, diff parsing, local file helpers |
 
 `utils/sizeUtils.js` is a legacy helper that no page imports.
@@ -34,6 +35,7 @@ flowchart LR
         f_ctx["context/AppContext.jsx<br/>user, authLoading, selectedRepository (localStorage),<br/>loginWithGithub, switchAccount, logout"]
         f_hauth["hooks/useAuth.js<br/>thin wrapper"]
         f_hrepo["hooks/useRepository.js<br/>selected repository wrapper"]
+        f_htrans["hooks/usePageTransition.js<br/>fade the old page out before showing the next"]
     end
 
     subgraph SERVICES["services/ — the only code that calls the API"]
@@ -48,12 +50,13 @@ flowchart LR
     subgraph LAYOUTS["layouts/"]
         direction TB
         f_dash["DashboardLayout.jsx<br/>skip link, sidebar, mobile top bar + drawer, main"]
-        f_authl["AuthLayout.jsx<br/>centred sign-in shell"]
+        f_authl["AuthLayout.jsx<br/>one-screen sign-in shell, brand palette"]
     end
 
     subgraph PAGES["pages/"]
         direction TB
-        pg_login["Login.jsx<br/>GitHub sign-in, server status, error codes,<br/>use a different account"]
+        pg_home["Home.jsx<br/>four slides, scroll snapping, arrow keys,<br/>slide indicator"]
+        pg_login["Login.jsx<br/>GitHub sign-in card + artwork, server status,<br/>error codes, use a different account"]
         pg_dash["Dashboard.jsx<br/>real metrics, recent scans, findings by rule, environment"]
         pg_repos["RepositoryUpload.jsx<br/>GitHub list (search, filter, sort) + local review tab"]
         pg_review["RepositoryDetails.jsx<br/>metadata, file tree, zip note, start scan"]
@@ -98,6 +101,17 @@ flowchart LR
         ui_toast["ToastProvider.jsx + toastContext.js<br/>notifications, useToast()"]
     end
 
+    subgraph BRAND["components/brand/ + home/ + auth/ — public pages"]
+        direction TB
+        b_logo["brand/CryptoAuditLogo.jsx<br/>shield + keyhole mark, wordmark"]
+        b_art["brand/CryptoAuditGraphic.jsx<br/>abstract SVG artwork, fragments as children"]
+        b_frag["brand/AnalysisCard.jsx · AlgorithmBadge.jsx<br/>product-UI fragments"]
+        b_anim["brand/AnimatedSection.jsx<br/>slide with staggered reveal"]
+        h_nav["home/CryptoAuditNavbar.jsx · SlideNavigation.jsx"]
+        h_slides["home/HeroSlide · CapabilitySlide ·<br/>WorkflowSlide · FindingSlide · SecurityFinding"]
+        a_comp["auth/AuthHero.jsx · GithubAuthButton.jsx"]
+    end
+
     subgraph UTILS["utils/"]
         direction TB
         u_format["format.js<br/>dates, sizes, rule names, sort orders"]
@@ -110,12 +124,16 @@ flowchart LR
 
     subgraph STYLES["styles/"]
         direction TB
-        st["tokens.css · base.css · components.css<br/>layout.css · code.css · pages.css"]
+        st["tokens.css · base.css · components.css<br/>layout.css · code.css · pages.css<br/>brand.css · auth.css · home.css"]
     end
 
     f_app --> f_ctx & ui_toast & d_protect & PAGES
     PAGES --> SERVICES
     PAGES --> f_dash & f_authl
+    pg_home --> h_nav & h_slides
+    h_slides --> b_anim & b_art & b_frag
+    pg_login --> a_comp & b_art & b_frag
+    f_app --> f_htrans
     f_dash --> d_side & ui_drawer
     pg_find --> d_compare & d_expl & d_gates
     pg_scan --> d_stages & ui_table
