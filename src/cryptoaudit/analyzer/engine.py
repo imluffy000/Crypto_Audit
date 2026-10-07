@@ -12,7 +12,8 @@ from cryptoaudit.analyzer.rules.cr2 import CR2Rule
 from cryptoaudit.analyzer.rules.cr3 import CR3Rule
 from cryptoaudit.analyzer.rules.cr4 import CR4Rule
 from cryptoaudit.analyzer.rules.cr5 import CR5Rule
-from cryptoaudit.core.config import load_rule_config
+from cryptoaudit.core.config import Settings, load_rule_config
+from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.core.models import AnalysisResult, Finding
 
 RULE_CLASS_MAP = {
@@ -24,18 +25,49 @@ RULE_CLASS_MAP = {
 }
 
 
-def load_default_rules(rules_dir: Path = Path("configs/rules")) -> List[BaseRule]:
-    """Load all configured rule YAML files from rules_dir."""
-    rules: List[BaseRule] = []
-    rule_files = ["cr1.yaml", "cr2.yaml", "cr3.yaml", "cr4.yaml", "cr5.yaml"]
+RULE_FILES = ["cr1.yaml", "cr2.yaml", "cr3.yaml", "cr4.yaml", "cr5.yaml"]
 
-    for filename in rule_files:
-        rule_path = rules_dir / filename
-        if rule_path.is_file():
-            config = load_rule_config(rule_path)
-            rule_cls = RULE_CLASS_MAP.get(config.rule_id)
-            if rule_cls:
-                rules.append(rule_cls(config))
+# Repository-level rules directory (src/cryptoaudit/analyzer/engine.py -> repo root).
+REPO_RULES_DIR = Path(__file__).resolve().parents[3] / "configs" / "rules"
+
+
+def resolve_rules_dir(rules_dir: Optional[Path] = None) -> Path:
+    """
+    Resolve the rules directory independent of the current working directory.
+
+    Order: explicit argument, then the configured Settings.rules_dir (cwd-relative,
+    the historical default), then the repository's configs/rules directory.
+    """
+    if rules_dir is not None:
+        return Path(rules_dir)
+    configured = Settings().rules_dir
+    if configured.is_dir():
+        return configured
+    return REPO_RULES_DIR
+
+
+def load_default_rules(rules_dir: Optional[Path] = None) -> List[BaseRule]:
+    """Load all configured rule YAML files; fail loudly instead of silently loading no rules."""
+    resolved_dir = resolve_rules_dir(rules_dir)
+    rules: List[BaseRule] = []
+    missing: List[str] = []
+
+    for filename in RULE_FILES:
+        rule_path = resolved_dir / filename
+        if not rule_path.is_file():
+            missing.append(filename)
+            continue
+        config = load_rule_config(rule_path)
+        rule_cls = RULE_CLASS_MAP.get(config.rule_id)
+        if rule_cls:
+            rules.append(rule_cls(config))
+
+    if missing:
+        raise CryptoAuditError(
+            ErrorCode.ANALYSIS_ERROR,
+            f"Rule configuration files missing from {resolved_dir}: {', '.join(missing)}",
+            {"rules_dir": str(resolved_dir), "missing": missing},
+        )
 
     return rules
 
