@@ -212,6 +212,8 @@ important:
 | `CRYPTOAUDIT_MAX_UNPACKED_MB` | `4096` | Everything in the archive, including non-Python files |
 | `CRYPTOAUDIT_MAX_PYTHON_FILES` | `5000` | Files beyond the limit are listed as skipped |
 | `CRYPTOAUDIT_MAX_FILE_KB` | `1024` | Larger `.py` files (usually generated) are skipped and listed |
+| `CRYPTOAUDIT_SCAN_ARCHIVES` | `true` | Also scan `.py` files inside `.zip` archives in the repository (in memory, one level deep) |
+| `CRYPTOAUDIT_MAX_ARCHIVE_MB` | `100` | Larger `.zip` archives are skipped and listed |
 | `CRYPTOAUDIT_SCAN_PARALLELISM` | `4` | Files repaired and validated concurrently within one scan |
 | `CRYPTOAUDIT_SCAN_WORKERS` | `2` | Scans running at the same time |
 | `CRYPTOAUDIT_LLM_TIMEOUT` | `600` | Seconds allowed for one generation |

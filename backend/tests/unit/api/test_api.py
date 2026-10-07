@@ -240,7 +240,7 @@ def test_lists_repos_and_nested_tree(env):
     repos = client.get("/api/repos").json()
     assert [r["full_name"] for r in repos] == ["alice/app"]
     tree = client.get("/api/repos/alice/app/tree").json()
-    assert tree["ref"] == "main" and tree["python_files"] == 2 and tree["files"] == 3
+    assert tree["ref"] == "main" and tree["python_files"] == 2 and tree["files"] == 3 and tree["archives"] == 0
     root = tree["tree"]
     assert [c["name"] for c in root["children"]] == ["app", "README.md"]  # folders first
     assert [c["name"] for c in root["children"][0]["children"]] == ["auth.py", "tokens.py"]

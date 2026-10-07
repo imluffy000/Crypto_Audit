@@ -11,7 +11,7 @@ import { Alert, EmptyState } from '../components/ui/States';
 import { useToast } from '../components/ui/toastContext';
 import { useAuth } from '../context/AppContext';
 import { scanService } from '../services/scanService';
-import { formatMegabytes } from '../utils/format';
+import { formatMegabytes, pluralize } from '../utils/format';
 
 const PIPELINE = [
   ['Analysis', 'CR1–CR5 rules over every Python file'],
@@ -71,7 +71,7 @@ function RepositoryDetails() {
     ['Source', isGitHub ? 'GitHub' : 'Local files'],
     ['Branch', <span key="b" className="mono">{repo.branch || 'main'}</span>],
     ['Files', repo.files ?? '–'],
-    ['Python files', repo.pythonFiles ?? '–'],
+    ['Python files', repo.archives ? `${repo.pythonFiles ?? 0} + inside ${pluralize(repo.archives, 'zip archive')}` : repo.pythonFiles ?? '–'],
     ['Size', formatMegabytes(repo.totalSize)],
     ['Status', isGitHub ? <Badge key="s" tone="success">Ready to scan</Badge> : <Badge key="s" tone="neutral">Review only</Badge>],
   ];
@@ -103,6 +103,13 @@ function RepositoryDetails() {
       {!isGitHub ? (
         <Alert tone="warning" title="Scanning needs a GitHub repository">
           Local uploads can be reviewed here, but scans fetch code from GitHub so results are tied to a commit.
+        </Alert>
+      ) : null}
+
+      {isGitHub && repo.archives ? (
+        <Alert tone="info" title={`${pluralize(repo.archives, 'zip archive')} found`}>
+          Python files inside <span className="mono">.zip</span> archives are scanned too. They are read in memory, one level deep,
+          and never extracted or executed. Their findings appear as <span className="mono">archive.zip/path/file.py</span>.
         </Alert>
       ) : null}
 

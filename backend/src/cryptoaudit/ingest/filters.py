@@ -7,7 +7,9 @@ from typing import Optional
 
 MAX_SOURCE_BYTES = 1_000_000
 
-EXCLUDED_DIRS = frozenset({".git", ".venv", "venv", "env", "node_modules", "__pycache__", "build", "dist", ".tox", ".mypy_cache"})
+EXCLUDED_DIRS = frozenset(
+    {".git", ".venv", "venv", "env", "node_modules", "__pycache__", "build", "dist", ".tox", ".mypy_cache", "__MACOSX"}
+)
 
 GITHUB_NAME = re.compile(r"^[A-Za-z0-9_.-]{1,100}$")
 GIT_REF = re.compile(r"^[A-Za-z0-9._/-]{1,200}$")
@@ -21,6 +23,8 @@ class SnapshotLimits:
     max_unpacked_bytes: int = 4 * 1024 * 1024 * 1024  # sum of all member sizes in the archive
     max_python_files: int = 5000
     max_file_bytes: int = MAX_SOURCE_BYTES
+    scan_archives: bool = True  # also read .py files inside .zip archives committed to the repository
+    max_archive_bytes: int = 100 * 1024 * 1024  # a .zip larger than this is skipped, not opened
 
 
 def is_valid_github_name(value: str) -> bool:

@@ -61,6 +61,7 @@ export const repositoryService = {
       branch: result.ref,
       files: result.files,
       pythonFiles: result.python_files,
+      archives: result.archives || 0,
       totalSize: result.total_size,
       truncated: result.truncated,
       source: 'GitHub',

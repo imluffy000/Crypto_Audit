@@ -70,6 +70,7 @@ class RepoTreeOut(BaseModel):
     tree: TreeNode
     files: int
     python_files: int
+    archives: int = 0  # .zip files; their .py contents are scanned but not listed in the tree
     total_size: int
     truncated: bool
 

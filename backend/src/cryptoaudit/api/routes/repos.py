@@ -42,6 +42,7 @@ def repo_tree(
         tree=build_tree(repo.name, entries),
         files=len(blobs),
         python_files=sum(1 for e in blobs if e.path.endswith(".py")),
+        archives=sum(1 for e in blobs if e.path.lower().endswith(".zip")) if services.settings.scan_archives else 0,
         total_size=sum(e.size or 0 for e in blobs),
         truncated=truncated,
     )

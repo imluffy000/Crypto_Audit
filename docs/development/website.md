@@ -118,6 +118,8 @@ All limits are settings in `backend/.env` (defaults shown):
 | `CRYPTOAUDIT_MAX_UNPACKED_MB` | 4096 | Everything in the archive, including non-Python files. |
 | `CRYPTOAUDIT_MAX_PYTHON_FILES` | 5000 | Files beyond the limit are listed as skipped. |
 | `CRYPTOAUDIT_MAX_FILE_KB` | 1024 | Larger `.py` files (usually generated code) are skipped and listed. |
+| `CRYPTOAUDIT_SCAN_ARCHIVES` | true | Also scan `.py` files inside `.zip` archives committed to the repository. They are read in memory, one level deep (nested archives are listed as skipped), count towards the unpacked and file-count limits, and their findings are reported as `archive.zip/path/file.py`. |
+| `CRYPTOAUDIT_MAX_ARCHIVE_MB` | 100 | Larger `.zip` archives are skipped and listed. |
 | `CRYPTOAUDIT_SCAN_PARALLELISM` | 4 | Files repaired and validated concurrently within one scan. |
 | `CRYPTOAUDIT_SCAN_WORKERS` | 2 | Scans running at the same time. |
 | `CRYPTOAUDIT_LLM_NUM_CTX` | 8192 | Context window for S3/S4 (prompt + complete repaired file). Files that do not fit are recorded as `NO_REPAIR` (`LIMIT_EXCEEDED`), never truncated. Larger values need more GPU memory. |
