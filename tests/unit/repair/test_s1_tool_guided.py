@@ -9,9 +9,9 @@ from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.models.repair import RepairStatus, StrategyId
 from cryptoaudit.models.scan import ScannerIssue, ScanReport
 from cryptoaudit.repair import build_repair_request
-from cryptoaudit.repair.strategies import ToolGuidedRepairStrategy
-from cryptoaudit.scanners import BanditScanner
+from cryptoaudit.repair.s1_hint import ToolGuidedRepairStrategy
 from cryptoaudit.utils.errors import ErrorCode
+from cryptoaudit.validation.scanners import BanditScanner
 
 MD5_SOURCE = "import hashlib\n\ndef hash_password(password):\n    return hashlib.md5(password.encode()).hexdigest()\n"
 

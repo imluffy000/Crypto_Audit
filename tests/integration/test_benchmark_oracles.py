@@ -11,12 +11,12 @@ from pathlib import Path
 import pytest
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.benchmark import BenchmarkRepository
-from cryptoaudit.benchmark.oracle import load_oracle
-from cryptoaudit.candidate import IntegrityChecker
+from cryptoaudit.ingest.benchmark_loader import BenchmarkRepository
 from cryptoaudit.models.repair import RepairResult, RepairStatus, StrategyId, make_candidate
 from cryptoaudit.models.validation import GateId, GateStatus
 from cryptoaudit.validation import LocalProcessSandbox, ScannerValidator, ValidationPipeline
+from cryptoaudit.validation.integrity import IntegrityChecker
+from cryptoaudit.validation.oracle import load_oracle
 
 REFERENCE_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "reference_repairs"
 CASES = BenchmarkRepository().case_ids()

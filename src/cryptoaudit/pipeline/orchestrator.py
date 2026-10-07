@@ -7,47 +7,22 @@ Generation and validation are kept apart: strategies receive a RepairRequest bui
 input only, while the hidden oracle is handed exclusively to the validation pipeline.
 """
 
-import tempfile
-import time
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
+from typing import List, Optional, Sequence
 
-from cryptoaudit.aggregation.aggregator import build_outcome
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.benchmark.oracle import HiddenOracle
-from cryptoaudit.candidate.integrity import IntegrityChecker
-from cryptoaudit.context.builder import ContextBuilder
-from cryptoaudit.models.experiment import CaseOutcome
+from cryptoaudit.context.context_builder import ContextBuilder
 from cryptoaudit.models.finding import Finding
-from cryptoaudit.models.repair import Candidate, RepairConstraints, RepairRequest, make_candidate
+from cryptoaudit.models.repair import RepairConstraints
 from cryptoaudit.models.scan import ModuleInput
-from cryptoaudit.models.validation import ValidationReport
+from cryptoaudit.pipeline.pipeline_result import ModuleRun, StrategyRun
+from cryptoaudit.pipeline.stages import analysis_stage, candidate_stage, validation_stage
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.request import build_repair_request
-from cryptoaudit.storage.experiment_store import ExperimentStore
-from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.validation.pipeline import ValidationPipeline
-
-
-@dataclass
-class StrategyRun:
-    candidate: Candidate
-    report: ValidationReport
-    outcome: CaseOutcome
-
-
-@dataclass
-class ModuleRun:
-    module: ModuleInput
-    findings: List[Finding] = field(default_factory=list)
-    baseline: Dict[str, dict] = field(default_factory=dict)
-    request: Optional[RepairRequest] = None
-    runs: List[StrategyRun] = field(default_factory=list)
-
-    @property
-    def rule_ids(self) -> List[str]:
-        return sorted({f.rule_id for f in self.findings})
+from cryptoaudit.storage.sqlite import ExperimentStore
+from cryptoaudit.validation.integrity import IntegrityChecker
+from cryptoaudit.validation.oracle import HiddenOracle
+from cryptoaudit.validation.runner import ValidationPipeline
 
 
 class RepairPipeline:
@@ -68,16 +43,7 @@ class RepairPipeline:
         self.store = store
 
     def analyze(self, module: ModuleInput) -> List[Finding]:
-        """Run the deterministic Analyzer; finding paths are normalised to the module name."""
-        with tempfile.TemporaryDirectory(prefix="cryptoaudit-in-") as tmp:
-            path = Path(tmp) / module.module_name
-            with open(path, "w", encoding="utf-8", newline="") as handle:
-                handle.write(module.source)
-            try:
-                result = self.analyzer.analyze_file(path)
-            except ValueError as exc:
-                raise CryptoAuditError(ErrorCode.PARSE_ERROR, str(exc).replace(str(path), module.module_name)) from exc
-        return [f.model_copy(update={"file": module.module_name}) for f in result.findings]
+        return analysis_stage(self.analyzer, module)
 
     def run_module(
         self,
@@ -98,16 +64,8 @@ class RepairPipeline:
         run.request = build_repair_request(module.module_name, module.source, run.findings, constraints, self.context_builder)
 
         for strategy in self.strategies:
-            repair = strategy.repair(run.request)
-            integrity = (
-                self.integrity.check(repair.candidate_code or "", module.allowed_libraries, module.source)
-                if repair.produced
-                else None
-            )
-            candidate = make_candidate(module.module_name, module.source, repair, integrity)
-            started = time.perf_counter()
-            report = self.validator.validate(candidate, module.source, run.rule_ids, oracle, functional_checks)
-            outcome = build_outcome(candidate, report, run.rule_ids, module.case_id, time.perf_counter() - started)
+            candidate = candidate_stage(strategy, run.request, module, self.integrity)
+            report, outcome = validation_stage(self.validator, candidate, module, run.rule_ids, oracle, functional_checks)
             if self.store is not None and run_id is not None:
                 self.store.record(run_id, outcome, candidate, report)
             run.runs.append(StrategyRun(candidate=candidate, report=report, outcome=outcome))

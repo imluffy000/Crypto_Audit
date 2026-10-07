@@ -8,7 +8,7 @@ import pytest
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.models.repair import RepairStatus, StrategyId
 from cryptoaudit.repair import build_repair_request
-from cryptoaudit.repair.strategies import TemplateRepairStrategy
+from cryptoaudit.repair.s2_template import TemplateRepairStrategy
 
 
 def _repair_source(tmp_path: Path, source: str):

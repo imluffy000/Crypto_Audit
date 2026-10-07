@@ -5,11 +5,11 @@ import sqlite3
 
 import pytest
 
-from cryptoaudit.aggregation import build_outcome
-from cryptoaudit.candidate import IntegrityChecker
 from cryptoaudit.models.repair import RepairResult, RepairStatus, StrategyId, make_candidate
 from cryptoaudit.models.validation import GateId, GateResult, GateStatus, ValidationReport
-from cryptoaudit.storage import ExperimentStore
+from cryptoaudit.storage import ExperimentStore, export_jsonl
+from cryptoaudit.validation.gates import build_outcome
+from cryptoaudit.validation.integrity import IntegrityChecker
 
 
 def _sample():
@@ -80,5 +80,5 @@ def test_export_jsonl(tmp_path):
     candidate, report, outcome = _sample()
     store.record(run.run_id, outcome, candidate, report)
     out = tmp_path / "records.jsonl"
-    assert store.export_jsonl(out, run.run_id) == 1
+    assert export_jsonl(store, out, run.run_id) == 1
     assert json.loads(out.read_text(encoding="utf-8").splitlines()[0])["strategy_id"] == "S2"

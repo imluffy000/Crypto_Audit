@@ -11,8 +11,10 @@ from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.llm import LLMRequest, LLMResponse, OllamaClient
 from cryptoaudit.models.repair import RepairConstraints, RepairStatus, StrategyId
 from cryptoaudit.repair import build_repair_request
-from cryptoaudit.repair.prompting import OutputParseError, parse_llm_output, render_prompt
-from cryptoaudit.repair.strategies import LLMRepairStrategy, MigrationAwareRepairStrategy
+from cryptoaudit.repair.parser import OutputParseError, parse_llm_output
+from cryptoaudit.repair.prompt_builder import render_prompt
+from cryptoaudit.repair.s3_llm import LLMRepairStrategy
+from cryptoaudit.repair.s4_migration import MigrationAwareRepairStrategy
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 FIXTURE = Path("tests/fixtures/cr5/vulnerable.py")

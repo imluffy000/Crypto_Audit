@@ -8,22 +8,20 @@ from typing import Dict, List
 import pytest
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.benchmark import BenchmarkRepository
-from cryptoaudit.benchmark.oracle import load_oracle
+from cryptoaudit.ingest.benchmark_loader import BenchmarkRepository
 from cryptoaudit.llm import LLMRequest, LLMResponse
 from cryptoaudit.models.experiment import Verdict
 from cryptoaudit.models.repair import RepairStatus, StrategyId
 from cryptoaudit.models.scan import ModuleInput, ScannerIssue, ScanReport
 from cryptoaudit.models.validation import GateId, GateStatus
 from cryptoaudit.pipeline import BenchmarkRunner, RepairPipeline
-from cryptoaudit.repair.strategies import (
-    LLMRepairStrategy,
-    MigrationAwareRepairStrategy,
-    TemplateRepairStrategy,
-    ToolGuidedRepairStrategy,
-)
+from cryptoaudit.repair.s1_hint import ToolGuidedRepairStrategy
+from cryptoaudit.repair.s2_template import TemplateRepairStrategy
+from cryptoaudit.repair.s3_llm import LLMRepairStrategy
+from cryptoaudit.repair.s4_migration import MigrationAwareRepairStrategy
 from cryptoaudit.storage import ExperimentStore
 from cryptoaudit.validation import LocalProcessSandbox, ScannerValidator, ValidationPipeline
+from cryptoaudit.validation.oracle import load_oracle
 
 REPO = BenchmarkRepository()
 

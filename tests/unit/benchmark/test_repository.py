@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.benchmark import BenchmarkRepository
-from cryptoaudit.benchmark.oracle import load_oracle
+from cryptoaudit.ingest.benchmark_loader import BenchmarkRepository
 from cryptoaudit.utils.errors import CryptoAuditError
+from cryptoaudit.validation.oracle import load_oracle
 
 EXPECTED_CASES = ["cr1_password_md5", "cr2_ecb_records", "cr3_static_iv", "cr4_weak_kdf", "cr5_session_token"]
 SRC = Path(__file__).resolve().parents[3] / "src" / "cryptoaudit"
@@ -84,13 +84,16 @@ def test_module_file_cannot_escape_public_dir(tmp_path):
         BenchmarkRepository(tmp_path).public_case("c1")
 
 
-FORBIDDEN_IMPORTERS = ["repair", "context", "llm", "scanners"]
+# Packages on the generation/public side: none may import validation (which owns hidden oracles).
+FORBIDDEN_IMPORTERS = ["repair", "context", "llm", "ingest", "analysis", "rules"]
 
 
 @pytest.mark.parametrize("package", FORBIDDEN_IMPORTERS)
 def test_generation_side_never_imports_hidden_oracle(package):
     """Import boundary: code that builds candidates must not be able to reach hidden oracles."""
-    for path in (SRC / package).rglob("*.py"):
+    files = list((SRC / package).rglob("*.py"))
+    assert files, f"package {package} not found"
+    for path in files:
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             names = []
@@ -99,5 +102,5 @@ def test_generation_side_never_imports_hidden_oracle(package):
             elif isinstance(node, ast.ImportFrom):
                 names = [node.module or ""]
             for name in names:
-                assert "benchmark.oracle" not in name, f"{path} imports the hidden oracle loader"
+                assert "validation.oracle" not in name, f"{path} imports the hidden oracle loader"
                 assert "validation" not in name.split("."), f"{path} imports validation internals"

@@ -1,5 +1,6 @@
-"""Experiment database (append-only)."""
+"""Experiment database (append-only SQLite) and JSONL export."""
 
-from cryptoaudit.storage.experiment_store import ExperimentStore
+from cryptoaudit.storage.jsonl import export_jsonl
+from cryptoaudit.storage.sqlite import ExperimentStore
 
-__all__ = ["ExperimentStore"]
+__all__ = ["ExperimentStore", "export_jsonl"]

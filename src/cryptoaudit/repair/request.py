@@ -2,7 +2,7 @@
 
 from typing import Optional, Sequence
 
-from cryptoaudit.context.builder import ContextBuilder
+from cryptoaudit.context.context_builder import ContextBuilder
 from cryptoaudit.models.finding import Finding
 from cryptoaudit.models.repair import RepairConstraints, RepairRequest
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode

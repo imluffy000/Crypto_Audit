@@ -65,9 +65,9 @@ def test_callers_within_module():
     source = "def target():\n    return 1\n\ndef a():\n    return target()\n\ndef b():\n    return 2\n"
     import ast
 
-    from cryptoaudit.context.builder import _callers_of
+    from cryptoaudit.context.call_graph import callers_of
 
-    assert _callers_of(ast.parse(source), "target") == ["a"]
+    assert callers_of(ast.parse(source), "target") == ["a"]
 
 
 def test_context_is_deterministic_and_hashed(analyzed):

@@ -5,24 +5,23 @@ from typing import List, Optional, Sequence
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.config.settings import Settings
-from cryptoaudit.llm.client import LLMClient, OllamaClient
+from cryptoaudit.llm.client import LLMClient
+from cryptoaudit.llm.ollama_client import OllamaClient
 from cryptoaudit.models.repair import StrategyId
 from cryptoaudit.models.scan import Scanner
 from cryptoaudit.pipeline.orchestrator import RepairPipeline
 from cryptoaudit.repair.base import RepairStrategy
-from cryptoaudit.repair.strategies import (
-    LLMRepairStrategy,
-    MigrationAwareRepairStrategy,
-    TemplateRepairStrategy,
-    ToolGuidedRepairStrategy,
-)
-from cryptoaudit.scanners.bandit import BanditScanner
-from cryptoaudit.scanners.semgrep import SemgrepScanner
-from cryptoaudit.storage.experiment_store import ExperimentStore
+from cryptoaudit.repair.s1_hint import ToolGuidedRepairStrategy
+from cryptoaudit.repair.s2_template import TemplateRepairStrategy
+from cryptoaudit.repair.s3_llm import LLMRepairStrategy
+from cryptoaudit.repair.s4_migration import MigrationAwareRepairStrategy
+from cryptoaudit.storage.sqlite import ExperimentStore
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.validation.gates import ScannerValidator
-from cryptoaudit.validation.pipeline import ValidationPipeline
+from cryptoaudit.validation.runner import ValidationPipeline
 from cryptoaudit.validation.sandbox import DockerSandbox, LocalProcessSandbox, Sandbox
+from cryptoaudit.validation.scanners.bandit import BanditScanner
+from cryptoaudit.validation.scanners.semgrep import SemgrepScanner
+from cryptoaudit.validation.v0_scanner import ScannerValidator
 
 
 def parse_strategy_ids(values: Sequence[str]) -> List[StrategyId]:

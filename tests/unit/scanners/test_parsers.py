@@ -5,7 +5,12 @@ import shutil
 
 import pytest
 
-from cryptoaudit.scanners import BanditScanner, SemgrepScanner, parse_bandit_json, parse_semgrep_json
+from cryptoaudit.validation.scanners import (
+    BanditScanner,
+    SemgrepScanner,
+    parse_bandit_json,
+    parse_semgrep_json,
+)
 
 BANDIT_OUTPUT = json.dumps(
     {
