@@ -62,7 +62,7 @@ cryptoaudit serve                      # API on http://127.0.0.1:8000 (run from 
 cd frontend && npm install && npm run dev   # website on http://localhost:5173 (proxies /api to :8000)
 ```
 
-Optional local LLM (enables S3/S4 and the “Explain in plain language (AI)” button):
+Optional local LLM (enables S3/S4 and the “Summarise in plain language” button on a finding):
 
 ```sh
 ollama pull qwen2.5-coder:7b       # or set CRYPTOAUDIT_LLM_MODEL to another code model
