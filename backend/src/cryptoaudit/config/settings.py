@@ -14,7 +14,10 @@ class Settings(BaseSettings):
     rules_file: Path = Path("configs/rules.yaml")
     analyzer_version: str = "0.1.0"
 
-    # Repair / LLM (S3, S4)
+    # Repair / LLM (S3, S4, AI explanations)
+    # ollama: local only. openrouter: hosted (code is sent to OpenRouter). auto: Ollama when its model is
+    # available, otherwise OpenRouter when an API key is configured.
+    llm_provider: Literal["ollama", "openrouter", "auto"] = "ollama"
     llm_base_url: str = "http://localhost:11434"
     llm_model: str = "qwen2.5-coder:7b"
     llm_temperature: float = 0.0
@@ -22,6 +25,10 @@ class Settings(BaseSettings):
     llm_timeout: float = 600.0  # one complete generation; 7B models on small GPUs are slow
     llm_num_ctx: int = 8192  # context window (prompt + answer); larger needs more GPU memory
     llm_max_tokens: int = 8192  # upper bound on generated tokens
+    openrouter_api_key: Optional[SecretStr] = None
+    openrouter_model: str = "qwen/qwen-2.5-coder-32b-instruct"
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_context: int = 32768  # context window assumed for the OpenRouter model
     prompts_dir: Optional[Path] = None
 
     # Validation

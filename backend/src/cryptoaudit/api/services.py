@@ -12,9 +12,8 @@ from cryptoaudit.config.settings import Settings
 from cryptoaudit.ingest.filters import SnapshotLimits
 from cryptoaudit.ingest.github_client import GitHubClient, GitHubOAuth
 from cryptoaudit.llm.client import LLMClient
-from cryptoaudit.llm.ollama_client import OllamaClient
 from cryptoaudit.models.repair import StrategyId
-from cryptoaudit.pipeline.factory import build_pipeline
+from cryptoaudit.pipeline.factory import build_llm, build_pipeline
 from cryptoaudit.pipeline.orchestrator import RepairPipeline
 from cryptoaudit.storage.web_store import WebStore
 from cryptoaudit.validation.sandbox import DockerSandbox
@@ -65,20 +64,20 @@ def default_services(settings: Optional[Settings] = None, github_transport: Opti
             scopes=settings.github_oauth_scopes,
             transport=github_transport,
         )
-    ollama = OllamaClient(settings.llm_base_url, timeout=settings.llm_timeout)
+    llm = build_llm(settings)
 
     def pipeline_factory(strategy_ids: List[StrategyId]) -> RepairPipeline:
         # Web scans never execute repository code (no oracle => executable gates are NOT_RUN),
         # but the validation pipeline still requires an isolated sandbox to be configured.
-        return build_pipeline(settings, strategy_ids, DockerSandbox(settings.sandbox_image, settings.sandbox_timeout), llm_client=ollama)
+        return build_pipeline(settings, strategy_ids, DockerSandbox(settings.sandbox_image, settings.sandbox_timeout), llm_client=llm)
 
     return Services(
         settings=settings,
         store=WebStore(settings.web_db, _session_secret(settings)),
         auth=auth,
         github=lambda token: GitHubClient(token, transport=github_transport),
-        llm=ollama,
-        llm_available=lambda: ollama.is_available(settings.llm_model),
+        llm=llm,
+        llm_available=llm.available,
         pipeline_factory=pipeline_factory,
         executor=ThreadPoolExecutor(max_workers=max(1, settings.scan_workers), thread_name_prefix="cryptoaudit-scan"),
         limits=SnapshotLimits(

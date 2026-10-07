@@ -7,6 +7,8 @@ from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.config.settings import Settings
 from cryptoaudit.llm.client import LLMClient
 from cryptoaudit.llm.ollama_client import OllamaClient
+from cryptoaudit.llm.openrouter_client import OpenRouterClient
+from cryptoaudit.llm.router import LLMBackend, RoutingLLMClient
 from cryptoaudit.models.repair import StrategyId
 from cryptoaudit.models.scan import Scanner
 from cryptoaudit.pipeline.orchestrator import RepairPipeline
@@ -47,6 +49,41 @@ def build_scanners(settings: Settings) -> List[Scanner]:
     return scanners
 
 
+def build_llm(settings: Settings) -> RoutingLLMClient:
+    """LLM client for S3/S4 and AI explanations according to CRYPTOAUDIT_LLM_PROVIDER."""
+    backends = []
+    if settings.llm_provider in ("ollama", "auto"):
+        ollama = OllamaClient(settings.llm_base_url, timeout=settings.llm_timeout)
+        backends.append(
+            LLMBackend(
+                name="ollama",
+                client=ollama,
+                model=settings.llm_model,
+                context_window=settings.llm_num_ctx,
+                is_available=lambda: ollama.is_available(settings.llm_model),
+                send_num_ctx=True,
+            )
+        )
+    if settings.llm_provider in ("openrouter", "auto") and settings.openrouter_api_key is not None:
+        openrouter = OpenRouterClient(
+            settings.openrouter_api_key.get_secret_value(),
+            base_url=settings.openrouter_base_url,
+            timeout=settings.llm_timeout,
+            app_url=settings.public_url,
+        )
+        backends.append(
+            LLMBackend(
+                name="openrouter",
+                client=openrouter,
+                model=settings.openrouter_model,
+                context_window=settings.openrouter_context,
+                is_available=lambda: openrouter.is_available(settings.openrouter_model),
+                send_num_ctx=False,
+            )
+        )
+    return RoutingLLMClient(backends)
+
+
 def build_strategies(
     ids: Sequence[StrategyId], settings: Settings, llm_client: Optional[LLMClient] = None
 ) -> List[RepairStrategy]:
@@ -58,7 +95,7 @@ def build_strategies(
         elif sid is StrategyId.S2:
             strategies.append(TemplateRepairStrategy())
         else:
-            llm = llm or OllamaClient(settings.llm_base_url, timeout=settings.llm_timeout)
+            llm = llm or build_llm(settings)
             cls = LLMRepairStrategy if sid is StrategyId.S3 else MigrationAwareRepairStrategy
             strategies.append(
                 cls(

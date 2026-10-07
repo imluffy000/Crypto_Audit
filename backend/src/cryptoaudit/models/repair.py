@@ -66,6 +66,7 @@ class GenerationMetadata(BaseModel):
     seed: int
     max_tokens: int
     num_ctx: Optional[int] = None
+    provider: Optional[str] = None
     raw_output: Optional[str] = None
     model_digest: Optional[str] = None
 

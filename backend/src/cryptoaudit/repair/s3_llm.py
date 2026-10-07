@@ -46,7 +46,10 @@ class LLMRepairStrategy(RepairStrategy):
 
     def _repair(self, request: RepairRequest) -> RepairResult:
         prompt = render_prompt(request, self.prompt_id)
-        budget = module_budget(f"{prompt.system}\n{prompt.user}", request.source, self.num_ctx)
+        # A routing client reports the context window of the backend it will use.
+        context_window = getattr(self.client, "context_window", None)
+        num_ctx = (context_window() if callable(context_window) else None) or self.num_ctx
+        budget = module_budget(f"{prompt.system}\n{prompt.user}", request.source, num_ctx)
         metadata = GenerationMetadata(
             model=self.model,
             prompt_version=prompt.version,
@@ -54,14 +57,14 @@ class LLMRepairStrategy(RepairStrategy):
             temperature=self.temperature,
             seed=self.seed,
             max_tokens=budget.num_predict(self.max_tokens),
-            num_ctx=self.num_ctx,
+            num_ctx=num_ctx,
         )
         if not budget.fits:
             # Never send a prompt the model server would silently truncate.
             return self.failure(
                 RepairStatus.NO_REPAIR,
                 f"File too large for the model context: about {budget.prompt_tokens} prompt + {budget.answer_tokens} "
-                f"answer tokens exceed num_ctx={self.num_ctx} (raise CRYPTOAUDIT_LLM_NUM_CTX if GPU memory allows)",
+                f"answer tokens exceed the model context of {num_ctx} tokens (raise CRYPTOAUDIT_LLM_NUM_CTX if GPU memory allows)",
                 ErrorCode.LIMIT_EXCEEDED,
                 generation=metadata,
             )
@@ -72,14 +75,21 @@ class LLMRepairStrategy(RepairStrategy):
             temperature=self.temperature,
             seed=self.seed,
             max_tokens=metadata.max_tokens,
-            num_ctx=self.num_ctx,
+            num_ctx=num_ctx,
         )
         try:
             response = self.client.generate(llm_request)
         except CryptoAuditError as exc:
             return self.failure(RepairStatus.NO_REPAIR, exc.message, exc.code, generation=metadata)
 
-        metadata = metadata.model_copy(update={"raw_output": response.text, "model_digest": response.model_digest})
+        metadata = metadata.model_copy(
+            update={
+                "raw_output": response.text,
+                "model_digest": response.model_digest,
+                "model": response.model or metadata.model,
+                "provider": response.provider,
+            }
+        )
         all_ids = [finding_id(f) for f in request.findings]
         try:
             code = parse_llm_output(response.text, self.max_code_chars)

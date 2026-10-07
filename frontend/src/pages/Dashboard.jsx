@@ -58,7 +58,7 @@ function Dashboard() {
         <div className="stat-card">
           <span>Repair strategies</span>
           <strong>{health?.llm_available ? 'S1–S4' : 'S1–S2'}</strong>
-          <small>{health?.llm_available ? `LLM: ${health.llm_model}` : 'LLM strategies need local Ollama'}</small>
+          <small>{health?.llm_available ? `LLM: ${health.llm_model}` : 'S3/S4 need Ollama or OpenRouter'}</small>
         </div>
         <div className="stat-card">
           <span>Code execution</span>

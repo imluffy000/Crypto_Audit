@@ -32,6 +32,7 @@ class HealthOut(BaseModel):
     repo_access: str = "private"
     llm_model: str
     llm_available: bool
+    llm_provider: str = "ollama"
 
 
 class UserOut(BaseModel):

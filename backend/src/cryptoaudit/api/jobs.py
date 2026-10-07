@@ -21,7 +21,8 @@ def run_scan(services: Services, scan_id: str, access_token: str, owner: str, na
     scanner = None
     try:
         llm_ok = services.llm is not None and services.llm_available()
-        strategy_ids, skipped = select_web_strategies(llm_ok, f"Ollama model '{services.settings.llm_model}' is not available")
+        reason = getattr(services.llm, "unavailable_reason", lambda: "No LLM backend is available")()
+        strategy_ids, skipped = select_web_strategies(llm_ok, reason)
         pipeline = services.pipeline_factory(strategy_ids)
         scanner = RepositoryScanner(
             pipeline,

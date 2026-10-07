@@ -71,8 +71,9 @@ def create_app(services: Optional[Services] = None) -> FastAPI:
             github_configured=services.auth is not None,
             manage_access_url=services.auth.manage_access_url if services.auth else None,
             repo_access=settings.github_repo_access,
-            llm_model=settings.llm_model,
+            llm_model=services.llm.describe() if hasattr(services.llm, "describe") else settings.llm_model,
             llm_available=bool(services.llm is not None and services.llm_available()),
+            llm_provider=settings.llm_provider,
         )
 
     for router in (auth.router, repos.router, scan.router, findings.router, reports.router):
