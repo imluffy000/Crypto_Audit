@@ -70,6 +70,24 @@ ollama pull qwen2.5-coder:7b       # or set CRYPTOAUDIT_LLM_MODEL to another cod
 
 Without it, scans run S1 and S2 and the results page says S3/S4 were skipped.
 
+### Hosted fallback: OpenRouter
+
+If Ollama is not available (no GPU, model not pulled), S3/S4 can use a hosted model through
+[OpenRouter](https://openrouter.ai): create an API key and set in `backend/.env`:
+
+```sh
+CRYPTOAUDIT_LLM_PROVIDER=auto        # Ollama first, OpenRouter when Ollama is unavailable
+CRYPTOAUDIT_OPENROUTER_API_KEY=sk-or-...
+CRYPTOAUDIT_OPENROUTER_MODEL=qwen/qwen-2.5-coder-32b-instruct
+```
+
+Use `CRYPTOAUDIT_LLM_PROVIDER=openrouter` to always use OpenRouter, or `ollama` to never send code out.
+
+> **Privacy:** with OpenRouter, the files being repaired — including private repository code — are
+> sent to OpenRouter and the model provider it routes to. Every LLM result records which provider and
+> model produced it (`generation.provider`, `generation.model`).
+
+
 ## 3b. Run with Docker
 
 ```sh

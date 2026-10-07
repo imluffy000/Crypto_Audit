@@ -77,7 +77,8 @@ def ai_explanation(
     else:
         if services.llm is None or not services.llm_available():
             raise CryptoAuditError(
-                ErrorCode.LLM_ERROR, f"AI explanations need a local Ollama server with '{services.settings.llm_model}' pulled"
+                ErrorCode.LLM_ERROR,
+                "AI explanations need an available LLM: pull the Ollama model or configure OpenRouter (see .env.example)"
             )
         explanation = generate_ai_explanation(
             services.llm, services.settings.llm_model, run.explanation, run.diff, num_ctx=services.settings.llm_num_ctx

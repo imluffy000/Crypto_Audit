@@ -29,8 +29,8 @@ def record_kdf_calls():
 def _hash_twice(ctx):
     with record_kdf_calls() as calls:
         module = ctx.load_candidate()
-        module.hash_password("Adm1n!pass")
-        module.hash_password("Adm1n!pass")
+        module.hash_password("example-test-input-1")
+        module.hash_password("example-test-input-1")
     return calls
 
 
@@ -51,4 +51,4 @@ def check_salt_is_random_per_password(ctx):
 
 def check_hashes_differ_for_same_password(ctx):
     module = ctx.load_candidate()
-    assert module.hash_password("Adm1n!pass") != module.hash_password("Adm1n!pass")
+    assert module.hash_password("example-test-input-1") != module.hash_password("example-test-input-1")

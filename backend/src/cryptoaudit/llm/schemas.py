@@ -20,3 +20,4 @@ class LLMResponse(BaseModel):
     model: str
     duration_seconds: float = 0.0
     model_digest: Optional[str] = None
+    provider: Optional[str] = None  # backend that produced the text, e.g. 'ollama' or 'openrouter'
