@@ -6,8 +6,8 @@ from typing import Optional
 from pydantic import BaseModel
 
 from cryptoaudit.candidate.integrity import IntegrityReport
-from cryptoaudit.core.identity import stable_hash
 from cryptoaudit.repair.models import RepairResult
+from cryptoaudit.utils.hashing import stable_hash
 
 
 class Candidate(BaseModel):

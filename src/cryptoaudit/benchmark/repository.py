@@ -6,7 +6,7 @@ from typing import List, Optional
 import yaml
 
 from cryptoaudit.benchmark.models import CaseSpec, PublicCase
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 PUBLIC_DIR = "public"
 HIDDEN_DIR = "hidden"

@@ -9,14 +9,14 @@ from rich.console import Console
 from rich.table import Table
 
 from cryptoaudit.benchmark.repository import BenchmarkRepository
-from cryptoaudit.core.config import Settings
-from cryptoaudit.core.errors import CryptoAuditError
+from cryptoaudit.config.settings import Settings
 from cryptoaudit.evaluation import analyze as analyze_findings
 from cryptoaudit.evaluation import to_markdown
 from cryptoaudit.ingest.loader import load_module
 from cryptoaudit.pipeline.factory import build_pipeline, build_sandbox, open_store, parse_strategy_ids
 from cryptoaudit.pipeline.runner import BenchmarkRunner, describe_strategies
 from cryptoaudit.reporting.repair_report import module_run_to_dict, render_module_run
+from cryptoaudit.utils.errors import CryptoAuditError
 
 console = Console()
 bench_app = typer.Typer(help="Benchmark experiments: run all cases x strategies and analyse results.", add_completion=False)

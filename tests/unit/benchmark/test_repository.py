@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.benchmark import BenchmarkRepository
 from cryptoaudit.benchmark.oracle import load_oracle
-from cryptoaudit.core.errors import CryptoAuditError
+from cryptoaudit.utils.errors import CryptoAuditError
 
 EXPECTED_CASES = ["cr1_password_md5", "cr2_ecb_records", "cr3_static_iv", "cr4_weak_kdf", "cr5_session_token"]
 SRC = Path(__file__).resolve().parents[3] / "src" / "cryptoaudit"

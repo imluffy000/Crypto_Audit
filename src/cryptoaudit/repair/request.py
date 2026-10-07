@@ -3,9 +3,9 @@
 from typing import Optional, Sequence
 
 from cryptoaudit.context.builder import ContextBuilder
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.core.models import Finding
+from cryptoaudit.models.finding import Finding
 from cryptoaudit.repair.models import RepairConstraints, RepairRequest
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 
 def build_repair_request(

@@ -1,7 +1,8 @@
 """Unit tests for import analyzer module."""
 
 import ast
-from cryptoaudit.analyzer.imports import extract_imports
+
+from cryptoaudit.analysis.import_analyzer import extract_imports
 
 
 def test_import_detection_and_aliasing():

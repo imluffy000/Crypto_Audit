@@ -62,7 +62,7 @@ def test_runs_are_never_overwritten(tmp_path):
 def test_records_require_existing_run(tmp_path):
     store = ExperimentStore(tmp_path / "exp.sqlite")
     candidate, report, outcome = _sample()
-    from cryptoaudit.core.errors import CryptoAuditError
+    from cryptoaudit.utils.errors import CryptoAuditError
 
     with pytest.raises(CryptoAuditError):
         store.record("R-missing", outcome, candidate, report)

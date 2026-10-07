@@ -1,9 +1,9 @@
 """Unit tests for structured errors and stable finding identity."""
 
-from cryptoaudit.core.enums import Category, Severity
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.core.identity import finding_id, stable_hash
-from cryptoaudit.core.models import Finding
+from cryptoaudit.models.enums import Category, Severity
+from cryptoaudit.models.finding import Finding, finding_id
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.utils.hashing import stable_hash
 
 
 def _finding(**overrides) -> Finding:

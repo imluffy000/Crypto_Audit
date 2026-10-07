@@ -1,35 +1,11 @@
-"""Pydantic domain models for CryptoAudit analysis and findings."""
+"""Analysis models: rule configuration and the per-file analysis result."""
 
 from typing import Any, List, Optional
+
 from pydantic import BaseModel, Field
 
-from cryptoaudit.core.enums import Category, Confidence, Severity
-
-
-class Location(BaseModel):
-    """Source code location of a finding."""
-
-    file: str
-    line: int
-    column: Optional[int] = None
-
-
-class Finding(BaseModel):
-    """Cryptographic misuse finding reported by CryptoAudit."""
-
-    rule_id: str
-    category: Category
-    severity: Severity
-    confidence: Confidence = Confidence.HIGH
-    file: str
-    line: int
-    column: Optional[int] = None
-    matched_api: str
-    evidence: str
-    explanation: str
-    remediation: str
-    analyzer_version: str = "0.1.0"
-    rule_version: str = "1.0.0"
+from cryptoaudit.models.enums import Category, Severity
+from cryptoaudit.models.finding import Finding
 
 
 class RuleConfig(BaseModel):

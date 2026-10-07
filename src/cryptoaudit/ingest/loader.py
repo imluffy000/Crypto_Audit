@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import Iterator, Sequence, Union
 
 from cryptoaudit.benchmark.models import PublicCase
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.ingest.models import ModuleInput
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 MAX_SOURCE_BYTES = 1_000_000
 EXCLUDED_DIRS = frozenset({".git", ".venv", "venv", "env", "node_modules", "__pycache__", "build", "dist", ".tox", ".mypy_cache"})

@@ -1,10 +1,11 @@
 """Typer CLI entrypoint for CryptoAudit."""
 
 from pathlib import Path
+
 import typer
 from rich.console import Console
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.cli.pipeline_commands import register as register_pipeline_commands
 from cryptoaudit.reporting.findings import format_json_report, render_console_report
 

@@ -13,7 +13,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict
 
 from cryptoaudit.benchmark.repository import HIDDEN_DIR, BenchmarkRepository
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 
 class V3Policy(BaseModel):

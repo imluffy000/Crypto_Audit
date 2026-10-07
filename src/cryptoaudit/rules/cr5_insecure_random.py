@@ -2,11 +2,12 @@
 
 from typing import List, Set
 
-from cryptoaudit.analyzer.ast_parser import ASTParseResult
-from cryptoaudit.analyzer.calls import CallSite
-from cryptoaudit.analyzer.rules.base import BaseRule
-from cryptoaudit.core.enums import Confidence
-from cryptoaudit.core.models import Finding, RuleConfig
+from cryptoaudit.analysis.ast_parser import ASTParseResult
+from cryptoaudit.analysis.call_analyzer import CallSite
+from cryptoaudit.models.analysis import RuleConfig
+from cryptoaudit.models.enums import Confidence
+from cryptoaudit.models.finding import Finding
+from cryptoaudit.rules.base import BaseRule
 
 RANDOM_MODULE_APIS = {
     "random.random",

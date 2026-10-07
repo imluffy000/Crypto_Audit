@@ -2,6 +2,7 @@
 
 import os
 import secrets
+
 from Crypto.Cipher import AES
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 

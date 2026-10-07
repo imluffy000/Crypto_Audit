@@ -6,8 +6,8 @@ from typing import List, Optional, Tuple
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from cryptoaudit.context.models import CodeContext
-from cryptoaudit.core.errors import ErrorCode
-from cryptoaudit.core.models import Finding
+from cryptoaudit.models.finding import Finding
+from cryptoaudit.utils.errors import ErrorCode
 
 
 class RepairStatus(str, Enum):

@@ -6,10 +6,10 @@ from typing import Any, Callable, Dict, List, Optional, Sequence
 
 from cryptoaudit.benchmark.oracle import load_oracle
 from cryptoaudit.benchmark.repository import BenchmarkRepository
-from cryptoaudit.core.errors import CryptoAuditError
 from cryptoaudit.ingest.loader import from_public_case
 from cryptoaudit.pipeline.orchestrator import ModuleRun, RepairPipeline
 from cryptoaudit.storage.experiment_store import ExperimentStore, RunInfo
+from cryptoaudit.utils.errors import CryptoAuditError
 
 
 def current_git_commit(cwd: Optional[Path] = None) -> Optional[str]:

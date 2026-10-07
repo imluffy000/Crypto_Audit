@@ -9,7 +9,7 @@ from typing import Optional, Protocol
 
 from pydantic import BaseModel
 
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 DEFAULT_OLLAMA_URL = "http://localhost:11434"
 DEFAULT_MODEL = "codellama:7b-instruct"

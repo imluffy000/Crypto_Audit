@@ -2,9 +2,9 @@
 
 from typing import Dict, Iterable, List
 
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.models import StrategyId
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 
 class StrategyRegistry:

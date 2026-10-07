@@ -21,9 +21,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.validation.sandbox import harness
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.validation.models import CheckResult, GateStatus
+from cryptoaudit.validation.sandbox import harness
 
 HARNESS_SOURCE = Path(harness.__file__)
 DEFAULT_TIMEOUT = 120.0

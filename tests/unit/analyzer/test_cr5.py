@@ -1,8 +1,9 @@
 """Unit tests for CR5 rule (Weak randomness for security tokens)."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.enums import Category, Severity
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
+from cryptoaudit.models.enums import Category, Severity
 
 
 def test_cr5_vulnerable_token_randomness_detection():

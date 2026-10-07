@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from cryptoaudit.core.errors import ErrorCode
+from cryptoaudit.utils.errors import ErrorCode
 
 
 class GateId(str, Enum):

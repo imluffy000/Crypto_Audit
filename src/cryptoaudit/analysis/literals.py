@@ -3,8 +3,8 @@
 import ast
 from typing import Any, List, Optional, Set, Tuple, Union
 
-from cryptoaudit.analyzer.ast_parser import ASTParseResult
-from cryptoaudit.analyzer.calls import CallSite
+from cryptoaudit.analysis.ast_parser import ASTParseResult
+from cryptoaudit.analysis.call_analyzer import CallSite
 
 SECURE_GENERATOR_APIS = {
     "os.urandom",

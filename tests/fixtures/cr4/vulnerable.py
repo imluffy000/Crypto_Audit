@@ -1,8 +1,9 @@
 """Vulnerable fixture for CR4: Weak KDF parameters, static salt, or fast hash direct key derivation."""
 
 import hashlib
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 STATIC_SALT = b"hardcoded_static_salt"
 

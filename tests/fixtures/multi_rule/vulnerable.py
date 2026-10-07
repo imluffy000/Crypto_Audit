@@ -2,8 +2,9 @@
 
 import hashlib
 import random
-from Crypto.Cipher import AES
 from hashlib import sha1
+
+from Crypto.Cipher import AES
 
 
 def cr1_weak_hash(password: str) -> str:

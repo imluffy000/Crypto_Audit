@@ -9,7 +9,7 @@ from typing import Dict, List
 import pytest
 
 from cryptoaudit.aggregation import Verdict
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.benchmark import BenchmarkRepository
 from cryptoaudit.benchmark.oracle import load_oracle
 from cryptoaudit.ingest import ModuleInput

@@ -6,9 +6,9 @@ from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 from cryptoaudit.context.interface import extract_public_interface
 from cryptoaudit.context.models import CodeContext, FindingContext
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.core.identity import finding_id, stable_hash
-from cryptoaudit.core.models import Finding
+from cryptoaudit.models.finding import Finding, finding_id
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.utils.hashing import stable_hash
 
 ScopeNode = Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef]
 TRUNCATION_MARKER = "    # ... [truncated by CryptoAudit context budget]"

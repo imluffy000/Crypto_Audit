@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.context import ContextBudget, ContextBuilder
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.core.identity import finding_id
+from cryptoaudit.models.finding import finding_id
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 FIXTURE = Path("tests/fixtures/context/scopes.py")
 
@@ -63,8 +63,9 @@ def test_public_interface_and_imports(analyzed):
 
 def test_callers_within_module():
     source = "def target():\n    return 1\n\ndef a():\n    return target()\n\ndef b():\n    return 2\n"
-    from cryptoaudit.context.builder import _callers_of
     import ast
+
+    from cryptoaudit.context.builder import _callers_of
 
     assert _callers_of(ast.parse(source), "target") == ["a"]
 

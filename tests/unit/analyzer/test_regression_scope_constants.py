@@ -1,7 +1,8 @@
 """Regression test suite for Issue 3: Scope-aware constant resolution in CR3/CR4."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 
 
 def test_cr3_constant_in_unrelated_function_does_not_contaminate_parameter(tmp_path: Path):

@@ -1,7 +1,8 @@
 """Unit tests for multi-rule engine analysis, deduplication, determinism, and safe reference cases."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 
 
 def test_multi_rule_analysis_and_deduplication():

@@ -3,9 +3,10 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from cryptoaudit.analyzer.ast_parser import ASTParseResult
-from cryptoaudit.analyzer.calls import CallSite
-from cryptoaudit.core.models import Finding, RuleConfig
+from cryptoaudit.analysis.ast_parser import ASTParseResult
+from cryptoaudit.analysis.call_analyzer import CallSite
+from cryptoaudit.models.analysis import RuleConfig
+from cryptoaudit.models.finding import Finding
 
 
 class BaseRule(ABC):

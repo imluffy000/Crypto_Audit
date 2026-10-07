@@ -3,13 +3,12 @@
 import ast
 from typing import List, Optional, Sequence
 
-from cryptoaudit.core.errors import ErrorCode
-from cryptoaudit.core.identity import finding_id
-from cryptoaudit.core.models import Finding
+from cryptoaudit.models.finding import Finding, finding_id
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.edits import SourceIndex, TextEdit, apply_edits, edits_overlap, find_call
 from cryptoaudit.repair.models import RepairRequest, RepairResult, RepairStatus, StrategyId
 from cryptoaudit.scanners.models import Scanner, ScannerIssue, ScanReport
+from cryptoaudit.utils.errors import ErrorCode
 
 # Bandit test IDs whose own message prescribes a concrete code change.
 BANDIT_WEAK_HASH = "B324"  # "Consider usedforsecurity=False"

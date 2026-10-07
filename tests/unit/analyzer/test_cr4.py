@@ -1,8 +1,9 @@
 """Unit tests for CR4 rule (Weak KDF parameters, static salt, fast hash direct key derivation)."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.enums import Category, Severity
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
+from cryptoaudit.models.enums import Category, Severity
 
 
 def test_cr4_vulnerable_kdf_detection():

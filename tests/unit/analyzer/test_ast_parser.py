@@ -2,9 +2,10 @@
 
 import ast
 from pathlib import Path
+
 import pytest
 
-from cryptoaudit.analyzer.ast_parser import parse_source_file
+from cryptoaudit.analysis.ast_parser import parse_source_file
 
 
 def test_parse_valid_python_file(tmp_path: Path):

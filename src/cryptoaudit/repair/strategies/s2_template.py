@@ -4,8 +4,7 @@ import ast
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Set
 
-from cryptoaudit.core.identity import finding_id
-from cryptoaudit.core.models import Finding
+from cryptoaudit.models.finding import Finding, finding_id
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.edits import (
     SourceIndex,
@@ -17,7 +16,7 @@ from cryptoaudit.repair.edits import (
     parent_map,
 )
 from cryptoaudit.repair.models import RepairRequest, RepairResult, RepairStatus, StrategyId
-from cryptoaudit.core.errors import ErrorCode
+from cryptoaudit.utils.errors import ErrorCode
 
 DEFAULT_MIN_ITERATIONS = 600_000
 SALT_BYTES = 16

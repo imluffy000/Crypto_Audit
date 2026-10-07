@@ -1,7 +1,8 @@
 """Regression test suite for Issue 2: Removing comment-based false positives in CR1."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 
 
 def test_cr1_comment_with_password_no_false_positive(tmp_path: Path):

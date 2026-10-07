@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cryptoaudit.core.models import AnalysisResult
+from cryptoaudit.models.analysis import AnalysisResult
 
 
 def format_json_report(result: AnalysisResult) -> str:

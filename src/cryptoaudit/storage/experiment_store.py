@@ -13,8 +13,8 @@ from pydantic import BaseModel
 from cryptoaudit import __version__
 from cryptoaudit.aggregation.models import CaseOutcome
 from cryptoaudit.candidate.models import Candidate
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.core.identity import stable_hash
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.utils.hashing import stable_hash
 from cryptoaudit.validation.models import ValidationReport
 
 SCHEMA_VERSION = 1

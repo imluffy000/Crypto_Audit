@@ -1,8 +1,9 @@
 """Unit tests for CR3 rule (Static or reused IV / Nonce)."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.enums import Category, Severity
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
+from cryptoaudit.models.enums import Category, Severity
 
 
 def test_cr3_vulnerable_static_iv_detection():

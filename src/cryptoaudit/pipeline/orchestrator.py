@@ -15,18 +15,18 @@ from typing import Dict, List, Optional, Sequence
 
 from cryptoaudit.aggregation.aggregator import build_outcome
 from cryptoaudit.aggregation.models import CaseOutcome
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.benchmark.oracle import HiddenOracle
 from cryptoaudit.candidate.integrity import IntegrityChecker
 from cryptoaudit.candidate.models import Candidate, make_candidate
 from cryptoaudit.context.builder import ContextBuilder
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.core.models import Finding
 from cryptoaudit.ingest.models import ModuleInput
+from cryptoaudit.models.finding import Finding
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.models import RepairConstraints, RepairRequest
 from cryptoaudit.repair.request import build_repair_request
 from cryptoaudit.storage.experiment_store import ExperimentStore
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.validation.models import ValidationReport
 from cryptoaudit.validation.pipeline import ValidationPipeline
 

@@ -7,12 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.llm import LLMRequest, LLMResponse, OllamaClient
 from cryptoaudit.repair import RepairConstraints, RepairStatus, StrategyId, build_repair_request
 from cryptoaudit.repair.prompting import OutputParseError, parse_llm_output, render_prompt
 from cryptoaudit.repair.strategies import LLMRepairStrategy, MigrationAwareRepairStrategy
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 FIXTURE = Path("tests/fixtures/cr5/vulnerable.py")
 GOOD_OUTPUT = "Here you go:\n```python\nimport secrets\n\ndef f():\n    return secrets.token_hex(16)\n```\n"

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.benchmark import BenchmarkRepository
 from cryptoaudit.benchmark.oracle import load_oracle
 from cryptoaudit.candidate import IntegrityChecker, make_candidate

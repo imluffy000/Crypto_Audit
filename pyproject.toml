@@ -43,3 +43,10 @@ cryptoaudit = ["repair/prompting/templates/*.md"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cryptoaudit"]

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Sequence, Set
 
 from cryptoaudit import __version__ as CRYPTOAUDIT_VERSION
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.scanners.models import Scanner, ScanReport
 from cryptoaudit.validation.models import GateId, GateResult, GateStatus
 

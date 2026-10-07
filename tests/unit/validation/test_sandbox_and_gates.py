@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.candidate import IntegrityChecker, make_candidate
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.repair import RepairResult, RepairStatus, StrategyId
-from cryptoaudit.scanners import ScanReport, ScannerIssue
+from cryptoaudit.scanners import ScannerIssue, ScanReport
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.validation import (
     DockerSandbox,
     GateId,

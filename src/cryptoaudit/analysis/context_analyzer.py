@@ -4,7 +4,7 @@ import ast
 import re
 from typing import List, Optional, Set
 
-from cryptoaudit.analyzer.calls import CallSite
+from cryptoaudit.analysis.call_analyzer import CallSite
 
 EXACT_CREDENTIAL_TOKENS = {
     "password",

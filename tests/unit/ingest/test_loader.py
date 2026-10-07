@@ -2,8 +2,8 @@
 
 import pytest
 
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.ingest import iter_python_files, load_module
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 
 def test_load_module(tmp_path):

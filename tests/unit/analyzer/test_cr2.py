@@ -1,8 +1,9 @@
 """Unit tests for CR2 rule (Weak/unauthenticated ECB encryption mode)."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.enums import Category, Severity
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
+from cryptoaudit.models.enums import Category, Severity
 
 
 def test_cr2_vulnerable_ecb_detection():

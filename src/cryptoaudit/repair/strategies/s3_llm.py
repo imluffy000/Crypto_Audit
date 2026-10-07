@@ -1,11 +1,11 @@
 """S3: single-shot local LLM repair strategy."""
 
-from cryptoaudit.core.errors import CryptoAuditError
-from cryptoaudit.core.identity import finding_id
 from cryptoaudit.llm.client import DEFAULT_MODEL, LLMClient, LLMRequest
+from cryptoaudit.models.finding import finding_id
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.models import GenerationMetadata, RepairRequest, RepairResult, RepairStatus, StrategyId
 from cryptoaudit.repair.prompting import DEFAULT_MAX_CODE_CHARS, OutputParseError, parse_llm_output, render_prompt
+from cryptoaudit.utils.errors import CryptoAuditError
 
 
 class LLMRepairStrategy(RepairStrategy):

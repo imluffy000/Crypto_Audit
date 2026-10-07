@@ -6,11 +6,11 @@ from typing import List
 
 import pytest
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.errors import ErrorCode
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.repair import RepairStatus, StrategyId, build_repair_request
 from cryptoaudit.repair.strategies import ToolGuidedRepairStrategy
 from cryptoaudit.scanners import BanditScanner, ScannerIssue, ScanReport
+from cryptoaudit.utils.errors import ErrorCode
 
 MD5_SOURCE = "import hashlib\n\ndef hash_password(password):\n    return hashlib.md5(password.encode()).hexdigest()\n"
 

@@ -1,8 +1,9 @@
 """Unit tests for CR1 rule, fixtures, false positives, precision, and determinism."""
 
 from pathlib import Path
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.enums import Category, Severity
+
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
+from cryptoaudit.models.enums import Category, Severity
 
 
 def test_cr1_vulnerable_fixture_detection():

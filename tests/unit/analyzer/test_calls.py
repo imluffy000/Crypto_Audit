@@ -1,8 +1,9 @@
 """Unit tests for call site extractor module."""
 
 import ast
-from cryptoaudit.analyzer.calls import extract_calls
-from cryptoaudit.analyzer.imports import extract_imports
+
+from cryptoaudit.analysis.call_analyzer import extract_calls
+from cryptoaudit.analysis.import_analyzer import extract_imports
 
 
 def test_call_extraction_and_scope():

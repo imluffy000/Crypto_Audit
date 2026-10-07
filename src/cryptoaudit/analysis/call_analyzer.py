@@ -2,7 +2,8 @@
 
 import ast
 from typing import Dict, List, Optional
-from cryptoaudit.analyzer.imports import ImportTracker
+
+from cryptoaudit.analysis.import_analyzer import ImportTracker
 
 
 class CallSite:

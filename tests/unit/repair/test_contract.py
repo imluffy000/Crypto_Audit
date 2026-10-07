@@ -5,8 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from cryptoaudit.analyzer.engine import AnalyzerEngine
-from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
+from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.repair import (
     RepairRequest,
     RepairResult,
@@ -16,6 +15,7 @@ from cryptoaudit.repair import (
     StrategyRegistry,
     build_repair_request,
 )
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 FIXTURE = Path("tests/fixtures/cr5/vulnerable.py")
 
