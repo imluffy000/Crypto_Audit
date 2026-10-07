@@ -61,11 +61,20 @@ def edits_overlap(edit: TextEdit, others: Iterable[TextEdit]) -> bool:
 
 
 def find_call(tree: ast.AST, line: int, column: Optional[int]) -> Optional[ast.Call]:
-    """The call node an analyzer finding points at (CallSite records the call's own position)."""
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and node.lineno == line and (column is None or node.col_offset == column):
-            return node
-    return None
+    """
+    The call node an analyzer finding points at (CallSite records the call's own position).
+
+    Chained calls such as `hashlib.md5(x).hexdigest()` share a start position, so the
+    innermost (shortest) call is the one the analyzer resolved.
+    """
+    matches = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and node.lineno == line and (column is None or node.col_offset == column)
+    ]
+    if not matches:
+        return None
+    return min(matches, key=lambda n: (n.end_lineno or 0, n.end_col_offset or 0))
 
 
 def parent_map(tree: ast.AST) -> Dict[ast.AST, ast.AST]:

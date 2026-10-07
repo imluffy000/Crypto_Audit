@@ -52,3 +52,9 @@ def test_ensure_import_preserves_crlf():
 
 def test_ensure_import_in_module_without_imports():
     assert ensure_import("x = 1", "os") == "import os\nx = 1\n"
+
+
+def test_find_call_prefers_innermost_chained_call():
+    source = "import hashlib\nx = hashlib.md5(b'a').hexdigest()\n"
+    call = find_call(ast.parse(source), 2, 4)
+    assert SourceIndex(source).text(call) == "hashlib.md5(b'a')"
