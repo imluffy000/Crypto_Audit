@@ -26,7 +26,7 @@ Each side is self-contained: run backend commands from `backend/` and frontend c
 ```sh
 # backend: API on http://127.0.0.1:8000
 cd backend
-cp .env.example .env              # GitHub App credentials, see docs/development/website.md
+cp .env.example .env              # GitHub OAuth App credentials, see docs/development/website.md
 pip install -e ".[web,scanners]"
 cryptoaudit serve
 
@@ -36,9 +36,9 @@ npm install
 npm run dev
 ```
 
-Or run both with Docker: `docker compose -f docker/docker-compose.yml up --build` (http://localhost:8080).
+Or run both with Docker: `docker compose -f docker/docker-compose.yml up --build` (http://localhost:5173).
 
-Setup guide, GitHub App permissions and what the verdicts mean:
+Setup guide, GitHub OAuth scopes and what the verdicts mean:
 [docs/development/website.md](docs/development/website.md).
 
 ## Research pipeline

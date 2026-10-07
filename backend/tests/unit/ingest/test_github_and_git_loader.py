@@ -10,7 +10,7 @@ import pytest
 
 from cryptoaudit.ingest.filters import SnapshotLimits, is_valid_ref, safe_relative_path
 from cryptoaudit.ingest.git_loader import fetch_repository, read_python_modules
-from cryptoaudit.ingest.github_client import GitHubAppAuth, GitHubClient
+from cryptoaudit.ingest.github_client import GitHubClient, GitHubOAuth
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 REPO_JSON = {
@@ -119,17 +119,30 @@ def test_invalid_archive():
 # --- GitHub client ---------------------------------------------------------------------------
 
 
-def test_lists_repos_from_app_installations():
-    transport = github_transport(
-        {
-            ("GET", "/user/installations"): (200, {"installations": [{"id": 1}, {"id": 2}]}),
-            ("GET", "/user/installations/1/repositories"): (200, {"repositories": [REPO_JSON]}),
-            ("GET", "/user/installations/2/repositories"): (200, {"repositories": [REPO_JSON]}),
-        }
-    )
-    repos = GitHubClient("t", transport=transport).list_installation_repos()
-    assert [r.full_name for r in repos] == ["alice/app"]  # de-duplicated
-    assert repos[0].private and repos[0].default_branch == "main"
+def test_lists_user_repos_with_pagination():
+    seen = []
+    page_one = [dict(REPO_JSON, id=1000 + i, full_name=f"alice/r{i:03d}", name=f"r{i:03d}") for i in range(100)]
+
+    def repos(request):
+        seen.append(dict(request.url.params))
+        page = int(request.url.params["page"])
+        return 200, page_one if page == 1 else [REPO_JSON, page_one[0]]  # duplicate is de-duplicated
+
+    repos_list = GitHubClient("t", transport=github_transport({("GET", "/user/repos"): repos})).list_user_repos()
+    assert len(repos_list) == 101 and repos_list[0].full_name == "alice/app"
+    assert [p["page"] for p in seen] == ["1", "2"]
+    assert seen[0]["visibility"] == "all" and "organization_member" in seen[0]["affiliation"]
+
+
+def test_public_only_listing_requests_public_visibility():
+    seen = {}
+
+    def repos(request):
+        seen.update(request.url.params)
+        return 200, []
+
+    GitHubClient("t", transport=github_transport({("GET", "/user/repos"): repos})).list_user_repos(include_private=False)
+    assert seen["visibility"] == "public"
 
 
 def test_sends_token_and_api_version():
@@ -184,17 +197,40 @@ def test_fetch_repository_end_to_end():
     assert snapshot.modules[0].module_name == "pkg/auth.py"
 
 
-# --- GitHub App user authorisation -----------------------------------------------------------
+# --- OAuth App sign-in ------------------------------------------------------------------------
 
 
-def test_authorize_url_contains_state_and_redirect():
-    auth = GitHubAppAuth("Iv1.abc", "secret", "http://localhost:5173/api/auth/github/callback")
+def test_authorize_url_contains_scope_state_and_redirect():
+    auth = GitHubOAuth("Ov23abc", "secret", "http://localhost:5173/api/auth/github/callback", scopes=("read:user", "repo"))
     query = parse_qs(urlparse(auth.authorize_url("st4te")).query)
     assert query == {
-        "client_id": ["Iv1.abc"],
+        "client_id": ["Ov23abc"],
         "redirect_uri": ["http://localhost:5173/api/auth/github/callback"],
+        "scope": ["read:user repo"],
         "state": ["st4te"],
+        "allow_signup": ["false"],
     }
+    assert auth.manage_access_url == "https://github.com/settings/connections/applications/Ov23abc"
+
+
+def test_revoke_uses_app_credentials():
+    seen = {}
+
+    def revoke(request):
+        seen["auth"] = request.headers["authorization"]
+        seen["body"] = request.content.decode()
+        return 204, b""
+
+    transport = github_transport({("DELETE", "/applications/Ov23abc/token"): revoke})
+    assert GitHubOAuth("Ov23abc", "secret", "http://cb", transport=transport).revoke("gho_x") is True
+    assert seen["auth"].startswith("Basic ") and "gho_x" in seen["body"]
+
+
+def test_revoke_is_best_effort():
+    def boom(request):
+        raise httpx.ConnectError("offline")
+
+    assert GitHubOAuth("id", "secret", "http://cb", transport=httpx.MockTransport(boom)).revoke("gho_x") is False
 
 
 def test_code_exchange():
@@ -203,7 +239,7 @@ def test_code_exchange():
         assert body["code"] == ["c0de"] and body["client_secret"] == ["secret"]
         return 200, {"access_token": "ghu_x", "token_type": "bearer", "expires_in": 28800, "refresh_token": "ghr_y"}
 
-    auth = GitHubAppAuth("id", "secret", "http://cb", transport=github_transport({("POST", "/login/oauth/access_token"): token}))
+    auth = GitHubOAuth("id", "secret", "http://cb", transport=github_transport({("POST", "/login/oauth/access_token"): token}))
     result = auth.exchange_code("c0de")
     assert result.access_token == "ghu_x" and result.expires_in == 28800
 
@@ -211,7 +247,7 @@ def test_code_exchange():
 def test_code_exchange_error():
     transport = github_transport({("POST", "/login/oauth/access_token"): (200, {"error": "bad_verification_code"})})
     with pytest.raises(CryptoAuditError) as excinfo:
-        GitHubAppAuth("id", "secret", "http://cb", transport=transport).exchange_code("x")
+        GitHubOAuth("id", "secret", "http://cb", transport=transport).exchange_code("x")
     assert excinfo.value.code is ErrorCode.AUTHENTICATION_ERROR
     assert "bad_verification_code" in excinfo.value.message
 

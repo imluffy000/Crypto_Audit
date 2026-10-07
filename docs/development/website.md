@@ -9,25 +9,36 @@ The website is the React app in `frontend/` talking to the FastAPI backend (`cry
 routes under `/api`). Repository code is fetched as a tarball, read in memory, analysed and repaired
 — **never executed**.
 
-## 1. Create a GitHub App (one time)
+## 1. Create a GitHub OAuth App (one time)
 
-GitHub → **Settings → Developer settings → GitHub Apps → New GitHub App**:
+GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**:
 
 | Field | Value |
 |---|---|
-| GitHub App name | e.g. `CryptoAudit (local)` — its URL slug becomes `CRYPTOAUDIT_GITHUB_APP_SLUG` |
+| Application name | e.g. `CryptoAudit (local)` |
 | Homepage URL | `http://localhost:5173` |
-| Callback URL | `http://localhost:5173/api/auth/github/callback` (add `http://localhost:8080/api/auth/github/callback` too if you use docker compose) |
-| Expire user authorization tokens | leave checked |
-| Request user authorization (OAuth) during installation | **unchecked** (sign in from the website instead) |
-| Webhook → Active | **unchecked** (not used) |
-| Repository permissions → Contents | **Read-only** (Metadata read-only is added automatically) |
-| Account permissions | none |
-| Where can this app be installed | Only on this account (or any account) |
+| Authorization callback URL | `http://localhost:5173/api/auth/github/callback` |
+| Enable Device Flow | unchecked |
 
-Create the app, copy the **Client ID**, generate a **client secret**, then **Install App** on the
-repositories you want to scan. CryptoAudit can only see repositories the app is installed on;
-the website's “Grant repositories” button links to the installation page.
+Register the app, copy the **Client ID** and generate a **client secret**.
+
+OAuth Apps accept a single callback URL, so the dev server and `docker compose` both serve the site on
+`http://localhost:5173`. If you deploy elsewhere, register a separate OAuth App for that origin and set
+`CRYPTOAUDIT_PUBLIC_URL` to it.
+
+### Repository access
+
+| `CRYPTOAUDIT_GITHUB_REPO_ACCESS` | Scopes requested | What can be scanned |
+|---|---|---|
+| `private` (default) | `read:user repo` | Your public and private repositories, collaborations, organisation repositories |
+| `public` | `read:user` | Public repositories only |
+
+GitHub has no read-only scope for private repositories, so `private` shows **“Full control of private
+repositories”** on the consent screen. CryptoAudit only ever makes read requests (repository list,
+file tree, tarball download), and **signing out revokes the token** at GitHub. You can also review or
+revoke access at any time under GitHub → Settings → Applications → Authorized OAuth Apps (the
+website's “Manage GitHub access” button opens it). Organisations that restrict third-party access
+must approve the app there before their repositories appear.
 
 ## 2. Configure
 
@@ -37,8 +48,8 @@ cp .env.example .env
 python -c "import secrets; print(secrets.token_urlsafe(48))"   # paste as CRYPTOAUDIT_SESSION_SECRET
 ```
 
-Fill in `CRYPTOAUDIT_GITHUB_CLIENT_ID`, `CRYPTOAUDIT_GITHUB_CLIENT_SECRET` and
-`CRYPTOAUDIT_GITHUB_APP_SLUG` in `backend/.env`. `.env` is git-ignored — never commit it.
+Fill in `CRYPTOAUDIT_GITHUB_CLIENT_ID` and `CRYPTOAUDIT_GITHUB_CLIENT_SECRET` (and optionally
+`CRYPTOAUDIT_GITHUB_REPO_ACCESS`) in `backend/.env`. `.env` is git-ignored — never commit it.
 
 ## 3. Run (development)
 
@@ -62,7 +73,7 @@ Without it, scans run S1 and S2 and the results page says S3/S4 were skipped.
 ## 3b. Run with Docker
 
 ```sh
-docker compose -f docker/docker-compose.yml up --build          # http://localhost:8080
+docker compose -f docker/docker-compose.yml up --build          # http://localhost:5173
 docker compose -f docker/docker-compose.yml --profile llm up --build   # + Ollama
 ```
 
@@ -81,8 +92,8 @@ result. Scanner results (V0) are shown for comparison but never decide the verdi
 
 ## Security notes
 
-- Sign-in uses the GitHub App web flow with a single-use `state` bound to both the server and an
-  HttpOnly browser cookie. Sessions are HttpOnly, SameSite=Lax cookies; set
+- Sign-in uses the GitHub OAuth web flow with a single-use `state` bound to both the server and an
+  HttpOnly browser cookie. Tokens are revoked at GitHub on logout (OAuth App tokens never expire on their own). Sessions are HttpOnly, SameSite=Lax cookies; set
   `CRYPTOAUDIT_COOKIE_SECURE=true` behind HTTPS.
 - Access tokens are encrypted at rest in `backend/data/web/cryptoaudit.sqlite`; session IDs are stored hashed.
 - Repository archives are size-limited and read in memory (only `.py` files, no symlinks, no path

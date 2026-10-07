@@ -69,7 +69,8 @@ def create_app(services: Optional[Services] = None) -> FastAPI:
             status="ok",
             version=__version__,
             github_configured=services.auth is not None,
-            install_url=f"https://github.com/apps/{settings.github_app_slug}/installations/new" if settings.github_app_slug else None,
+            manage_access_url=services.auth.manage_access_url if services.auth else None,
+            repo_access=settings.github_repo_access,
             llm_model=settings.llm_model,
             llm_available=bool(services.llm is not None and services.llm_available()),
         )

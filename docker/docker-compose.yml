@@ -1,5 +1,5 @@
 # Local CryptoAudit stack:  docker compose -f docker/docker-compose.yml up --build
-# Website: http://localhost:8080   (add http://localhost:8080/api/auth/github/callback to the GitHub App callback URLs)
+# Website: http://localhost:5173   (same origin as the dev server, so one OAuth App callback URL serves both)
 # With a local LLM for S3/S4:  docker compose -f docker/docker-compose.yml --profile llm up --build
 #   then: docker compose -f docker/docker-compose.yml exec ollama ollama pull codellama:7b-instruct
 services:
@@ -9,7 +9,7 @@ services:
       dockerfile: docker/api.Dockerfile
     env_file: ../backend/.env
     environment:
-      CRYPTOAUDIT_PUBLIC_URL: http://localhost:8080
+      CRYPTOAUDIT_PUBLIC_URL: http://localhost:5173
       CRYPTOAUDIT_LLM_BASE_URL: http://ollama:11434
       CRYPTOAUDIT_WEB_DB: /app/data/web/cryptoaudit.sqlite
     volumes:
@@ -21,7 +21,7 @@ services:
       context: ..
       dockerfile: docker/web.Dockerfile
     ports:
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:5173:80"
     depends_on:
       - api
     restart: unless-stopped

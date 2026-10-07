@@ -1,7 +1,7 @@
 """Global settings, overridable through CRYPTOAUDIT_* environment variables (or a .env file)."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Literal, Optional, Tuple
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -34,10 +34,12 @@ class Settings(BaseSettings):
     benchmark_dir: Optional[Path] = None
     experiment_db: Path = Path("data/experiments/experiments.sqlite")
 
-    # Website (API + GitHub App sign-in)
+    # Website (API + GitHub OAuth App sign-in)
     github_client_id: Optional[str] = None
     github_client_secret: Optional[SecretStr] = None
-    github_app_slug: Optional[str] = None
+    # "private": request the `repo` scope so private repositories can be scanned (GitHub has no read-only
+    # private scope; CryptoAudit still only reads). "public": no repository scope, public repositories only.
+    github_repo_access: Literal["private", "public"] = "private"
     session_secret: Optional[SecretStr] = None
     public_url: str = "http://localhost:5173"  # browser-facing origin; the API is served under /api
     cors_origins: List[str] = []
@@ -51,6 +53,10 @@ class Settings(BaseSettings):
     @property
     def github_configured(self) -> bool:
         return bool(self.github_client_id and self.github_client_secret)
+
+    @property
+    def github_oauth_scopes(self) -> Tuple[str, ...]:
+        return ("read:user", "repo") if self.github_repo_access == "private" else ("read:user",)
 
     @property
     def oauth_redirect_uri(self) -> str:

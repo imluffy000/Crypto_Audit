@@ -10,7 +10,7 @@ import httpx
 
 from cryptoaudit.config.settings import Settings
 from cryptoaudit.ingest.filters import SnapshotLimits
-from cryptoaudit.ingest.github_client import GitHubAppAuth, GitHubClient
+from cryptoaudit.ingest.github_client import GitHubClient, GitHubOAuth
 from cryptoaudit.llm.client import LLMClient
 from cryptoaudit.llm.ollama_client import OllamaClient
 from cryptoaudit.models.repair import StrategyId
@@ -38,7 +38,7 @@ class InlineExecutor(Executor):
 class Services:
     settings: Settings
     store: WebStore
-    auth: Optional[GitHubAppAuth]
+    auth: Optional[GitHubOAuth]
     github: Callable[[str], GitHubClient]
     llm: Optional[LLMClient]
     llm_available: Callable[[], bool]
@@ -58,10 +58,11 @@ def default_services(settings: Optional[Settings] = None, github_transport: Opti
     settings = settings or Settings()
     auth = None
     if settings.github_configured:
-        auth = GitHubAppAuth(
+        auth = GitHubOAuth(
             settings.github_client_id or "",
             settings.github_client_secret.get_secret_value() if settings.github_client_secret else "",
             settings.oauth_redirect_uri,
+            scopes=settings.github_oauth_scopes,
             transport=github_transport,
         )
     ollama = OllamaClient(settings.llm_base_url, timeout=settings.llm_timeout)

@@ -24,7 +24,8 @@ function RepositoryUpload() {
   const [selectedGithubRepo, setSelectedGithubRepo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [githubError, setGithubError] = useState('');
-  const [installUrl, setInstallUrl] = useState(null);
+  const [manageUrl, setManageUrl] = useState(null);
+  const [repoAccess, setRepoAccess] = useState('private');
   const [githubLoaded, setGithubLoaded] = useState(false);
 
   const normalizedFiles = useMemo(() => files.map((file, index) => normalizeFileEntry(file, index)), [files]);
@@ -50,7 +51,13 @@ function RepositoryUpload() {
   };
 
   useEffect(() => {
-    authService.health().then((health) => setInstallUrl(health.install_url)).catch(() => setInstallUrl(null));
+    authService
+      .health()
+      .then((health) => {
+        setManageUrl(health.manage_access_url);
+        setRepoAccess(health.repo_access);
+      })
+      .catch(() => setManageUrl(null));
     if (location.pathname.endsWith('/github')) {
       handleGithubConnect();
     }
@@ -239,9 +246,9 @@ function RepositoryUpload() {
               <h3>Your GitHub repositories</h3>
             </div>
             <div className="header-actions small-gap">
-              {installUrl ? (
-                <a className="secondary-button" href={installUrl} target="_blank" rel="noreferrer">
-                  <ExternalLink size={14} /> Grant repositories
+              {manageUrl ? (
+                <a className="secondary-button" href={manageUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink size={14} /> Manage GitHub access
                 </a>
               ) : null}
               <button type="button" className="primary-button" onClick={handleGithubConnect} disabled={loading}>
@@ -281,10 +288,12 @@ function RepositoryUpload() {
           ) : (
             <div className="empty-state compact">
               <div className="empty-icon">GitHub</div>
-              <h3>{githubLoaded ? 'No repositories granted yet.' : 'Loading repositories…'}</h3>
+              <h3>{githubLoaded ? 'No repositories found.' : 'Loading repositories…'}</h3>
               <p>
-                CryptoAudit can only read repositories you grant to its GitHub App (read-only access to contents).
-                {installUrl ? ' Use “Grant repositories” to choose them, then refresh.' : ''}
+                {repoAccess === 'public'
+                  ? 'This server is configured for public repositories only.'
+                  : 'Repositories you own, collaborate on, or reach through an organisation are listed here.'}
+                {manageUrl ? ' Organisation repositories may need an owner to approve CryptoAudit under “Manage GitHub access”.' : ''}
               </p>
             </div>
           )}

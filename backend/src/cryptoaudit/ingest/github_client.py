@@ -1,6 +1,6 @@
-"""GitHub API access for the web flow: GitHub App user authorisation, repositories, trees, tarballs."""
+"""GitHub API access for the web flow: OAuth App sign-in, repositories, trees, tarballs. Read-only use."""
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from urllib.parse import urlencode
 
 import httpx
@@ -81,12 +81,15 @@ def _raise_for_status(response: httpx.Response, what: str) -> None:
     if response.status_code == 403 and response.headers.get("x-ratelimit-remaining") == "0":
         raise CryptoAuditError(ErrorCode.RATE_LIMITED, "GitHub API rate limit reached; try again later")
     if response.status_code in (403, 404):
-        raise CryptoAuditError(ErrorCode.NOT_FOUND, f"{what} not found or not accessible to the CryptoAudit GitHub App")
+        raise CryptoAuditError(ErrorCode.NOT_FOUND, f"{what} not found or not accessible with your GitHub authorisation")
     raise CryptoAuditError(ErrorCode.EXTERNAL_SERVICE_ERROR, f"GitHub returned HTTP {response.status_code} for {what}")
 
 
 class GitHubClient:
-    """User-to-server client. Holds the user's token only for the duration of a request or scan."""
+    """
+    Client acting as the signed-in user. Holds the token only for the duration of a request or scan,
+    and only ever issues read requests (even when the OAuth scope would allow writes).
+    """
 
     def __init__(
         self,
@@ -131,26 +134,21 @@ class GitHubClient:
             id=data["id"], login=data["login"], name=data.get("name"), email=data.get("email"), avatar_url=data.get("avatar_url")
         )
 
-    def list_installation_repos(self) -> List[GitHubRepo]:
-        """Repositories the user can access through installations of the CryptoAudit GitHub App."""
+    def list_user_repos(self, include_private: bool = True) -> List[GitHubRepo]:
+        """Repositories the user owns, collaborates on or can see through organisation membership."""
         repos: Dict[int, GitHubRepo] = {}
-        installations = []
+        params: Dict[str, Any] = {
+            "per_page": 100,
+            "sort": "updated",
+            "affiliation": "owner,collaborator,organization_member",
+            "visibility": "all" if include_private else "public",
+        }
         for page in range(1, MAX_PAGES + 1):
-            data = self._get("/user/installations", "installations", {"per_page": 100, "page": page})
-            installations.extend(data.get("installations", []))
-            if len(data.get("installations", [])) < 100:
+            items = self._get("/user/repos", "repositories", {**params, "page": page})
+            for item in items:
+                repos[item["id"]] = _repo(item)
+            if len(items) < 100:
                 break
-        for installation in installations:
-            for page in range(1, MAX_PAGES + 1):
-                data = self._get(
-                    f"/user/installations/{int(installation['id'])}/repositories",
-                    "installation repositories",
-                    {"per_page": 100, "page": page},
-                )
-                for item in data.get("repositories", []):
-                    repos[item["id"]] = _repo(item)
-                if len(data.get("repositories", [])) < 100:
-                    break
         return sorted(repos.values(), key=lambda r: r.full_name.lower())
 
     def get_repo(self, owner: str, name: str) -> GitHubRepo:
@@ -185,25 +183,42 @@ class GitHubClient:
         return b"".join(chunks)
 
 
-class GitHubAppAuth:
-    """User authorisation for a GitHub App (web application flow)."""
+class GitHubOAuth:
+    """OAuth App sign-in (web application flow) and token revocation."""
 
     def __init__(
         self,
         client_id: str,
         client_secret: str,
         redirect_uri: str,
+        scopes: Sequence[str] = ("read:user",),
         transport: Optional[httpx.BaseTransport] = None,
         web_url: str = GITHUB_WEB_URL,
+        api_url: str = GITHUB_API_URL,
     ) -> None:
         self.client_id = client_id
         self._client_secret = client_secret
         self.redirect_uri = redirect_uri
+        self.scopes = tuple(scopes)
         self.web_url = web_url.rstrip("/")
+        self.api_url = api_url.rstrip("/")
         self._transport = transport
 
+    @property
+    def manage_access_url(self) -> str:
+        """Where a user reviews or revokes this app's access (and requests organisation approval)."""
+        return f"{self.web_url}/settings/connections/applications/{self.client_id}"
+
     def authorize_url(self, state: str) -> str:
-        query = urlencode({"client_id": self.client_id, "redirect_uri": self.redirect_uri, "state": state})
+        query = urlencode(
+            {
+                "client_id": self.client_id,
+                "redirect_uri": self.redirect_uri,
+                "scope": " ".join(self.scopes),
+                "state": state,
+                "allow_signup": "false",
+            }
+        )
         return f"{self.web_url}/login/oauth/authorize?{query}"
 
     def exchange_code(self, code: str) -> OAuthToken:
@@ -226,3 +241,21 @@ class GitHubAppAuth:
             reason = data.get("error_description") or data.get("error") or f"HTTP {response.status_code}"
             raise CryptoAuditError(ErrorCode.AUTHENTICATION_ERROR, f"GitHub sign-in failed: {reason}")
         return OAuthToken(**{k: data[k] for k in ("access_token", "token_type", "expires_in", "refresh_token") if k in data})
+
+    def revoke(self, access_token: str) -> bool:
+        """
+        Revoke a user token at GitHub. OAuth App tokens do not expire, so this runs on logout.
+        Best effort: returns False instead of raising when GitHub cannot be reached.
+        """
+        try:
+            with httpx.Client(transport=self._transport, timeout=15.0) as http:
+                response = http.request(
+                    "DELETE",
+                    f"{self.api_url}/applications/{self.client_id}/token",
+                    auth=(self.client_id, self._client_secret),
+                    json={"access_token": access_token},
+                    headers={"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": API_VERSION},
+                )
+        except httpx.HTTPError:
+            return False
+        return response.status_code in (204, 404)

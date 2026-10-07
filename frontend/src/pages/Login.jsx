@@ -65,7 +65,7 @@ function Login() {
             <div className="alert-box warning">
               <AlertTriangle size={15} />
               <div>
-                <strong>GitHub App not configured.</strong>
+                <strong>GitHub sign-in not configured.</strong>
                 <p>Set CRYPTOAUDIT_GITHUB_CLIENT_ID and CRYPTOAUDIT_GITHUB_CLIENT_SECRET on the server (see .env.example).</p>
               </div>
             </div>
@@ -74,7 +74,7 @@ function Login() {
           {error ? <div className="form-error">{error}</div> : null}
 
           <p className="fine-print">
-            CryptoAudit only reads repositories you grant to its GitHub App. Your code is analysed and repaired but never executed.
+            CryptoAudit only reads your repositories; it never pushes or changes anything on GitHub. Your code is analysed and repaired but never executed, and signing out revokes CryptoAudit's access token.
           </p>
         </div>
       </div>

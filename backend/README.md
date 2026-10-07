@@ -9,7 +9,7 @@ and the test fixtures resolve from here.
 
 ```sh
 pip install -e ".[dev,web,scanners]"
-cp .env.example .env                  # website settings (GitHub App, session secret)
+cp .env.example .env                  # website settings (GitHub OAuth App, session secret)
 
 cryptoaudit serve                     # website API on http://127.0.0.1:8000
 cryptoaudit analyze path/to/file.py   # Analyzer only

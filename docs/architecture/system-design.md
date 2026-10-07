@@ -33,7 +33,7 @@ backend/                        Python package and everything it needs; run comm
 │   ├── cli/          main.py: analyze, repair, bench list|run|report, serve
 │   ├── api/          app, services, jobs, dependencies, schemas, routes/ (auth, repos, scan, findings, reports)
 │   ├── ingest/       file_loader, directory_loader, filters, benchmark_loader (public views only),
-│   │                 github_client (GitHub App API), git_loader (in-memory tarball ingestion)
+│   │                 github_client (GitHub OAuth + read-only API), git_loader (in-memory tarball ingestion)
 │   ├── analysis/     ast_parser, import_analyzer, call_analyzer, context_analyzer, literals, analyzer
 │   ├── rules/        base, registry, cr1_weak_hash … cr5_insecure_random
 │   ├── models/       finding, analysis, enums, context, scan, repair, validation, benchmark, experiment, explanation

@@ -90,7 +90,7 @@ function Dashboard() {
       ) : (
         <EmptyState
           title="No scans yet."
-          description="Grant a repository to the CryptoAudit GitHub App, then start your first scan."
+          description="Choose one of your GitHub repositories to start your first scan."
           actionText="Choose repository"
           onAction={() => navigate('/repositories/github')}
         />

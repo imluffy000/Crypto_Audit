@@ -64,8 +64,10 @@ A missing or unparseable result line, a broken oracle or an unavailable sandbox 
 ## Website flow
 
 ```
-browser ──► /api/auth/github/login ──► GitHub (App authorisation) ──► /api/auth/github/callback
+browser ──► /api/auth/github/login ──► GitHub (OAuth consent)     ──► /api/auth/github/callback
             (state: server-side, single use + HttpOnly cookie)        (code → user token → session cookie)
+
+POST /api/auth/logout ──► session deleted + token revoked at GitHub
 
 POST /api/scans ──► background job (api/jobs.py), token held in memory only
    FETCH     ingest.github_client.download_tarball (size-capped stream)

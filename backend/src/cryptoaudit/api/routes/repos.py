@@ -1,4 +1,4 @@
-"""Repositories the signed-in user has granted to the CryptoAudit GitHub App."""
+"""Repositories visible to the signed-in user through the CryptoAudit OAuth authorisation."""
 
 from pathlib import PurePosixPath
 from typing import Dict, List, Optional
@@ -18,7 +18,7 @@ MAX_TREE_ENTRIES = 5000
 @router.get("", response_model=List[RepoOut])
 def list_repos(session: SessionInfo = Depends(current_session), services: Services = Depends(get_services)) -> List[RepoOut]:
     with services.github(session.access_token) as client:
-        return [RepoOut(**repo.model_dump(exclude={"html_url"})) for repo in client.list_installation_repos()]
+        return [RepoOut(**repo.model_dump(exclude={"html_url"})) for repo in client.list_user_repos(include_private=services.settings.github_repo_access == "private")]
 
 
 @router.get("/{owner}/{name}/tree", response_model=RepoTreeOut)

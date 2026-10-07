@@ -1,4 +1,4 @@
-"""GitHub App sign-in: redirect to GitHub, handle the callback, issue a session cookie."""
+"""GitHub OAuth App sign-in: redirect to GitHub, handle the callback, issue a session cookie, revoke on logout."""
 
 import logging
 from urllib.parse import quote
@@ -79,7 +79,11 @@ def me(session: SessionInfo = Depends(current_session)) -> UserOut:
 def logout(request: Request, services: Services = Depends(get_services)) -> Response:
     session_id = request.cookies.get(SESSION_COOKIE)
     if session_id:
+        session = services.store.get_session(session_id)
         services.store.delete_session(session_id)
+        # OAuth App tokens never expire on their own: revoke this one at GitHub (best effort).
+        if session is not None and services.auth is not None and not services.auth.revoke(session.access_token):
+            logger.warning("Could not revoke a GitHub token at logout; the user can revoke it in GitHub settings")
     response = Response(status_code=204)
     response.delete_cookie(SESSION_COOKIE, path="/")
     return response

@@ -15,7 +15,7 @@ from cryptoaudit.api.dependencies import SESSION_COOKIE, STATE_COOKIE
 from cryptoaudit.api.services import InlineExecutor, Services
 from cryptoaudit.config.settings import Settings
 from cryptoaudit.ingest.filters import SnapshotLimits
-from cryptoaudit.ingest.github_client import GitHubAppAuth, GitHubClient
+from cryptoaudit.ingest.github_client import GitHubClient, GitHubOAuth
 from cryptoaudit.llm.schemas import LLMRequest, LLMResponse
 from cryptoaudit.models.scan import ScanStage, StageProgress
 from cryptoaudit.pipeline.orchestrator import RepairPipeline
@@ -51,6 +51,7 @@ class FakeGitHub:
         self.codes = {"code-alice": "ghu_alice", "code-bob": "ghu_bob"}
         self.repo = dict(REPO)
         self.tarball_status = 200
+        self.revoked = []
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         path = request.url.path
@@ -59,13 +60,15 @@ class FakeGitHub:
             if code not in self.codes:
                 return httpx.Response(200, json={"error": "bad_verification_code"})
             return httpx.Response(200, json={"access_token": self.codes[code], "token_type": "bearer"})
+        if request.method == "DELETE" and path == "/applications/Ov23test/token":
+            self.revoked.append(request.content.decode())
+            return httpx.Response(204)
         token = request.headers.get("authorization", "").removeprefix("Bearer ")
         if token not in self.users:
             return httpx.Response(401, json={})
         routes = {
             "/user": self.users[token],
-            "/user/installations": {"installations": [{"id": 1}]},
-            "/user/installations/1/repositories": {"repositories": [self.repo]},
+            "/user/repos": [self.repo],
             "/repos/alice/app": self.repo,
             "/repos/alice/app/git/trees/main": {
                 "tree": [
@@ -104,9 +107,8 @@ class FakeLLM:
 @pytest.fixture()
 def env(tmp_path):
     settings = Settings(
-        github_client_id="Iv1.test",
+        github_client_id="Ov23test",
         github_client_secret="client-secret",
-        github_app_slug="cryptoaudit-test",
         session_secret="s" * 40,
         web_db=tmp_path / "web.sqlite",
         public_url="http://localhost:5173",
@@ -128,7 +130,7 @@ def env(tmp_path):
     services = Services(
         settings=settings,
         store=WebStore(settings.web_db, "s" * 40),
-        auth=GitHubAppAuth("Iv1.test", "client-secret", settings.oauth_redirect_uri, transport=transport),
+        auth=GitHubOAuth("Ov23test", "client-secret", settings.oauth_redirect_uri, settings.github_oauth_scopes, transport=transport),
         github=lambda token: GitHubClient(token, transport=transport),
         llm=llm,
         llm_available=lambda: llm.available,
@@ -159,7 +161,8 @@ def test_health_reports_capabilities(env):
     client, *_ = env
     body = client.get("/api/health").json()
     assert body["github_configured"] is True and body["llm_available"] is True
-    assert body["install_url"] == "https://github.com/apps/cryptoaudit-test/installations/new"
+    assert body["manage_access_url"] == "https://github.com/settings/connections/applications/Ov23test"
+    assert body["repo_access"] == "private"
 
 
 def test_login_redirects_to_github_with_state_cookie(env):
@@ -168,7 +171,8 @@ def test_login_redirects_to_github_with_state_cookie(env):
     assert response.status_code == 302
     location = urlparse(response.headers["location"])
     query = parse_qs(location.query)
-    assert location.netloc == "github.com" and query["client_id"] == ["Iv1.test"]
+    assert location.netloc == "github.com" and query["client_id"] == ["Ov23test"]
+    assert query["scope"] == ["read:user repo"]
     assert query["redirect_uri"] == ["http://localhost:5173/api/auth/github/callback"]
     cookie = response.headers["set-cookie"]
     assert STATE_COOKIE in cookie and "HttpOnly" in cookie and query["state"][0] in cookie
@@ -205,11 +209,12 @@ def test_bad_code_redirects_with_error(env):
     assert response.headers["location"].endswith("/#/login?error=authentication_error")
 
 
-def test_logout_ends_session(env):
-    client, *_ = env
+def test_logout_ends_session_and_revokes_token(env):
+    client, services, github, _ = env
     sign_in(client)
     assert client.post("/api/auth/logout").status_code == 204
     assert client.get("/api/auth/me").status_code == 401
+    assert len(github.revoked) == 1 and "ghu_alice" in github.revoked[0]
 
 
 def test_protected_routes_require_sign_in(env):

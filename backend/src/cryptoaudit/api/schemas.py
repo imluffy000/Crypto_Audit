@@ -28,7 +28,8 @@ class HealthOut(BaseModel):
     status: str
     version: str
     github_configured: bool
-    install_url: Optional[str] = None
+    manage_access_url: Optional[str] = None
+    repo_access: str = "private"
     llm_model: str
     llm_available: bool
 
