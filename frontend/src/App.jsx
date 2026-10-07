@@ -6,9 +6,10 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import RepositoryUpload from './pages/RepositoryUpload';
 import RepositoryDetails from './pages/RepositoryDetails';
-import ScanPreparation from './pages/ScanPreparation';
-import ScanProgress from './pages/ScanProgress';
-import ComingSoon from './pages/ComingSoon';
+import ScanResults from './pages/ScanResults';
+import FindingDetail from './pages/FindingDetail';
+import Reports from './pages/Reports';
+import LatestFindings from './pages/LatestFindings';
 
 function App() {
   return (
@@ -59,18 +60,18 @@ function App() {
             }
           />
           <Route
-            path="/scan/preparing"
+            path="/scans/:scanId"
             element={
               <ProtectedRoute>
-                <ScanPreparation />
+                <ScanResults />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/scan"
+            path="/scans/:scanId/findings/:findingId"
             element={
               <ProtectedRoute>
-                <ScanProgress />
+                <FindingDetail />
               </ProtectedRoute>
             }
           />
@@ -78,15 +79,7 @@ function App() {
             path="/findings"
             element={
               <ProtectedRoute>
-                <ComingSoon title="Security Findings" subtitle="Detection engine integration will appear here." />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/findings/:id"
-            element={
-              <ProtectedRoute>
-                <ComingSoon title="Finding Detail" subtitle="Finding details will appear here in the next phase." />
+                <LatestFindings />
               </ProtectedRoute>
             }
           />
@@ -94,23 +87,7 @@ function App() {
             path="/reports"
             element={
               <ProtectedRoute>
-                <ComingSoon title="Reports" subtitle="Report generation is planned for the next development phase." />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reports/:id"
-            element={
-              <ProtectedRoute>
-                <ComingSoon title="Report Detail" subtitle="Security reporting details will appear here later." />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <ComingSoon title="Settings" subtitle="System preferences will be surfaced here when the platform evolves." />
+                <Reports />
               </ProtectedRoute>
             }
           />

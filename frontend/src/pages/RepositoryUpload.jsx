@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, FolderGit2, Search, ShieldCheck } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AlertTriangle, CheckCircle2, ExternalLink, FolderGit2, Lock, Search } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import FileUpload from '../components/FileUpload';
 import RepositoryTree from '../components/RepositoryTree';
 import { normalizeFileEntry } from '../utils/fileUtils';
 import { validateRepositoryFiles } from '../utils/validation';
+import { authService } from '../services/authService';
 import { repositoryService } from '../services/repositoryService';
 import { useAuth } from '../context/AppContext';
 
@@ -13,14 +14,18 @@ const tabs = ['upload', 'github'];
 
 function RepositoryUpload() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setSelectedRepository } = useAuth();
-  const [activeTab, setActiveTab] = useState('upload');
+  const [activeTab, setActiveTab] = useState(location.pathname.endsWith('/github') ? 'github' : 'upload');
   const [files, setFiles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [extensionFilter, setExtensionFilter] = useState('all');
   const [githubRepos, setGithubRepos] = useState([]);
   const [selectedGithubRepo, setSelectedGithubRepo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [githubError, setGithubError] = useState('');
+  const [installUrl, setInstallUrl] = useState(null);
+  const [githubLoaded, setGithubLoaded] = useState(false);
 
   const normalizedFiles = useMemo(() => files.map((file, index) => normalizeFileEntry(file, index)), [files]);
   const validation = useMemo(() => validateRepositoryFiles(normalizedFiles), [normalizedFiles]);
@@ -31,35 +36,37 @@ function RepositoryUpload() {
 
   const handleGithubConnect = async () => {
     setLoading(true);
+    setGithubError('');
     try {
       const repos = await repositoryService.getGitHubRepositories();
       setGithubRepos(repos);
       setActiveTab('github');
+    } catch (error) {
+      setGithubError(error.message);
     } finally {
+      setGithubLoaded(true);
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    authService.health().then((health) => setInstallUrl(health.install_url)).catch(() => setInstallUrl(null));
+    if (location.pathname.endsWith('/github')) {
+      handleGithubConnect();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSelectGithubRepo = async (repo) => {
     setLoading(true);
+    setGithubError('');
     setSelectedGithubRepo(repo);
 
     try {
-      const tree = await repositoryService.getGitHubRepositoryFiles(repo.id);
-      const selected = {
-        id: repo.id,
-        name: repo.name,
-        owner: repo.owner,
-        branch: repo.branch,
-        files: repo.files,
-        totalSize: repo.size * 1024 * 1024,
-        source: 'GitHub',
-        status: 'Ready to scan',
-        tree,
-      };
-
-      setSelectedRepository(selected);
+      setSelectedRepository(await repositoryService.getGitHubRepository(repo));
       navigate('/repositories/review');
+    } catch (error) {
+      setGithubError(error.message);
     } finally {
       setLoading(false);
     }
@@ -229,12 +236,21 @@ function RepositoryUpload() {
           <div className="summary-topline github-block">
             <div>
               <p className="eyebrow">GitHub integration</p>
-              <h3>Connect GitHub Repository</h3>
+              <h3>Your GitHub repositories</h3>
             </div>
-            <button type="button" className="primary-button" onClick={handleGithubConnect} disabled={loading}>
-              <FolderGit2 size={15} /> {loading ? 'Loading...' : 'Connect GitHub'}
-            </button>
+            <div className="header-actions small-gap">
+              {installUrl ? (
+                <a className="secondary-button" href={installUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink size={14} /> Grant repositories
+                </a>
+              ) : null}
+              <button type="button" className="primary-button" onClick={handleGithubConnect} disabled={loading}>
+                <FolderGit2 size={15} /> {loading ? 'Loading...' : 'Refresh'}
+              </button>
+            </div>
           </div>
+
+          {githubError ? <div className="form-error">{githubError}</div> : null}
 
           {githubRepos.length ? (
             <div className="github-grid">
@@ -244,14 +260,20 @@ function RepositoryUpload() {
                     <FolderGit2 size={16} />
                     <strong>{repo.name}</strong>
                   </div>
-                  <p>{repo.owner}</p>
+                  <p>{repo.owner}{repo.description ? ` · ${repo.description}` : ''}</p>
                   <div className="github-meta">
-                    <span>Visibility: {repo.visibility}</span>
+                    <span>{repo.visibility === 'Private' ? <Lock size={11} /> : null} {repo.visibility}</span>
                     <span>Branch: {repo.branch}</span>
+                    <span>{repo.language || 'Unknown language'}</span>
                     <span>Updated: {repo.lastUpdated}</span>
                   </div>
-                  <button type="button" className="secondary-button" onClick={() => handleSelectGithubRepo(repo)}>
-                    Select
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => handleSelectGithubRepo(repo)}
+                    disabled={loading}
+                  >
+                    {loading && selectedGithubRepo?.id === repo.id ? 'Loading…' : 'Select'}
                   </button>
                 </div>
               ))}
@@ -259,8 +281,11 @@ function RepositoryUpload() {
           ) : (
             <div className="empty-state compact">
               <div className="empty-icon">GitHub</div>
-              <h3>No repositories connected yet.</h3>
-              <p>Click the button above to load mock GitHub repositories for the frontend flow.</p>
+              <h3>{githubLoaded ? 'No repositories granted yet.' : 'Loading repositories…'}</h3>
+              <p>
+                CryptoAudit can only read repositories you grant to its GitHub App (read-only access to contents).
+                {installUrl ? ' Use “Grant repositories” to choose them, then refresh.' : ''}
+              </p>
             </div>
           )}
         </div>

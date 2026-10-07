@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { BarChart3, FolderOpen, LogOut, ShieldCheck, Sparkles, UserCircle2 } from 'lucide-react';
+import { BarChart3, FolderOpen, LogOut, ShieldAlert, ShieldCheck, Sparkles, UserCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AppContext';
 
 const navItems = [
   { label: 'Dashboard', to: '/dashboard', icon: Sparkles },
-  { label: 'Repositories', to: '/repositories/upload', icon: FolderOpen },
-  { label: 'Reports', to: '/reports', icon: BarChart3 },
-  { label: 'Settings', to: '/settings', icon: ShieldCheck },
+  { label: 'Repositories', to: '/repositories/github', icon: FolderOpen },
+  { label: 'Findings', to: '/findings', icon: ShieldAlert },
+  { label: 'Scans & Reports', to: '/reports', icon: BarChart3 },
 ];
 
 function Sidebar() {
@@ -34,10 +34,10 @@ function Sidebar() {
 
       <div className="sidebar-footer">
         <div className="profile-card">
-          <UserCircle2 size={18} />
+          {user?.avatar ? <img className="avatar" src={user.avatar} alt="" /> : <UserCircle2 size={18} />}
           <div>
             <strong>{user?.name || 'Developer'}</strong>
-            <small>{user?.email || 'developer@example.com'}</small>
+            <small>{user?.login ? `@${user.login}` : ''}</small>
           </div>
         </div>
         <button type="button" className="logout-button" onClick={logout}>

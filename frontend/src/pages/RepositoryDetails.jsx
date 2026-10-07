@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CircleCheckBig, FolderTree, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CircleCheckBig, FolderTree, ShieldCheck } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import RepositoryTree from '../components/RepositoryTree';
 import { useAuth } from '../context/AppContext';
@@ -8,6 +9,8 @@ import { scanService } from '../services/scanService';
 function RepositoryDetails() {
   const navigate = useNavigate();
   const { selectedRepository, setSelectedRepository } = useAuth();
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState('');
 
   if (!selectedRepository) {
     return (
@@ -20,9 +23,18 @@ function RepositoryDetails() {
     );
   }
 
+  const isGitHub = selectedRepository.source === 'GitHub';
+
   const handleStartScan = async () => {
-    await scanService.prepareScan(selectedRepository);
-    navigate('/scan/preparing');
+    setStarting(true);
+    setError('');
+    try {
+      const { scan_id: scanId } = await scanService.startScan(selectedRepository);
+      navigate(`/scans/${scanId}`);
+    } catch (err) {
+      setError(err.message);
+      setStarting(false);
+    }
   };
 
   return (
@@ -58,15 +70,21 @@ function RepositoryDetails() {
           </div>
           <div>
             <span>Files</span>
-            <strong>{selectedRepository.files || 142}</strong>
+            <strong>{selectedRepository.files ?? 0}</strong>
+          </div>
+          <div>
+            <span>Python files</span>
+            <strong>{selectedRepository.pythonFiles ?? '–'}</strong>
           </div>
           <div>
             <span>Total Size</span>
-            <strong>{selectedRepository.totalSize ? `${(selectedRepository.totalSize / (1024 * 1024)).toFixed(1)} MB` : '4.8 MB'}</strong>
+            <strong>{selectedRepository.totalSize ? `${(selectedRepository.totalSize / (1024 * 1024)).toFixed(1)} MB` : '–'}</strong>
           </div>
           <div>
             <span>Status</span>
-            <strong className="success-text"><CircleCheckBig size={14} /> Ready for scanning</strong>
+            <strong className={isGitHub ? 'success-text' : ''}>
+              {isGitHub ? <><CircleCheckBig size={14} /> Ready for scanning</> : 'Review only'}
+            </strong>
           </div>
         </div>
       </div>
@@ -80,9 +98,26 @@ function RepositoryDetails() {
         <RepositoryTree tree={selectedRepository.tree || { name: selectedRepository.name, type: 'folder', children: [] }} />
       </div>
 
+      {!isGitHub ? (
+        <div className="alert-box warning">
+          <AlertTriangle size={15} />
+          <div>
+            <strong>Scanning needs a GitHub repository.</strong>
+            <p>Local uploads can be reviewed here, but scans fetch code from GitHub so results are tied to a commit.</p>
+          </div>
+        </div>
+      ) : null}
+      {selectedRepository.truncated ? (
+        <p className="subtitle">The file tree is truncated for display; the scan still reads every Python file (within limits).</p>
+      ) : null}
+      {error ? <div className="form-error">{error}</div> : null}
+
       <div className="footer-actions">
-        <button type="button" className="primary-button" onClick={handleStartScan}>
-          <ShieldCheck size={16} /> Start Security Scan
+        <span className="subtitle">
+          Runs CR1–CR5 analysis, generates S1–S4 repair candidates and validates them. Your code is never executed.
+        </span>
+        <button type="button" className="primary-button" onClick={handleStartScan} disabled={!isGitHub || starting}>
+          <ShieldCheck size={16} /> {starting ? 'Starting…' : 'Start Security Scan'}
         </button>
       </div>
     </DashboardLayout>
