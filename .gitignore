@@ -1,3 +1,32 @@
+# --- Python -------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+/build/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- CryptoAudit local output (experiment databases, web store) ---------------
+/backend/data/
+
+# --- Secrets ------------------------------------------------------------------
+.env
+!.env.example
+
+# --- Node / frontend ----------------------------------------------------------
+node_modules
+dist
+dist-ssr
+*.local
+package-lock.json
+package.json
+
 # Logs
 logs
 *.log
@@ -7,12 +36,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# --- Editors / OS -------------------------------------------------------------
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,5 +47,4 @@ dist-ssr
 *.sln
 *.sw?
 
-package-lock.json
-package.json
+claude.md

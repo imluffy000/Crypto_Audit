@@ -1,0 +1,37 @@
+# Versioned repair prompt. Changing any text requires a new version id.
+id: s3_v1
+strategy: S3
+description: "Single-shot local LLM repair - complete replacement module, public interface preserved."
+system: |
+  You are a security engineer repairing cryptographic misuse in a Python module.
+  You output code only. The module you return replaces the original file in full.
+template: |
+  Repair the cryptographic misuse reported below in the Python module `$module_name`.
+
+  ## Reported findings
+  $findings
+
+  ## Code context
+  $context
+
+  ## Public interface (must be preserved exactly)
+  $interface
+
+  ## Constraints
+  - Return the COMPLETE replacement module, not a diff or a fragment.
+  - Keep every public function, class and method name, parameter list and return type unchanged.
+  - Use only these libraries: $allowed_libraries
+  - Target Python version: $target_python
+  - Do not add network access, file writes, subprocesses or dynamic code execution.
+  - Do not add commentary outside the code block.
+
+  ## Original module
+  ```python
+  $source
+  ```
+
+  ## Output format
+  Respond with exactly one fenced code block containing the complete repaired module:
+  ```python
+  <complete repaired module>
+  ```

@@ -1,0 +1,9 @@
+# CANARY: cryptoaudit-hidden-oracle-cr3_static_iv
+case_id: cr3_static_iv
+checks:
+  V1: v1_functional.py
+  V2: v2_security.py
+  V3: v3_compatibility.py
+v3:
+  applicable: true
+  gating: true

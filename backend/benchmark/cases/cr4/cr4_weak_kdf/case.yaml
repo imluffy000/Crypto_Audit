@@ -1,0 +1,7 @@
+case_id: cr4_weak_kdf
+rule_id: CR4
+title: PBKDF2 with static salt and low iterations
+description: Admin passwords use PBKDF2-HMAC-SHA256 with a hardcoded salt and 1,000 iterations.
+module_file: module.py
+target_python: "3.11"
+allowed_libraries: [hashlib, hmac, secrets, os, base64, binascii]

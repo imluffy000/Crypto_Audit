@@ -1,70 +1,72 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { authService } from '../services/authService';
-import { mockUser } from '../data/mockUser';
 
 const AppContext = createContext(null);
-const STORAGE_KEYS = {
-  user: 'criptoaudit-user',
-  repository: 'criptoaudit-repository',
-};
+const REPOSITORY_KEY = 'criptoaudit-repository';
+
+function readStoredRepository() {
+  try {
+    const stored = localStorage.getItem(REPOSITORY_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
 
 export function CryptoAuditProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEYS.user);
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  // The session lives in an HttpOnly cookie; the user is always read from the server.
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [selectedRepository, setSelectedRepository] = useState(readStoredRepository);
 
-  const [selectedRepository, setSelectedRepository] = useState(() => {
-    const storedRepository = localStorage.getItem(STORAGE_KEYS.repository);
-    return storedRepository ? JSON.parse(storedRepository) : null;
-  });
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.user);
+  const refreshUser = useCallback(async () => {
+    try {
+      setUser(await authService.currentUser());
+    } catch {
+      setUser(null);
+    } finally {
+      setAuthLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    if (selectedRepository) {
-      localStorage.setItem(STORAGE_KEYS.repository, JSON.stringify(selectedRepository));
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.repository);
+    let active = true;
+    authService
+      .currentUser()
+      .then((profile) => active && setUser(profile))
+      .catch(() => active && setUser(null))
+      .finally(() => active && setAuthLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (selectedRepository) {
+        localStorage.setItem(REPOSITORY_KEY, JSON.stringify(selectedRepository));
+      } else {
+        localStorage.removeItem(REPOSITORY_KEY);
+      }
+    } catch {
+      // storage unavailable (private mode): selection simply is not remembered
     }
   }, [selectedRepository]);
 
-  const loginWithGithub = async () => {
-    const response = await authService.loginWithGithub();
-    setUser(response);
-    return response;
-  };
+  const loginWithGithub = useCallback(() => authService.loginWithGithub(), []);
 
-  const loginWithEmail = async ({ email, password }) => {
-    const response = await authService.loginWithEmail({ email, password });
-    setUser(response);
-    return response;
-  };
-
-  const logout = async () => {
-    await authService.logout();
-    setUser(null);
-    setSelectedRepository(null);
-  };
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+      setSelectedRepository(null);
+    }
+  }, []);
 
   const value = useMemo(
-    () => ({
-      user,
-      setUser,
-      selectedRepository,
-      setSelectedRepository,
-      loginWithGithub,
-      loginWithEmail,
-      logout,
-      mockUser,
-    }),
-    [user, selectedRepository],
+    () => ({ user, authLoading, refreshUser, selectedRepository, setSelectedRepository, loginWithGithub, logout }),
+    [user, authLoading, refreshUser, selectedRepository, loginWithGithub, logout],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

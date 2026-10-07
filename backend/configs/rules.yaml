@@ -1,0 +1,106 @@
+# CryptoAudit rule configuration: one entry per rule (CR1-CR5).
+rules:
+
+  - rule_id: CR1
+    name: Weak Hashing for Stored Credentials
+    category: WEAK_HASH_CREDENTIALS
+    severity: HIGH
+    description: Detects weak hash functions (MD5, SHA1) used for hashing passwords or stored credentials.
+    rule_version: 1.0.0
+
+    targeted_apis:
+      - hashlib.md5
+      - hashlib.sha1
+
+    weak_algorithms:
+      - md5
+      - sha1
+
+    context_keywords:
+      - password
+      - passwd
+      - pwd
+      - secret
+      - credential
+      - cred
+      - auth
+      - login
+      - user_pass
+      - db_password
+      - hash_password
+
+    remediation: Use password-specific hashing algorithms with built-in salting and work factor (key derivation), such as Argon2id (argon2-cffi), bcrypt, or PBKDF2 with HMAC-SHA256 and at least 600,000 iterations.
+
+  - rule_id: CR2
+    name: Weak or Unauthenticated Encryption Mode
+    category: WEAK_OR_UNAUTHENTICATED_ENCRYPTION
+    severity: HIGH
+    description: Detects Electronic Codebook (ECB) mode encryption which lacks confidentiality and patterns protection.
+    rule_version: 1.0.0
+
+    targeted_apis:
+      - AES.new
+      - Crypto.Cipher.AES.new
+      - cryptography.hazmat.primitives.ciphers.modes.ECB
+      - modes.ECB
+
+    remediation: Use an authenticated encryption mode such as AES-GCM or ChaCha20-Poly1305 which provides both confidentiality and data integrity authentication.
+
+  - rule_id: CR3
+    name: Static or Reused IV / Nonce
+    category: STATIC_OR_REUSED_IV_NONCE
+    severity: HIGH
+    description: Detects static or hardcoded Initialization Vectors (IVs) or nonces in symmetric encryption.
+    rule_version: 1.0.0
+
+    targeted_apis:
+      - AES.new
+      - Cipher
+
+    remediation: Generate a fresh, unpredictable, cryptographically secure IV or nonce for every encryption operation using os.urandom() or secrets.token_bytes().
+
+  - rule_id: CR4
+    name: Weak KDF Parameters or Static Salt
+    category: WEAK_KDF_PARAMETERS_OR_STATIC_SALT
+    severity: HIGH
+    description: Detects weak key derivation function (KDF) configurations, hardcoded static salts, or direct fast hash key derivation.
+    rule_version: 1.0.0
+
+    min_iterations: 600000
+
+    targeted_apis:
+      - hashlib.pbkdf2_hmac
+      - PBKDF2HMAC
+      - hashlib.md5
+      - hashlib.sha256
+
+    remediation: Use PBKDF2-HMAC-SHA256 with at least 600,000 iterations or Argon2id with a unique, cryptographically random salt (os.urandom(16)) per password derivation.
+
+  - rule_id: CR5
+    name: Weak Randomness for Security-Sensitive Tokens
+    category: WEAK_RANDOMNESS_SECURITY_TOKENS
+    severity: HIGH
+    description: Detects standard pseudo-random number generators (random module) used for generating security-sensitive tokens or secrets.
+    rule_version: 1.0.0
+
+    targeted_apis:
+      - random.random
+      - random.randint
+      - random.randrange
+      - random.choice
+      - random.choices
+      - random.sample
+      - random.getrandbits
+
+    context_keywords:
+      - token
+      - session
+      - secret
+      - api_key
+      - auth
+      - password_reset
+      - reset_code
+      - security_code
+      - verification_code
+
+    remediation: Use cryptographically secure random number generators such as Python's secrets module (secrets.token_hex, secrets.token_bytes, secrets.choice) or os.urandom().

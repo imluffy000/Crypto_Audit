@@ -1,0 +1,23 @@
+{
+  "_canary": "CANARY: cryptoaudit-hidden-oracle-cr2_ecb_records",
+  "description": "Ciphertexts persisted by the original implementation.",
+  "key": "6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c",
+  "records": [
+    {
+      "plaintext": "",
+      "ciphertext": "176c6e1fc61e972dbc392919797e922f"
+    },
+    {
+      "plaintext": "637573746f6d65723a616c696365",
+      "ciphertext": "b852277f21eda292fdff2d768be8ba8a"
+    },
+    {
+      "plaintext": "4141414141414141414141414141414141414141414141414141414141414141",
+      "ciphertext": "bb2789c377c332e736b07ef129f8e656bb2789c377c332e736b07ef129f8e656176c6e1fc61e972dbc392919797e922f"
+    },
+    {
+      "plaintext": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60616263",
+      "ciphertext": "a074012b98ceee88e66a73db55f63473b0eddeade03dc06cefc474f32158b5654cc6d8a693167e19cda878855e76f7049ec030cfa649ad27f1127b7aa0f8ec5571a778640f28ff9af6ed6ff5a823a41b037cf3374546eb3e30c1fdb26b27e6dee05b48ff953cf4439a3d18a97f90bc5d"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cryptoaudit"
+version = "0.1.0"
+description = "Python-focused cryptographic misuse analysis framework"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic==2.13.5",
+    "pydantic-settings==2.15.0",
+    "PyYAML==6.0.2",
+    "typer==0.27.2",
+    "rich==13.9.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "cryptography==50.0.2",
+    "fastapi==0.142.2",
+    "httpx==0.28.1",
+]
+# Libraries the benchmark programs and their hidden oracles import (also installed in the sandbox image).
+benchmark = [
+    "cryptography==50.0.2",
+]
+# Website backend: REST API, GitHub App sign-in and repository fetching.
+web = [
+    "fastapi==0.142.2",
+    "uvicorn==0.54.0",
+    "httpx==0.28.1",
+    "cryptography==50.0.2",
+]
+# External baseline scanners used for S1 hints and V0 re-scans. Semgrep is run as a separate
+# CLI and pins an old OpenTelemetry, so install it as an isolated tool:
+#   uv tool install semgrep==1.163.0   (or: pipx install semgrep==1.163.0)
+scanners = [
+    "bandit==1.9.4",
+]
+
+[project.scripts]
+cryptoaudit = "cryptoaudit.cli.main:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cryptoaudit"]

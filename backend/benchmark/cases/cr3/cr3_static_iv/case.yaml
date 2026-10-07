@@ -1,0 +1,7 @@
+case_id: cr3_static_iv
+rule_id: CR3
+title: Static IV in AES-CBC
+description: Session payloads are encrypted with AES-CBC using a hardcoded IV.
+module_file: module.py
+target_python: "3.11"
+allowed_libraries: [cryptography, os, secrets, hmac, hashlib]

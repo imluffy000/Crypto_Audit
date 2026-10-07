@@ -1,29 +1,28 @@
-import { mockUser } from '../data/mockUser';
+import { api } from './api';
 
-const delay = (ms = 600) => new Promise((resolve) => setTimeout(resolve, ms));
+function toUser(profile) {
+  return {
+    id: profile.id,
+    login: profile.login,
+    name: profile.name || profile.login,
+    email: profile.email || `@${profile.login}`,
+    avatar: profile.avatar_url,
+    provider: 'github',
+  };
+}
 
 export const authService = {
-  loginWithGithub: async () => {
-    await delay();
-    return { ...mockUser, provider: 'github' };
+  // Full-page redirect: GitHub sign-in is handled by the backend, which sets an HttpOnly session cookie.
+  loginWithGithub: () => {
+    window.location.assign(api.url('/auth/github/login'));
   },
 
-  loginWithEmail: async ({ email, password }) => {
-    await delay();
-
-    if (!email || !password) {
-      throw new Error('Email and password are required');
-    }
-
-    return {
-      ...mockUser,
-      email,
-      provider: 'email',
-    };
-  },
+  currentUser: async () => toUser(await api.get('/auth/me')),
 
   logout: async () => {
-    await delay(200);
+    await api.post('/auth/logout');
     return true;
   },
+
+  health: () => api.get('/health'),
 };

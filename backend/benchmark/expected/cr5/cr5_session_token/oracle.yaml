@@ -1,0 +1,8 @@
+# CANARY: cryptoaudit-hidden-oracle-cr5_session_token
+case_id: cr5_session_token
+checks:
+  V1: v1_functional.py
+  V2: v2_security.py
+v3:
+  applicable: false
+  gating: false
