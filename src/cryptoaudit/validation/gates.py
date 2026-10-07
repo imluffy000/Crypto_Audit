@@ -64,6 +64,9 @@ class OracleGate:
         if check_file is None:
             if static_failed:
                 return result(GateStatus.FAIL, "Static checks failed; no executable oracle available")
+            if checks:
+                passed = ", ".join(c.name for c in checks)
+                return result(GateStatus.NOT_RUN, f"Static checks passed ({passed}); no executable oracle for this gate")
             return result(GateStatus.NOT_RUN, "No oracle checks available for this gate")
 
         run = self.sandbox.run_checks(candidate.code or "", check_file, artifacts_dir)

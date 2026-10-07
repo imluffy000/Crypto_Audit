@@ -5,6 +5,7 @@ import typer
 from rich.console import Console
 
 from cryptoaudit.analyzer.engine import AnalyzerEngine
+from cryptoaudit.cli.pipeline_commands import register as register_pipeline_commands
 from cryptoaudit.reporting.findings import format_json_report, render_console_report
 
 app = typer.Typer(
@@ -51,6 +52,9 @@ def analyze(
     except Exception as exc:
         console.print(f"[bold red]Error analyzing file {python_file}: {exc}[/bold red]")
         raise typer.Exit(code=1)
+
+
+register_pipeline_commands(app)
 
 
 if __name__ == "__main__":
