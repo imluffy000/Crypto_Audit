@@ -1,0 +1,494 @@
+/*
+ * Signed-out pages (sign-in). Editorial layout with its own palette, scoped to .auth-page so the
+ * signed-in app keeps its tokens. Shared components (alerts, focus ring, links) pick these up
+ * through the overridden variables.
+ *
+ *   Background #F3F6F2   Card #FFFFFF       Cream   #FEF7E5   Border  #D9E2DC
+ *   Primary    #0F766E   Secondary #14B8A6  Accent  #D9F99D
+ *   Text       #17201D   Secondary text #66736D
+ *   Warning    #D99A28   Danger #DC4C4C     Success #269A6B
+ *
+ * Contrast: white on #0F766E is 5.5:1, #0F766E on the background 5.0:1, #66736D on the
+ * background 4.5:1. #14B8A6 and #D9F99D are only used as fills, never for text.
+ */
+.auth-page {
+  --auth-bg: #f3f6f2;
+  --auth-card: #ffffff;
+  --auth-cream: #fef7e5;
+  --auth-primary: #0f766e;
+  --auth-primary-hover: #0b5d56;
+  --auth-secondary: #14b8a6;
+  --auth-accent: #d9f99d;
+  --auth-text: #17201d;
+  --auth-text-2: #66736d;
+  --auth-border: #d9e2dc;
+  --auth-warning: #d99a28;
+  --auth-danger: #dc4c4c;
+  --auth-success: #269a6b;
+
+  /* Map onto the shared tokens used by Alert, links and the focus ring. */
+  --bg: var(--auth-bg);
+  --surface: var(--auth-card);
+  --surface-2: var(--auth-cream);
+  --border: var(--auth-border);
+  --text: var(--auth-text);
+  --text-2: var(--auth-text-2);
+  --text-3: var(--auth-text-2);
+  --accent: var(--auth-primary);
+  --accent-hover: var(--auth-primary-hover);
+  --accent-text: var(--auth-text);
+  --warning: #9a6a12; /* icon/text tone of the warning colour, darkened for 4.5:1 */
+  --danger: #b93a3a;
+  --success: var(--auth-success);
+  --focus-ring: 0 0 0 2px var(--auth-bg), 0 0 0 4px var(--auth-primary);
+
+  --page-gutter: clamp(16px, 4vw, 56px);
+  --page-pad: clamp(16px, 4vh, 40px);
+
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--auth-bg);
+  color: var(--auth-text);
+  font-family: 'Inter', var(--font-sans);
+}
+
+/* ---------- Single-screen layout ---------- */
+.auth-main {
+  width: 100%;
+  max-width: 1360px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--page-pad) var(--page-gutter);
+  display: grid;
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 24px;
+  align-items: center;
+}
+
+.auth-hero {
+  grid-column: 1 / span 5;
+}
+
+/* The artwork fills the viewport height, so the page never needs to scroll. */
+.auth-visual {
+  grid-column: 7 / span 6;
+  width: 100%;
+  height: calc(100dvh - 2 * var(--page-pad));
+  max-height: 780px;
+  aspect-ratio: auto;
+}
+
+/* ---------- Sign-in card ---------- */
+.auth-card-head {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.auth-card-title {
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--auth-text);
+}
+
+.auth-card-lead {
+  color: var(--auth-text-2);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.auth-card {
+  display: grid;
+  gap: 16px;
+  max-width: 460px;
+  padding: 32px;
+  background: var(--auth-card);
+  border: 1px solid var(--auth-border);
+  border-radius: 24px;
+  animation: auth-rise 600ms var(--ease) both 120ms;
+}
+
+.github-auth-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  height: 54px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--auth-primary);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  transition: background-color var(--duration) var(--ease), transform var(--duration) var(--ease);
+}
+
+.github-auth-button:hover:not(:disabled) {
+  background: var(--auth-primary-hover);
+  transform: translateY(-1px);
+}
+
+.github-auth-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.github-auth-button:focus-visible {
+  border-radius: 14px;
+}
+
+.github-auth-button:disabled {
+  opacity: 0.6;
+}
+
+.auth-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--auth-text-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.auth-trust svg {
+  color: var(--auth-primary);
+}
+
+.auth-card-footer {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--auth-border);
+  text-align: center;
+}
+
+.auth-card-footer .link-button {
+  font-size: 0.875rem;
+}
+
+.auth-scope {
+  color: var(--auth-text-2);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* ---------- Abstract graphic ---------- */
+.crypto-graphic {
+  position: relative;
+  aspect-ratio: 560 / 620;
+  overflow: hidden;
+  border-radius: 48px;
+  background: #e8efe9;
+  isolation: isolate;
+}
+
+.crypto-graphic-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+.art-hex {
+  fill: #ffffff;
+  fill-opacity: 0.16;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  letter-spacing: 0.12em;
+}
+
+.art-scan {
+  transform-box: view-box;
+  transform-origin: 214px 262px;
+  animation: auth-spin 18s linear infinite;
+}
+
+.art-blob {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: auth-breathe 14s ease-in-out infinite alternate;
+}
+
+.crypto-graphic.is-compact .art-secondary {
+  display: none;
+}
+
+/* Product-UI fragments */
+.status-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--auth-card, #ffffff);
+  border: 1px solid var(--auth-border, #d9e2dc);
+  border-radius: 18px;
+  box-shadow: 0 10px 24px -14px rgba(23, 32, 29, 0.28);
+  color: var(--auth-text, #17201d);
+  font-size: 0.8125rem;
+}
+
+.status-card-eyebrow {
+  color: var(--auth-text-2, #66736d);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status-card-title {
+  font-size: 1.0625rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.status-card-detail {
+  color: var(--auth-text-2, #66736d);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+.status-card-rows {
+  display: grid;
+  gap: 2px;
+  margin: 2px 0 4px;
+}
+
+.status-card-rows div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.status-card-rows dd {
+  order: -1;
+  margin: 0;
+  min-width: 2.2em;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-card-rows dt {
+  color: var(--auth-text-2, #66736d);
+}
+
+.status-card-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--auth-border, #d9e2dc);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.status-card-caption {
+  color: var(--auth-text-2, #66736d);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status-card-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-card-status.tone-success .status-card-state svg,
+.status-card-status.tone-live .status-dot {
+  color: var(--auth-success, #269a6b);
+}
+
+.status-card-status.tone-warning .status-card-state svg {
+  color: var(--auth-warning, #d99a28);
+}
+
+.status-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+  animation: auth-ping 2.4s var(--ease) infinite;
+}
+
+.graphic-card {
+  position: absolute;
+  animation: auth-rise 700ms var(--ease) both, auth-float 7s ease-in-out infinite alternate;
+}
+
+.card-algorithm {
+  top: 8%;
+  left: 7%;
+  width: min(44%, 210px);
+  animation-delay: 250ms, 0s;
+}
+
+.card-scan {
+  top: 37%;
+  right: 7%;
+  width: min(54%, 250px);
+  animation-delay: 400ms, -2.5s;
+}
+
+.card-warning {
+  bottom: 7%;
+  left: 7%;
+  width: min(52%, 248px);
+  animation-delay: 550ms, -5s;
+}
+
+/* ---------- Motion ---------- */
+@keyframes auth-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auth-float {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -4px;
+  }
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes auth-breathe {
+  to {
+    transform: scale(1.03) rotate(2deg);
+  }
+}
+
+@keyframes auth-ping {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.6);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-card,
+  .graphic-card,
+  .art-scan,
+  .art-blob,
+  .status-dot::after {
+    animation: none !important;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1180px) {
+  .auth-hero {
+    grid-column: 1 / span 6;
+  }
+
+  .auth-visual {
+    grid-column: 7 / span 6;
+  }
+
+  .card-scan {
+    width: min(62%, 250px);
+  }
+
+  .card-warning {
+    width: min(64%, 248px);
+  }
+}
+
+/* Stacked: the card at its natural height, the artwork takes whatever height is left. */
+@media (max-width: 900px) {
+  .auth-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    width: 100%;
+    max-width: 560px;
+    height: calc(100dvh - 2 * var(--page-pad));
+    margin: 0 auto;
+  }
+
+  .auth-card {
+    max-width: none;
+  }
+
+  .auth-visual {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    border-radius: 32px;
+  }
+
+  .auth-visual .art-secondary,
+  .auth-visual .card-algorithm,
+  .auth-visual .card-warning {
+    display: none;
+  }
+
+  .auth-visual .card-scan {
+    top: auto;
+    right: 6%;
+    bottom: 8%;
+    width: min(70%, 250px);
+  }
+}
+
+/* Too short for the artwork next to the card: show the card alone. */
+@media (max-width: 900px) and (max-height: 680px) {
+  .auth-visual {
+    display: none;
+  }
+
+  .auth-grid {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    padding: 20px;
+    border-radius: 20px;
+  }
+}
