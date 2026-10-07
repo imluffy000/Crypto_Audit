@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 from cryptoaudit.cli.main import app
 
 runner = CliRunner()
-CR5 = Path("benchmark/cases/cr5_session_token/public/module.py")
+CR5 = Path("benchmark/cases/cr5/cr5_session_token/module.py")
 
 
 @pytest.fixture(autouse=True)

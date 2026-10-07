@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class CaseSpec(BaseModel):
-    """Public metadata from public/case.yaml."""
+    """Public metadata from benchmark/cases/<rule>/<case_id>/case.yaml."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 

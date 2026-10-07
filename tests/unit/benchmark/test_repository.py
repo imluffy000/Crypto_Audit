@@ -59,29 +59,47 @@ def test_v3_applicability_matches_architecture(repo):
 
 def test_path_traversal_is_rejected(repo):
     with pytest.raises(CryptoAuditError):
-        repo.public_case("../cases/cr1_password_md5")
+        repo.public_case("../cases/cr1/cr1_password_md5")
     with pytest.raises(CryptoAuditError):
         repo.public_case("does_not_exist")
 
 
-def test_public_case_ignores_hidden_directory(tmp_path):
-    case = tmp_path / "c1" / "public"
+def _write_case(root, rule="cr5", case_id="c1", rule_id="CR5", extra=""):
+    case = root / "cases" / rule / case_id
     case.mkdir(parents=True)
-    (case / "case.yaml").write_text("case_id: c1\nrule_id: CR5\ntitle: t\n", encoding="utf-8")
+    (case / "case.yaml").write_text(f"case_id: {case_id}\nrule_id: {rule_id}\ntitle: t\n{extra}", encoding="utf-8")
     (case / "module.py").write_text("x = 1\n", encoding="utf-8")
-    hidden = tmp_path / "c1" / "hidden"
-    hidden.mkdir()
-    (hidden / "secret.py").write_text("SECRET = 1\n", encoding="utf-8")
+    return case
+
+
+def test_public_case_never_reads_expected_or_artifacts(tmp_path):
+    _write_case(tmp_path)
+    for role in ("expected", "artifacts"):
+        hidden = tmp_path / role / "cr5" / "c1"
+        hidden.mkdir(parents=True)
+        (hidden / "secret.py").write_text("SECRET = 1\n", encoding="utf-8")
     loaded = BenchmarkRepository(tmp_path).public_case("c1")
     assert "SECRET" not in loaded.model_dump_json()
 
 
-def test_module_file_cannot_escape_public_dir(tmp_path):
-    case = tmp_path / "c1" / "public"
-    case.mkdir(parents=True)
-    (case / "case.yaml").write_text("case_id: c1\nrule_id: CR5\ntitle: t\nmodule_file: ../hidden/v1.py\n", encoding="utf-8")
+def test_module_file_cannot_escape_case_dir(tmp_path):
+    _write_case(tmp_path, extra="module_file: ../../../expected/cr5/c1/v1_functional.py\n")
     with pytest.raises(CryptoAuditError):
         BenchmarkRepository(tmp_path).public_case("c1")
+
+
+def test_case_must_be_filed_under_its_rule(tmp_path):
+    _write_case(tmp_path, rule="cr1", rule_id="CR5")
+    with pytest.raises(CryptoAuditError, match="filed under cr1"):
+        BenchmarkRepository(tmp_path).public_case("c1")
+
+
+def test_layout_mirrors_rule_groups(repo):
+    root = repo.root
+    for case_id in EXPECTED_CASES:
+        rule = repo.rule_group(case_id)
+        assert rule == case_id.split("_")[0]
+        assert (root / "expected" / rule / case_id / "oracle.yaml").is_file()
 
 
 # Packages on the generation/public side: none may import validation (which owns hidden oracles).

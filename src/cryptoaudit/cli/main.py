@@ -114,10 +114,10 @@ def repair(
 
 
 @bench_app.command("list")
-def bench_list(cases_dir: Optional[Path] = typer.Option(None, "--cases-dir")) -> None:
+def bench_list(benchmark_dir: Optional[Path] = typer.Option(None, "--benchmark-dir")) -> None:
     """List benchmark cases (public metadata only)."""
     try:
-        repo = BenchmarkRepository(cases_dir or Settings().benchmark_dir)
+        repo = BenchmarkRepository(benchmark_dir or Settings().benchmark_dir)
     except CryptoAuditError as exc:
         _fail(exc)
         return
@@ -132,7 +132,7 @@ def bench_list(cases_dir: Optional[Path] = typer.Option(None, "--cases-dir")) ->
 def bench_run(
     strategies: List[str] = STRATEGIES_OPTION,
     cases: List[str] = typer.Option([], "--case", "-c", help="Case id to run (repeatable); default all."),
-    cases_dir: Optional[Path] = typer.Option(None, "--cases-dir"),
+    benchmark_dir: Optional[Path] = typer.Option(None, "--benchmark-dir"),
     db: Optional[Path] = typer.Option(None, "--db", help="Experiment database path."),
     sandbox: Optional[str] = SANDBOX_OPTION,
     unsafe_local_sandbox: bool = UNSAFE_OPTION,
@@ -140,7 +140,7 @@ def bench_run(
     """Run the benchmark and append the results to the experiment database."""
     settings = Settings()
     try:
-        repo = BenchmarkRepository(cases_dir or settings.benchmark_dir)
+        repo = BenchmarkRepository(benchmark_dir or settings.benchmark_dir)
         store = open_store(settings, db)
         box = build_sandbox(settings, sandbox, unsafe_local_sandbox)
         pipeline = build_pipeline(settings, parse_strategy_ids(strategies), box, store)

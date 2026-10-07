@@ -3,7 +3,7 @@ case_id: cr2_ecb_records
 checks:
   V1: v1_functional.py
   V2: v2_security.py
-  V3: v3_compat.py
+  V3: v3_compatibility.py
 v3:
   applicable: true
   gating: true

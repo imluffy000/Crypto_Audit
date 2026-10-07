@@ -1,7 +1,7 @@
 """Ingestion of benchmark cases. Public views only: never reads expected outcomes or hidden artifacts."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import yaml
 
@@ -9,48 +9,65 @@ from cryptoaudit.models.benchmark import CaseSpec, PublicCase
 from cryptoaudit.models.scan import ModuleInput
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
-PUBLIC_DIR = "public"
-HIDDEN_DIR = "hidden"
-REPO_BENCHMARK_DIR = Path(__file__).resolve().parents[3] / "benchmark" / "cases"
+# benchmark/<role>/<rule>/<case_id>/ - only CASES_DIR is visible to the repair side.
+CASES_DIR = "cases"
+EXPECTED_DIR = "expected"
+ARTIFACTS_DIR = "artifacts"
+RESULTS_DIR = "results"
+REPO_BENCHMARK_DIR = Path(__file__).resolve().parents[3] / "benchmark"
 
 
-def resolve_benchmark_dir(cases_dir: Optional[Path] = None) -> Path:
-    if cases_dir is not None:
-        return Path(cases_dir)
-    return REPO_BENCHMARK_DIR
+def resolve_benchmark_dir(benchmark_dir: Optional[Path] = None) -> Path:
+    return Path(benchmark_dir) if benchmark_dir is not None else REPO_BENCHMARK_DIR
 
 
 class BenchmarkRepository:
-    def __init__(self, cases_dir: Optional[Path] = None) -> None:
-        self.cases_dir = resolve_benchmark_dir(cases_dir)
-        if not self.cases_dir.is_dir():
-            raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"Benchmark directory not found: {self.cases_dir}")
+    """Discovers cases under benchmark/cases/<rule>/<case_id>/ (module + case.yaml)."""
+
+    def __init__(self, benchmark_dir: Optional[Path] = None) -> None:
+        self.root = resolve_benchmark_dir(benchmark_dir)
+        self.cases_root = self.root / CASES_DIR
+        if not self.cases_root.is_dir():
+            raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"Benchmark cases directory not found: {self.cases_root}")
+
+    def _index(self) -> Dict[str, Path]:
+        return {
+            path.parent.name: path.parent
+            for path in sorted(self.cases_root.glob("*/*/case.yaml"))
+        }
 
     def case_ids(self) -> List[str]:
-        return sorted(p.name for p in self.cases_dir.iterdir() if (p / PUBLIC_DIR / "case.yaml").is_file())
+        return sorted(self._index())
 
     def case_dir(self, case_id: str) -> Path:
-        path = (self.cases_dir / case_id).resolve()
-        if path.parent != self.cases_dir.resolve() or not (path / PUBLIC_DIR / "case.yaml").is_file():
+        path = self._index().get(case_id)
+        if path is None:
             raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"Unknown benchmark case: {case_id}")
         return path
 
+    def rule_group(self, case_id: str) -> str:
+        """The <rule> directory a case lives in (e.g. 'cr1'); mirrored under expected/ and artifacts/."""
+        return self.case_dir(case_id).parent.name
+
     def public_case(self, case_id: str) -> PublicCase:
-        public = self.case_dir(case_id) / PUBLIC_DIR
-        data = yaml.safe_load((public / "case.yaml").read_text(encoding="utf-8"))
+        case_dir = self.case_dir(case_id)
+        data = yaml.safe_load((case_dir / "case.yaml").read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"Invalid case.yaml for {case_id}")
         spec = CaseSpec(**data)
         if spec.case_id != case_id:
             raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"case.yaml id {spec.case_id!r} != directory {case_id!r}")
-        module_path = (public / spec.module_file).resolve()
-        if module_path.parent != public.resolve() or not module_path.is_file():
-            raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"Module file must live in public/: {spec.module_file}")
+        if spec.rule_id.lower() != case_dir.parent.name:
+            raise CryptoAuditError(
+                ErrorCode.INVALID_INPUT, f"Case {case_id} is filed under {case_dir.parent.name}/ but targets {spec.rule_id}"
+            )
+        module_path = (case_dir / spec.module_file).resolve()
+        if module_path.parent != case_dir.resolve() or not module_path.is_file():
+            raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"Module file must live in the case directory: {spec.module_file}")
         return PublicCase(spec=spec, source=module_path.read_text(encoding="utf-8"))
 
     def public_module_path(self, case_id: str) -> Path:
-        case = self.public_case(case_id)
-        return self.case_dir(case_id) / PUBLIC_DIR / case.spec.module_file
+        return self.case_dir(case_id) / self.public_case(case_id).spec.module_file
 
 
 def from_public_case(case: PublicCase) -> ModuleInput:
