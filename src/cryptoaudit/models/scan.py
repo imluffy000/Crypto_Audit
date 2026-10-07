@@ -173,3 +173,24 @@ class RepositoryScanResult(BaseModel):
     findings: List[FindingView] = Field(default_factory=list)
     files: List[FileScanResult] = Field(default_factory=list)
     summary: RepositoryScanSummary = Field(default_factory=RepositoryScanSummary)
+
+
+class ScanStatus(str, Enum):
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class ScanRecord(BaseModel):
+    """A website scan job as stored by the web store."""
+
+    scan_id: str
+    repository: str
+    ref: str
+    status: ScanStatus
+    stages: List[StageProgress] = Field(default_factory=list)
+    error: Optional[Dict[str, object]] = None
+    result: Optional[RepositoryScanResult] = None
+    created_at: str
+    updated_at: str
