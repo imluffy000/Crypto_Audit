@@ -46,6 +46,7 @@ export const repositoryService = {
       visibility: repo.private ? 'Private' : 'Public',
       language: repo.language,
       lastUpdated: relativeTime(repo.updated_at),
+      updatedAt: repo.updated_at,
       size: repo.size_kb / 1024,
     }));
   },

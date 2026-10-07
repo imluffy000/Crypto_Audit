@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
-import { FileArchive, FolderPlus, UploadCloud } from 'lucide-react';
+import { FilePlus2, FolderPlus, Upload } from 'lucide-react';
+import Button from './ui/Button';
 
-function FileUpload({ onFilesSelected, label = 'Upload your project' }) {
+function FileUpload({ onFilesSelected, label = 'Drop files or a folder here' }) {
   const inputRef = useRef(null);
   const folderInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -13,12 +14,9 @@ function FileUpload({ onFilesSelected, label = 'Upload your project' }) {
     }
   };
 
-  const openFileDialog = () => inputRef.current?.click();
-  const openFolderDialog = () => folderInputRef.current?.click();
-
   return (
     <div
-      className={`upload-zone ${isDragging ? 'dragging' : ''}`}
+      className={`dropzone ${isDragging ? 'is-dragging' : ''}`}
       onDragOver={(event) => {
         event.preventDefault();
         setIsDragging(true);
@@ -32,27 +30,19 @@ function FileUpload({ onFilesSelected, label = 'Upload your project' }) {
       }}
     >
       <input ref={inputRef} type="file" multiple hidden onChange={handleFiles} />
-      <input
-        ref={folderInputRef}
-        type="file"
-        webkitdirectory=""
-        directory=""
-        multiple
-        hidden
-        onChange={handleFiles}
-      />
+      <input ref={folderInputRef} type="file" webkitdirectory="" directory="" multiple hidden onChange={handleFiles} />
 
-      <UploadCloud size={36} />
-      <h3>{label}</h3>
-      <p>Drag and drop files or a complete folder here</p>
+      <Upload size={22} aria-hidden="true" className="dropzone-icon" />
+      <p className="dropzone-title">{label}</p>
+      <p className="dropzone-hint">Files are read in your browser only. Nothing is uploaded to the server.</p>
 
-      <div className="upload-actions">
-        <button type="button" className="primary-button" onClick={openFileDialog}>
-          <FileArchive size={15} /> Browse Files
-        </button>
-        <button type="button" className="secondary-button" onClick={openFolderDialog}>
-          <FolderPlus size={15} /> Select Folder
-        </button>
+      <div className="dropzone-actions">
+        <Button icon={FilePlus2} onClick={() => inputRef.current?.click()}>
+          Choose files
+        </Button>
+        <Button icon={FolderPlus} onClick={() => folderInputRef.current?.click()}>
+          Choose folder
+        </Button>
       </div>
     </div>
   );

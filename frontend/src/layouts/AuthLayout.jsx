@@ -1,5 +1,5 @@
 function AuthLayout({ children }) {
-  return <div className="auth-shell">{children}</div>;
+  return <main className="auth-shell">{children}</main>;
 }
 
 export default AuthLayout;

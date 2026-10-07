@@ -1,105 +1,79 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, FileText, FolderClosed, FolderOpen } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen } from 'lucide-react';
 import { formatFileSize } from '../utils/fileUtils';
 
-function buildMatches(node, term, extensionFilter) {
-  if (!node) return false;
-
-  const title = (node.name || '').toLowerCase();
-  const searchMatches = !term || title.includes(term.toLowerCase());
-  const extensionMatches = extensionFilter === 'all' || node.fileType === extensionFilter;
-  return searchMatches && extensionMatches;
+// Keep a node if it matches the search/extension filter or if any descendant does.
+function filterTree(node, term, extension) {
+  if (node.type !== 'folder') {
+    const nameOk = !term || node.name.toLowerCase().includes(term);
+    const extOk = extension === 'all' || node.fileType === extension;
+    return nameOk && extOk ? node : null;
+  }
+  const children = (node.children || []).map((child) => filterTree(child, term, extension)).filter(Boolean);
+  const folderNameMatches = term && extension === 'all' && node.name.toLowerCase().includes(term);
+  if (!children.length && !folderNameMatches) return null;
+  return { ...node, children: folderNameMatches && !children.length ? node.children : children };
 }
 
+function sortChildren(children = []) {
+  return [...children].sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === 'folder' ? -1 : 1));
+}
+
+/** File tree with expand/collapse. While searching, every folder on a matching path is opened. */
 function RepositoryTree({ tree, searchQuery = '', extensionFilter = 'all' }) {
-  const [expandedFolders, setExpandedFolders] = useState({ repository: true });
+  const [collapsed, setCollapsed] = useState(() => new Set());
+  const term = searchQuery.trim().toLowerCase();
+  const filtering = Boolean(term) || extensionFilter !== 'all';
 
-  const visibleTree = useMemo(() => {
-    if (!tree) return null;
+  const visible = useMemo(() => (tree ? filterTree(tree, term, extensionFilter) : null), [tree, term, extensionFilter]);
 
-    const walk = (node, parentPath = 'repository') => {
-      if (!node) return null;
-
-      const isFolder = node.type === 'folder';
-      const matches = buildMatches(node, searchQuery, extensionFilter);
-      const childMatches = isFolder
-        ? (node.children || []).some((child) => walk(child, `${parentPath}/${child.name}`) !== null)
-        : false;
-
-      if (!matches && isFolder && !childMatches) {
-        return null;
-      }
-
-      return { ...node, matches, childMatches, parentPath };
-    };
-
-    const rootNode = walk(tree);
-    return rootNode;
-  }, [tree, searchQuery, extensionFilter]);
-
-  if (!visibleTree) {
-    return <p className="empty-tree">No files match the current search or filter.</p>;
+  if (!visible || (visible.type === 'folder' && !visible.children?.length)) {
+    return <p className="tree-empty">{filtering ? 'No files match the current search or filter.' : 'This repository has no files to show.'}</p>;
   }
 
-  const toggleFolder = (name) => {
-    setExpandedFolders((prev) => ({ ...prev, [name]: !prev[name] }));
-  };
+  const toggle = (path) =>
+    setCollapsed((current) => {
+      const next = new Set(current);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
 
-  const renderNode = (node, depth = 0, path = 'repository') => {
+  const renderNode = (node, depth, path) => {
     const isFolder = node.type === 'folder';
-    const isExpanded = expandedFolders[path] ?? true;
+    const open = filtering || !collapsed.has(path);
+    const indent = { paddingLeft: `${depth * 16 + 8}px` };
 
-    if (isFolder && !isExpanded) {
+    if (!isFolder) {
       return (
-        <div key={path} className="tree-node folder-compact" style={{ marginLeft: depth * 14 }}>
-          <button type="button" className="tree-folder-toggle" onClick={() => toggleFolder(path)}>
-            <ChevronRight size={14} />
-            <FolderClosed size={14} />
-            <span>{node.name}</span>
-          </button>
-        </div>
+        <li key={path} role="treeitem" aria-selected={false} className="tree-row tree-file" style={indent}>
+          <FileText size={14} aria-hidden="true" className="tree-icon" />
+          <span className="tree-name mono">{node.name}</span>
+          <span className="tree-meta">{formatFileSize(node.size || 0)}</span>
+        </li>
       );
     }
 
     return (
-      <div key={path}>
-        <div className="tree-node" style={{ marginLeft: depth * 14 }}>
-          {isFolder ? (
-            <button type="button" className="tree-folder-toggle" onClick={() => toggleFolder(path)}>
-              {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              {isExpanded ? <FolderOpen size={14} /> : <FolderClosed size={14} />}
-              <span>{node.name}</span>
-            </button>
-          ) : (
-            <div className="tree-file-row">
-              <span className="file-name"><FileText size={14} /> {node.name}</span>
-              <span className="file-meta">{node.fileType || 'file'}</span>
-              <span className="file-meta">{formatFileSize(node.size || 0)}</span>
-            </div>
-          )}
-        </div>
-
-        {isFolder && isExpanded && Array.isArray(node.children) ? (
-          <div>
-            {node.children
-              .filter((child) => {
-                if (!searchQuery) return true;
-                const query = searchQuery.toLowerCase();
-                if (child.type === 'folder') {
-                  return child.name.toLowerCase().includes(query) || (child.children || []).some((grandchild) =>
-                    grandchild.name.toLowerCase().includes(query)
-                  );
-                }
-                return child.name.toLowerCase().includes(query);
-              })
-              .map((child) => renderNode(child, depth + 1, `${path}/${child.name}`))}
-          </div>
+      <li key={path} role="treeitem" aria-expanded={open} aria-selected={false}>
+        <button type="button" className="tree-row tree-folder" style={indent} onClick={() => toggle(path)} disabled={filtering}>
+          {open ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
+          {open ? <FolderOpen size={14} aria-hidden="true" className="tree-icon" /> : <Folder size={14} aria-hidden="true" className="tree-icon" />}
+          <span className="tree-name mono">{node.name}</span>
+          <span className="tree-meta">{(node.children || []).length}</span>
+        </button>
+        {open ? (
+          <ul role="group">{sortChildren(node.children).map((child) => renderNode(child, depth + 1, `${path}/${child.name}`))}</ul>
         ) : null}
-      </div>
+      </li>
     );
   };
 
-  return <div className="repository-tree">{renderNode(visibleTree, 0, 'repository')}</div>;
+  return (
+    <ul className="repo-tree" role="tree" aria-label="Repository files">
+      {renderNode(visible, 0, visible.name || 'repository')}
+    </ul>
+  );
 }
 
 export default RepositoryTree;

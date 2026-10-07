@@ -1,66 +1,59 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
+import { Columns2, Rows3 } from 'lucide-react';
 import { changedLines } from '../utils/diff';
+import CodeViewer from './code/CodeViewer';
+import DiffViewer from './code/DiffViewer';
+import Tabs, { TabPanel } from './ui/Tabs';
 
-function CodePane({ title, code, marks }) {
-  const lines = (code || '').replace(/\n$/, '').split('\n');
-  return (
-    <div className="code-pane">
-      <div className="code-pane-title">{title}</div>
-      <pre>
-        {lines.map((text, index) => {
-          const number = index + 1;
-          return (
-            <div key={number} className={`code-line ${marks(number)}`}>
-              <span className="line-number">{number}</span>
-              <code>{text || ' '}</code>
-            </div>
-          );
-        })}
-      </pre>
-    </div>
-  );
-}
-
-function CodeCompare({ original, repaired, diff, findingLines = [] }) {
+/** Original vs repaired candidate, side by side (with changed and flagged lines marked) or as a unified diff. */
+function CodeCompare({ original, repaired, diff, path, findingLines = [], findingMarkers = {} }) {
   const [view, setView] = useState('split');
+  const tabsId = useId();
   const { removed, added } = useMemo(() => changedLines(diff), [diff]);
-  const flagged = useMemo(() => new Set(findingLines), [findingLines]);
+
+  const originalMarks = useMemo(() => {
+    const marks = {};
+    findingLines.forEach((line) => {
+      marks[line] = 'flagged';
+    });
+    removed.forEach((line) => {
+      marks[line] = 'removed';
+    });
+    return marks;
+  }, [findingLines, removed]);
+
+  const repairedMarks = useMemo(() => Object.fromEntries([...added].map((line) => [line, 'added'])), [added]);
 
   return (
     <div className="code-compare">
-      <div className="tab-row compact">
-        <button type="button" className={`tab-button ${view === 'split' ? 'active' : ''}`} onClick={() => setView('split')}>
-          Side by side
-        </button>
-        <button type="button" className={`tab-button ${view === 'diff' ? 'active' : ''}`} onClick={() => setView('diff')}>
-          Unified diff
-        </button>
+      <div className="code-compare-toolbar">
+        <Tabs
+          idBase={tabsId}
+          label="Code view"
+          size="sm"
+          value={view}
+          onChange={setView}
+          tabs={[
+            { id: 'split', label: 'Side by side', icon: Columns2 },
+            { id: 'diff', label: 'Unified diff', icon: Rows3 },
+          ]}
+        />
+        <ul className="code-legend" aria-label="Legend">
+          <li><span className="legend-swatch flagged" aria-hidden="true" /> Finding</li>
+          <li><span className="legend-swatch removed" aria-hidden="true" /> Removed</li>
+          <li><span className="legend-swatch added" aria-hidden="true" /> Added</li>
+        </ul>
       </div>
+      <TabPanel idBase={tabsId} id={view}>
       {view === 'split' ? (
         <div className="code-split">
-          <CodePane
-            title="Original"
-            code={original}
-            marks={(n) => [removed.has(n) ? 'removed' : '', flagged.has(n) ? 'flagged' : ''].join(' ')}
-          />
-          {repaired ? (
-            <CodePane title="Repaired candidate" code={repaired} marks={(n) => (added.has(n) ? 'added' : '')} />
-          ) : (
-            <div className="code-pane empty">This strategy produced no code.</div>
-          )}
+          <CodeViewer title="Original" path={path} code={original} marks={originalMarks} markers={findingMarkers} />
+          <CodeViewer title="Repaired candidate" path={path} code={repaired} marks={repairedMarks} emptyMessage="This strategy produced no code for this file." />
         </div>
       ) : (
-        <pre className="unified-diff">
-          {(diff || 'No textual change.').split('\n').map((line, index) => (
-            <div
-              key={index}
-              className={line.startsWith('+') && !line.startsWith('+++') ? 'added' : line.startsWith('-') && !line.startsWith('---') ? 'removed' : ''}
-            >
-              {line || ' '}
-            </div>
-          ))}
-        </pre>
+        <DiffViewer diff={diff} path={path} />
       )}
+      </TabPanel>
     </div>
   );
 }

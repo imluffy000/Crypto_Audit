@@ -1,7 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
-import './App.css';
 import { CryptoAuditProvider } from './context/AppContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ToastProvider from './components/ui/ToastProvider';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import RepositoryUpload from './pages/RepositoryUpload';
@@ -14,6 +14,7 @@ import LatestFindings from './pages/LatestFindings';
 function App() {
   return (
     <CryptoAuditProvider>
+      <ToastProvider>
       <HashRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -94,6 +95,7 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </HashRouter>
+      </ToastProvider>
     </CryptoAuditProvider>
   );
 }

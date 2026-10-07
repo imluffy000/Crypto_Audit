@@ -1,0 +1,153 @@
+/*
+ * CryptoAudit design tokens.
+ * One accent (blue) for interaction; semantic colours carry meaning only:
+ * green = success/verified, amber = warning/unverified, red = critical/failed, blue = info.
+ * Light by default; dark follows the operating system.
+ */
+:root {
+  --font-sans: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 8px;
+
+  --content-max: 1200px;
+  --sidebar-width: 232px;
+  --topbar-height: 56px;
+
+  --duration: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f2f4f7;
+  --surface-3: #e8ebf0;
+  --border: #e0e4ea;
+  --border-strong: #c9d0d9;
+  --text: #14181f;
+  --text-2: #475161;
+  --text-3: #677180;
+  --overlay: rgba(15, 20, 28, 0.45);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.12);
+
+  --accent: #2557d6;
+  --accent-hover: #1d47b3;
+  --accent-subtle: #ebf1fd;
+  --accent-text: #1f4cbf;
+  --on-accent: #ffffff;
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px #2557d6;
+
+  --success: #17784a;
+  --success-subtle: #e7f4ed;
+  --success-border: #b6dcc6;
+  --warning: #8f5300;
+  --warning-subtle: #fdf3e1;
+  --warning-border: #efd29b;
+  --danger: #bf3120;
+  --danger-subtle: #fcedeb;
+  --danger-border: #f0bdb5;
+  --info: #1d65ad;
+  --info-subtle: #e8f1fa;
+  --info-border: #b9d3ec;
+  --neutral-subtle: #eef0f3;
+  --neutral-border: #d9dee5;
+
+  --code-bg: #fbfbfc;
+  --code-gutter: #f4f5f7;
+  --code-line-number: #8a929e;
+  --code-added: #e3f3ea;
+  --code-added-strong: #c4e6d2;
+  --code-removed: #fbe9e6;
+  --code-removed-strong: #f4cbc4;
+  --code-flagged: #fdf1d9;
+  --syn-keyword: #1f4cbf;
+  --syn-string: #0f6a45;
+  --syn-comment: #6e7781;
+  --syn-number: #8f5300;
+  --syn-builtin: #8a3b12;
+  --syn-decorator: #8f5300;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1116;
+    --surface: #151a21;
+    --surface-2: #1a2028;
+    --surface-3: #222933;
+    --border: #262d37;
+    --border-strong: #353d4a;
+    --text: #e6e9ee;
+    --text-2: #aab2be;
+    --text-3: #868f9c;
+    --overlay: rgba(0, 0, 0, 0.6);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.45);
+
+    --accent: #3a6ad9;
+    --accent-hover: #4a7ae6;
+    --accent-subtle: rgba(76, 130, 247, 0.14);
+    --accent-text: #8fb0fa;
+    --on-accent: #ffffff;
+    --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px #6b98f8;
+
+    --success: #4cc38a;
+    --success-subtle: rgba(76, 195, 138, 0.12);
+    --success-border: rgba(76, 195, 138, 0.35);
+    --warning: #e3a842;
+    --warning-subtle: rgba(227, 168, 66, 0.12);
+    --warning-border: rgba(227, 168, 66, 0.35);
+    --danger: #f27a69;
+    --danger-subtle: rgba(242, 122, 105, 0.12);
+    --danger-border: rgba(242, 122, 105, 0.38);
+    --info: #6aaee9;
+    --info-subtle: rgba(106, 174, 233, 0.12);
+    --info-border: rgba(106, 174, 233, 0.35);
+    --neutral-subtle: #20262f;
+    --neutral-border: #353d4a;
+
+    --code-bg: #11151b;
+    --code-gutter: #141920;
+    --code-line-number: #5f6874;
+    --code-added: rgba(76, 195, 138, 0.11);
+    --code-added-strong: rgba(76, 195, 138, 0.26);
+    --code-removed: rgba(242, 122, 105, 0.12);
+    --code-removed-strong: rgba(242, 122, 105, 0.28);
+    --code-flagged: rgba(227, 168, 66, 0.13);
+    --syn-keyword: #8fb0fa;
+    --syn-string: #7fd8b0;
+    --syn-comment: #7a8390;
+    --syn-number: #e3a842;
+    --syn-builtin: #f0a17a;
+    --syn-decorator: #e3a842;
+
+    color-scheme: dark;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration: 0ms;
+  }
+}
