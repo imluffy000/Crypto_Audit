@@ -4,7 +4,7 @@ import time
 from abc import ABC, abstractmethod
 from typing import Any
 
-from cryptoaudit.repair.models import RepairRequest, RepairResult, RepairStatus, StrategyId
+from cryptoaudit.models.repair import RepairRequest, RepairResult, RepairStatus, StrategyId
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 

@@ -4,10 +4,11 @@ import itertools
 
 import pytest
 
-from cryptoaudit.aggregation import Verdict, build_outcome, compare_strategies, decide
-from cryptoaudit.candidate import IntegrityChecker, make_candidate
-from cryptoaudit.repair import RepairResult, RepairStatus, StrategyId
-from cryptoaudit.validation import GateId, GateResult, GateStatus, ValidationReport
+from cryptoaudit.aggregation import build_outcome, compare_strategies, decide
+from cryptoaudit.candidate import IntegrityChecker
+from cryptoaudit.models.experiment import Verdict
+from cryptoaudit.models.repair import RepairResult, RepairStatus, StrategyId, make_candidate
+from cryptoaudit.models.validation import GateId, GateResult, GateStatus, ValidationReport
 
 P, F, E, NR, NA = GateStatus.PASS, GateStatus.FAIL, GateStatus.ERROR, GateStatus.NOT_RUN, GateStatus.NOT_APPLICABLE
 

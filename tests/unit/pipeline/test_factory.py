@@ -3,8 +3,8 @@
 import pytest
 
 from cryptoaudit.config.settings import Settings
+from cryptoaudit.models.repair import StrategyId
 from cryptoaudit.pipeline.factory import build_sandbox, build_strategies, parse_strategy_ids
-from cryptoaudit.repair import StrategyId
 from cryptoaudit.utils.errors import CryptoAuditError
 from cryptoaudit.validation import DockerSandbox
 

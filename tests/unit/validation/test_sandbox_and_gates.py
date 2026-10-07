@@ -1,22 +1,15 @@
 """Sandbox, harness and gate-level tests."""
 
-from pathlib import Path
 
 import pytest
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.candidate import IntegrityChecker, make_candidate
-from cryptoaudit.repair import RepairResult, RepairStatus, StrategyId
-from cryptoaudit.scanners import ScannerIssue, ScanReport
+from cryptoaudit.candidate import IntegrityChecker
+from cryptoaudit.models.repair import RepairResult, RepairStatus, StrategyId, make_candidate
+from cryptoaudit.models.scan import ScannerIssue, ScanReport
+from cryptoaudit.models.validation import GateId, GateStatus
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.validation import (
-    DockerSandbox,
-    GateId,
-    GateStatus,
-    LocalProcessSandbox,
-    ScannerValidator,
-    ValidationPipeline,
-)
+from cryptoaudit.validation import DockerSandbox, LocalProcessSandbox, ScannerValidator, ValidationPipeline
 from cryptoaudit.validation.gates import interface_check
 
 ORIGINAL = "def add(a: int, b: int) -> int:\n    return a + b\n"

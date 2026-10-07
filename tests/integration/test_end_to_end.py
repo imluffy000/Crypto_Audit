@@ -3,28 +3,27 @@ End-to-end: benchmark case -> Analyzer -> Context -> S1/S2/S3/S4 -> integrity ->
 aggregation -> experiment store. Uses deterministic fake scanners/LLM so results are stable.
 """
 
-from pathlib import Path
 from typing import Dict, List
 
 import pytest
 
-from cryptoaudit.aggregation import Verdict
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.benchmark import BenchmarkRepository
 from cryptoaudit.benchmark.oracle import load_oracle
-from cryptoaudit.ingest import ModuleInput
 from cryptoaudit.llm import LLMRequest, LLMResponse
+from cryptoaudit.models.experiment import Verdict
+from cryptoaudit.models.repair import RepairStatus, StrategyId
+from cryptoaudit.models.scan import ModuleInput, ScannerIssue, ScanReport
+from cryptoaudit.models.validation import GateId, GateStatus
 from cryptoaudit.pipeline import BenchmarkRunner, RepairPipeline
-from cryptoaudit.repair import RepairStatus, StrategyId
 from cryptoaudit.repair.strategies import (
     LLMRepairStrategy,
     MigrationAwareRepairStrategy,
     TemplateRepairStrategy,
     ToolGuidedRepairStrategy,
 )
-from cryptoaudit.scanners import ScannerIssue, ScanReport
 from cryptoaudit.storage import ExperimentStore
-from cryptoaudit.validation import GateId, GateStatus, LocalProcessSandbox, ScannerValidator, ValidationPipeline
+from cryptoaudit.validation import LocalProcessSandbox, ScannerValidator, ValidationPipeline
 
 REPO = BenchmarkRepository()
 

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 from cryptoaudit.context.interface import extract_public_interface
-from cryptoaudit.context.models import CodeContext, FindingContext
+from cryptoaudit.models.context import CodeContext, FindingContext
 from cryptoaudit.models.finding import Finding, finding_id
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.utils.hashing import stable_hash

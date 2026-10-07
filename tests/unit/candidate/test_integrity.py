@@ -2,8 +2,8 @@
 
 import pytest
 
-from cryptoaudit.candidate import IntegrityChecker, make_candidate
-from cryptoaudit.repair import RepairResult, RepairStatus, StrategyId
+from cryptoaudit.candidate import IntegrityChecker
+from cryptoaudit.models.repair import RepairResult, RepairStatus, StrategyId, make_candidate
 
 ALLOWED = ("hashlib", "hmac", "secrets", "os")
 

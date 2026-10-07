@@ -4,10 +4,10 @@ import ast
 from typing import List, Optional, Sequence
 
 from cryptoaudit.models.finding import Finding, finding_id
+from cryptoaudit.models.repair import RepairRequest, RepairResult, RepairStatus, StrategyId
+from cryptoaudit.models.scan import Scanner, ScannerIssue, ScanReport
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.edits import SourceIndex, TextEdit, apply_edits, edits_overlap, find_call
-from cryptoaudit.repair.models import RepairRequest, RepairResult, RepairStatus, StrategyId
-from cryptoaudit.scanners.models import Scanner, ScannerIssue, ScanReport
 from cryptoaudit.utils.errors import ErrorCode
 
 # Bandit test IDs whose own message prescribes a concrete code change.

@@ -3,7 +3,7 @@
 import ast
 from typing import Iterable, List, Optional, Sequence, Set
 
-from pydantic import BaseModel, Field
+from cryptoaudit.models.validation import IntegrityIssue, IntegrityReport
 
 DEFAULT_MAX_CHARS = 100_000
 
@@ -28,20 +28,8 @@ DENIED_OS_PREFIXES = ("exec", "spawn")
 WRITE_MODES = set("wax+")
 
 
-class IntegrityIssue(BaseModel):
-    kind: str  # syntax | size | dependency | dangerous_call
-    message: str
-    line: Optional[int] = None
 
 
-class IntegrityReport(BaseModel):
-    passed: bool
-    syntax_ok: bool
-    imports: List[str] = Field(default_factory=list)
-    issues: List[IntegrityIssue] = Field(default_factory=list)
-
-    def issues_of(self, kind: str) -> List[IntegrityIssue]:
-        return [i for i in self.issues if i.kind == kind]
 
 
 class IntegrityChecker:

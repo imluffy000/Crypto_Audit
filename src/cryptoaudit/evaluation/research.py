@@ -7,8 +7,8 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from pydantic import BaseModel, Field
 
 from cryptoaudit.aggregation.aggregator import compare_strategies
-from cryptoaudit.aggregation.models import CaseOutcome, StrategyStats, Verdict
-from cryptoaudit.validation.models import GateStatus
+from cryptoaudit.models.experiment import CaseOutcome, StrategyStats, Verdict
+from cryptoaudit.models.validation import GateStatus
 
 
 def wilson_interval(successes: int, total: int, z: float = 1.96) -> Optional[Tuple[float, float]]:

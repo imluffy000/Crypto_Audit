@@ -1,15 +1,16 @@
 """S1 tool-guided strategy tests using deterministic fake scanners."""
 
 import shutil
-from pathlib import Path
 from typing import List
 
 import pytest
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.repair import RepairStatus, StrategyId, build_repair_request
+from cryptoaudit.models.repair import RepairStatus, StrategyId
+from cryptoaudit.models.scan import ScannerIssue, ScanReport
+from cryptoaudit.repair import build_repair_request
 from cryptoaudit.repair.strategies import ToolGuidedRepairStrategy
-from cryptoaudit.scanners import BanditScanner, ScannerIssue, ScanReport
+from cryptoaudit.scanners import BanditScanner
 from cryptoaudit.utils.errors import ErrorCode
 
 MD5_SOURCE = "import hashlib\n\ndef hash_password(password):\n    return hashlib.md5(password.encode()).hexdigest()\n"

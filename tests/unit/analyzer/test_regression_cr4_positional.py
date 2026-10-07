@@ -1,11 +1,8 @@
 """Regression test suite for Issue 1: Correct positional PBKDF2HMAC argument parsing."""
 
-import ast
 from pathlib import Path
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.analysis.ast_parser import parse_source_file
-from cryptoaudit.models.enums import Category
 
 
 def test_cr4_vulnerable_positional_pbkdf2hmac(tmp_path: Path):

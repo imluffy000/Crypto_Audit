@@ -7,9 +7,9 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 
-from cryptoaudit.aggregation.models import Verdict
+from cryptoaudit.models.experiment import Verdict
+from cryptoaudit.models.validation import GateStatus
 from cryptoaudit.pipeline.orchestrator import ModuleRun
-from cryptoaudit.validation.models import GateStatus
 
 VERDICT_STYLE = {
     Verdict.VERIFIED: ("bold green", "Verified"),

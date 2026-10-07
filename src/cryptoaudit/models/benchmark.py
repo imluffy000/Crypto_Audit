@@ -1,4 +1,4 @@
-"""Benchmark case models. PublicCase is the only view a repair strategy may receive."""
+"""Benchmark models. PublicCase is the only case view a repair strategy may receive."""
 
 from typing import Tuple
 

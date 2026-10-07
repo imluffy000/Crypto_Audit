@@ -4,9 +4,9 @@ from collections import defaultdict
 from statistics import mean
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
-from cryptoaudit.aggregation.models import CaseOutcome, StrategyStats, Verdict
-from cryptoaudit.candidate.models import Candidate
-from cryptoaudit.validation.models import GateId, GateStatus, ValidationReport
+from cryptoaudit.models.experiment import CaseOutcome, StrategyStats, Verdict
+from cryptoaudit.models.repair import Candidate
+from cryptoaudit.models.validation import GateId, GateStatus, ValidationReport
 
 EXECUTABLE_GATES = (GateId.V1, GateId.V2, GateId.V3)
 

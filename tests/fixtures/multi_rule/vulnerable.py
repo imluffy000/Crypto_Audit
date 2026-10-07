@@ -2,7 +2,6 @@
 
 import hashlib
 import random
-from hashlib import sha1
 
 from Crypto.Cipher import AES
 

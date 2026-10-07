@@ -6,9 +6,10 @@ from typing import List, Optional, Sequence
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.config.settings import Settings
 from cryptoaudit.llm.client import LLMClient, OllamaClient
+from cryptoaudit.models.repair import StrategyId
+from cryptoaudit.models.scan import Scanner
 from cryptoaudit.pipeline.orchestrator import RepairPipeline
 from cryptoaudit.repair.base import RepairStrategy
-from cryptoaudit.repair.models import StrategyId
 from cryptoaudit.repair.strategies import (
     LLMRepairStrategy,
     MigrationAwareRepairStrategy,
@@ -16,7 +17,6 @@ from cryptoaudit.repair.strategies import (
     ToolGuidedRepairStrategy,
 )
 from cryptoaudit.scanners.bandit import BanditScanner
-from cryptoaudit.scanners.models import Scanner
 from cryptoaudit.scanners.semgrep import SemgrepScanner
 from cryptoaudit.storage.experiment_store import ExperimentStore
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode

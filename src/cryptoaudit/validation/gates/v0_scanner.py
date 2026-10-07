@@ -7,8 +7,8 @@ from typing import Dict, List, Sequence, Set
 
 from cryptoaudit import __version__ as CRYPTOAUDIT_VERSION
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.scanners.models import Scanner, ScanReport
-from cryptoaudit.validation.models import GateId, GateResult, GateStatus
+from cryptoaudit.models.scan import Scanner, ScanReport
+from cryptoaudit.models.validation import GateId, GateResult, GateStatus
 
 # Bandit test IDs that correspond to each CryptoAudit rule.
 BANDIT_RULE_MAP: Dict[str, Set[str]] = {

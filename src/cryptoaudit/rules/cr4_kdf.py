@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from cryptoaudit.analysis.ast_parser import ASTParseResult
 from cryptoaudit.analysis.call_analyzer import CallSite
-from cryptoaudit.analysis.literals import get_literal_value, resolve_scope_aware_constant
+from cryptoaudit.analysis.literals import resolve_scope_aware_constant
 from cryptoaudit.models.analysis import RuleConfig
 from cryptoaudit.models.enums import Confidence
 from cryptoaudit.models.finding import Finding

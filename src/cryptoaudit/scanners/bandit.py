@@ -3,7 +3,7 @@
 import json
 from typing import Optional
 
-from cryptoaudit.scanners.models import ScannerIssue, ScanReport
+from cryptoaudit.models.scan import ScannerIssue, ScanReport
 from cryptoaudit.scanners.runner import TemporarySource, ToolError, resolve_executable, run_tool
 
 

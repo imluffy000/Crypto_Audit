@@ -3,9 +3,9 @@
 from typing import Optional, Sequence
 
 from cryptoaudit.benchmark.oracle import HiddenOracle
-from cryptoaudit.candidate.models import Candidate
+from cryptoaudit.models.repair import Candidate
+from cryptoaudit.models.validation import CheckResult, GateId, GateResult, GateStatus, ValidationReport
 from cryptoaudit.validation.gates import OracleGate, ScannerValidator, interface_check
-from cryptoaudit.validation.models import CheckResult, GateId, GateResult, GateStatus, ValidationReport
 from cryptoaudit.validation.sandbox import Sandbox
 
 

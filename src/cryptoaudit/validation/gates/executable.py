@@ -5,9 +5,9 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
-from cryptoaudit.candidate.models import Candidate
 from cryptoaudit.context.interface import extract_public_interface
-from cryptoaudit.validation.models import CheckResult, GateId, GateResult, GateStatus
+from cryptoaudit.models.repair import Candidate
+from cryptoaudit.models.validation import CheckResult, GateId, GateResult, GateStatus
 from cryptoaudit.validation.sandbox import Sandbox
 
 

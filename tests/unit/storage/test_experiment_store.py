@@ -6,10 +6,10 @@ import sqlite3
 import pytest
 
 from cryptoaudit.aggregation import build_outcome
-from cryptoaudit.candidate import IntegrityChecker, make_candidate
-from cryptoaudit.repair import RepairResult, RepairStatus, StrategyId
+from cryptoaudit.candidate import IntegrityChecker
+from cryptoaudit.models.repair import RepairResult, RepairStatus, StrategyId, make_candidate
+from cryptoaudit.models.validation import GateId, GateResult, GateStatus, ValidationReport
 from cryptoaudit.storage import ExperimentStore
-from cryptoaudit.validation import GateId, GateResult, GateStatus, ValidationReport
 
 
 def _sample():

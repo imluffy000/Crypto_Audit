@@ -9,7 +9,8 @@ import pytest
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.llm import LLMRequest, LLMResponse, OllamaClient
-from cryptoaudit.repair import RepairConstraints, RepairStatus, StrategyId, build_repair_request
+from cryptoaudit.models.repair import RepairConstraints, RepairStatus, StrategyId
+from cryptoaudit.repair import build_repair_request
 from cryptoaudit.repair.prompting import OutputParseError, parse_llm_output, render_prompt
 from cryptoaudit.repair.strategies import LLMRepairStrategy, MigrationAwareRepairStrategy
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode

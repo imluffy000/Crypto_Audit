@@ -8,14 +8,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel
-
 from cryptoaudit import __version__
-from cryptoaudit.aggregation.models import CaseOutcome
-from cryptoaudit.candidate.models import Candidate
+from cryptoaudit.models.experiment import CaseOutcome, RunInfo
+from cryptoaudit.models.repair import Candidate
+from cryptoaudit.models.validation import ValidationReport
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.utils.hashing import stable_hash
-from cryptoaudit.validation.models import ValidationReport
 
 SCHEMA_VERSION = 1
 TABLES = ("runs", "baselines", "records")
@@ -60,13 +58,6 @@ CREATE INDEX IF NOT EXISTS idx_records_run ON records(run_id);
 """
 
 
-class RunInfo(BaseModel):
-    run_id: str
-    created_at: str
-    cryptoaudit_version: str
-    git_commit: Optional[str]
-    config_hash: str
-    config: Dict[str, Any]
 
 
 def _now() -> str:

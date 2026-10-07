@@ -21,8 +21,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
+from cryptoaudit.models.validation import CheckResult, GateStatus
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.validation.models import CheckResult, GateStatus
 from cryptoaudit.validation.sandbox import harness
 
 HARNESS_SOURCE = Path(harness.__file__)

@@ -1,6 +1,6 @@
 """S4: migration-aware LLM repair strategy."""
 
-from cryptoaudit.repair.models import StrategyId
+from cryptoaudit.models.repair import StrategyId
 from cryptoaudit.repair.strategies.s3_llm import LLMRepairStrategy
 
 

@@ -6,7 +6,8 @@ from pathlib import Path
 import pytest
 
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
-from cryptoaudit.repair import RepairStatus, StrategyId, build_repair_request
+from cryptoaudit.models.repair import RepairStatus, StrategyId
+from cryptoaudit.repair import build_repair_request
 from cryptoaudit.repair.strategies import TemplateRepairStrategy
 
 

@@ -2,8 +2,8 @@
 
 from typing import Dict, Iterable, List
 
+from cryptoaudit.models.repair import StrategyId
 from cryptoaudit.repair.base import RepairStrategy
-from cryptoaudit.repair.models import StrategyId
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 

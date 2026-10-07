@@ -7,8 +7,9 @@ from typing import Any, Callable, Dict, List, Optional, Sequence
 from cryptoaudit.benchmark.oracle import load_oracle
 from cryptoaudit.benchmark.repository import BenchmarkRepository
 from cryptoaudit.ingest.loader import from_public_case
+from cryptoaudit.models.experiment import RunInfo
 from cryptoaudit.pipeline.orchestrator import ModuleRun, RepairPipeline
-from cryptoaudit.storage.experiment_store import ExperimentStore, RunInfo
+from cryptoaudit.storage.experiment_store import ExperimentStore
 from cryptoaudit.utils.errors import CryptoAuditError
 
 

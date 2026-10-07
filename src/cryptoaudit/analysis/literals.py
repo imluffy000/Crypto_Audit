@@ -1,7 +1,7 @@
 """AST helper module for literal evaluation, scope-aware constant tracking, and secure generator identification."""
 
 import ast
-from typing import Any, List, Optional, Set, Tuple, Union
+from typing import Any, Optional, Set, Tuple, Union
 
 from cryptoaudit.analysis.ast_parser import ASTParseResult
 from cryptoaudit.analysis.call_analyzer import CallSite

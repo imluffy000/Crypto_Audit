@@ -1,4 +1,4 @@
-"""Validation result models: per-check, per-gate and per-candidate."""
+"""Validation models: integrity reports and per-check, per-gate and per-candidate results."""
 
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -51,3 +51,19 @@ class ValidationReport(BaseModel):
     def status(self, gate_id: GateId) -> GateStatus:
         result = self.gate(gate_id)
         return result.status if result is not None else GateStatus.NOT_RUN
+
+
+class IntegrityIssue(BaseModel):
+    kind: str  # syntax | size | dependency | dangerous_call
+    message: str
+    line: Optional[int] = None
+
+
+class IntegrityReport(BaseModel):
+    passed: bool
+    syntax_ok: bool
+    imports: List[str] = Field(default_factory=list)
+    issues: List[IntegrityIssue] = Field(default_factory=list)
+
+    def issues_of(self, kind: str) -> List[IntegrityIssue]:
+        return [i for i in self.issues if i.kind == kind]

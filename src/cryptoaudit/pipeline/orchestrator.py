@@ -14,20 +14,19 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
 from cryptoaudit.aggregation.aggregator import build_outcome
-from cryptoaudit.aggregation.models import CaseOutcome
 from cryptoaudit.analysis.analyzer import AnalyzerEngine
 from cryptoaudit.benchmark.oracle import HiddenOracle
 from cryptoaudit.candidate.integrity import IntegrityChecker
-from cryptoaudit.candidate.models import Candidate, make_candidate
 from cryptoaudit.context.builder import ContextBuilder
-from cryptoaudit.ingest.models import ModuleInput
+from cryptoaudit.models.experiment import CaseOutcome
 from cryptoaudit.models.finding import Finding
+from cryptoaudit.models.repair import Candidate, RepairConstraints, RepairRequest, make_candidate
+from cryptoaudit.models.scan import ModuleInput
+from cryptoaudit.models.validation import ValidationReport
 from cryptoaudit.repair.base import RepairStrategy
-from cryptoaudit.repair.models import RepairConstraints, RepairRequest
 from cryptoaudit.repair.request import build_repair_request
 from cryptoaudit.storage.experiment_store import ExperimentStore
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.validation.models import ValidationReport
 from cryptoaudit.validation.pipeline import ValidationPipeline
 
 

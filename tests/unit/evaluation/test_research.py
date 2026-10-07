@@ -1,11 +1,10 @@
 """Research analysis tests on synthetic outcomes."""
 
-import pytest
 
-from cryptoaudit.aggregation import CaseOutcome, Verdict
 from cryptoaudit.evaluation import analyze, to_markdown, wilson_interval
-from cryptoaudit.repair import RepairStatus, StrategyId
-from cryptoaudit.validation import GateStatus
+from cryptoaudit.models.experiment import CaseOutcome, Verdict
+from cryptoaudit.models.repair import RepairStatus, StrategyId
+from cryptoaudit.models.validation import GateStatus
 
 P, F, NA = GateStatus.PASS, GateStatus.FAIL, GateStatus.NOT_APPLICABLE
 

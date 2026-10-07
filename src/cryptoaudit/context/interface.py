@@ -3,7 +3,7 @@
 import ast
 from typing import List, Union
 
-from cryptoaudit.context.models import SymbolSignature
+from cryptoaudit.models.context import SymbolSignature
 
 FunctionNode = Union[ast.FunctionDef, ast.AsyncFunctionDef]
 

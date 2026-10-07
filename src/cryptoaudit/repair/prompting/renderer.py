@@ -5,7 +5,7 @@ from pathlib import Path
 from string import Template
 from typing import List
 
-from cryptoaudit.repair.models import RepairRequest
+from cryptoaudit.models.repair import RepairRequest
 from cryptoaudit.utils.hashing import stable_hash
 
 PROMPT_DIR = Path(__file__).parent / "templates"

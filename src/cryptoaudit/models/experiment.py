@@ -1,12 +1,12 @@
-"""Aggregated per-case outcomes and cross-strategy comparison statistics."""
+"""Experiment models: per-case outcomes, verdicts, strategy statistics and run metadata."""
 
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from cryptoaudit.repair.models import RepairStatus, StrategyId
-from cryptoaudit.validation.models import GateStatus
+from cryptoaudit.models.repair import RepairStatus, StrategyId
+from cryptoaudit.models.validation import GateStatus
 
 
 class Verdict(str, Enum):
@@ -63,3 +63,12 @@ class StrategyStats(BaseModel):
     def rate(self, count: int, denominator: Optional[int] = None) -> Optional[float]:
         base = self.attempts if denominator is None else denominator
         return None if base == 0 else round(count / base, 4)
+
+
+class RunInfo(BaseModel):
+    run_id: str
+    created_at: str
+    cryptoaudit_version: str
+    git_commit: Optional[str]
+    config_hash: str
+    config: Dict[str, Any]

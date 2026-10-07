@@ -1,4 +1,4 @@
-"""Context Engine models: the bounded code context handed to the Repair Engine."""
+"""Context models: the bounded code context handed to the Repair Engine."""
 
 from typing import Dict, List, Optional
 
