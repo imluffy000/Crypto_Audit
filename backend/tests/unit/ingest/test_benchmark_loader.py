@@ -77,9 +77,9 @@ def test_public_case_never_reads_expected_or_artifacts(tmp_path):
     for role in ("expected", "artifacts"):
         hidden = tmp_path / role / "cr5" / "c1"
         hidden.mkdir(parents=True)
-        (hidden / "secret.py").write_text("SECRET = 1\n", encoding="utf-8")
+        (hidden / "hidden_check.py").write_text("HIDDEN_MARKER = 1\n", encoding="utf-8")
     loaded = BenchmarkRepository(tmp_path).public_case("c1")
-    assert "SECRET" not in loaded.model_dump_json()
+    assert "HIDDEN_MARKER" not in loaded.model_dump_json()
 
 
 def test_module_file_cannot_escape_case_dir(tmp_path):

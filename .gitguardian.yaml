@@ -1,0 +1,10 @@
+# GitGuardian configuration. The benchmark and tests intentionally contain fake credentials
+# (e.g. passwords fed to the password-hashing code under test); they are not secrets.
+version: 2
+secret:
+  ignored_paths:
+    - "backend/benchmark/**"
+    - "backend/tests/**"
+    # pre-restructure locations that still appear in this branch's history
+    - "benchmark/**"
+    - "tests/**"
