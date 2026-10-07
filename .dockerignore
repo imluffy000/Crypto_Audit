@@ -1,0 +1,11 @@
+.git
+.env
+**/node_modules
+**/dist
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+.venv
+venv
+data
+benchmark/results

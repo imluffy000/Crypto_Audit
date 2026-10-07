@@ -60,3 +60,21 @@ GateResult ◄─ parse nonce-tagged line ◄──────── stdout
 
 A missing or unparseable result line, a broken oracle or an unavailable sandbox is an `ERROR`
 (validator could not evaluate), never a `PASS`.
+
+## Website flow
+
+```
+browser ──► /api/auth/github/login ──► GitHub (App authorisation) ──► /api/auth/github/callback
+            (state: server-side, single use + HttpOnly cookie)        (code → user token → session cookie)
+
+POST /api/scans ──► background job (api/jobs.py), token held in memory only
+   FETCH     ingest.github_client.download_tarball (size-capped stream)
+   PARSE     ingest.git_loader: .py files read in memory; symlinks/traversal/oversize skipped
+   ANALYZE   analysis_stage per file
+   CONTEXT   build_repair_request (ContextBuilder)
+   REPAIR    S1, S2 (+ S3, S4 when Ollama serves the model)
+   VALIDATE  V0 scanners + V1 syntax/interface; V2/V3 NOT_RUN (no oracle) — nothing is executed
+   EXPLAIN   reporting.explanation (evidence-based) per candidate
+   REPORT    RepositoryScanResult stored in the web store
+GET /api/scans/{id} (progress) · /findings · /findings/{fid} · POST …/ai-explanation (optional, labelled)
+```

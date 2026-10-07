@@ -15,6 +15,10 @@ htmlcov/
 # --- CryptoAudit local output (experiment databases, reports) -----------------
 /data/
 
+# --- Secrets ------------------------------------------------------------------
+.env
+!.env.example
+
 # --- Node / frontend ----------------------------------------------------------
 node_modules
 dist

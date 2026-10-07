@@ -24,12 +24,14 @@ benchmark/
 └── results/                local run output (git-ignored)
 configs/rules.yaml          CR1–CR5 rule configuration
 prompts/repair/             versioned LLM prompts (s3_v1.yaml, s4_v1.yaml)
-docker/sandbox/             isolated validation runtime image
+docker/                     sandbox/ (validation runtime), api + web images, docker-compose, nginx
 docs/                       architecture/, development/
 frontend/                   React/Vite UI
 src/cryptoaudit/
-├── cli/          main.py: analyze, repair, bench list|run|report
-├── ingest/       file_loader, directory_loader, filters, benchmark_loader (public views only)
+├── cli/          main.py: analyze, repair, bench list|run|report, serve
+├── api/          app, services, jobs, dependencies, schemas, routes/ (auth, repos, scan, findings, reports)
+├── ingest/       file_loader, directory_loader, filters, benchmark_loader (public views only),
+│                 github_client (GitHub App API), git_loader (in-memory tarball ingestion)
 ├── analysis/     ast_parser, import_analyzer, call_analyzer, context_analyzer, literals, analyzer
 ├── rules/        base, registry, cr1_weak_hash … cr5_insecure_random
 ├── models/       finding, analysis, enums, context, scan, repair, validation, benchmark, experiment
@@ -43,7 +45,7 @@ src/cryptoaudit/
 │   └── scanners/ bandit, semgrep, process
 ├── pipeline/     orchestrator, stages, pipeline_result, factory, benchmark_runner
 ├── reporting/    console_report, json_report, markdown_report, research
-├── storage/      sqlite (append-only experiment DB), jsonl (export)
+├── storage/      sqlite (append-only experiment DB), jsonl (export), web_store (sessions, scan jobs)
 ├── config/       settings (CRYPTOAUDIT_* environment variables)
 └── utils/        errors, hashing
 tests/
@@ -69,7 +71,8 @@ Runtime output (`data/`, e.g. `data/experiments/experiments.sqlite`) is git-igno
 | 6 | Aggregation | `validation.gates`, `reporting.research` | `decide`, `build_outcome`, `compare_strategies` |
 | 7 | Experiment database | `storage` | `ExperimentStore`, `export_jsonl` |
 | 8 | Research analysis | `reporting` | `analyze`, `to_markdown` |
-| 9 | User interface / output | `cli`, `reporting` | `cryptoaudit repair`, `cryptoaudit bench …` |
+| 9 | User interface / output | `cli`, `api`, `frontend/`, `reporting` | website, `cryptoaudit repair`, `cryptoaudit bench …` |
+| – | Website scan | `pipeline.repository_scan`, `api` | `RepositoryScanner`, staged progress, explanations |
 | – | Orchestration | `pipeline` | `RepairPipeline`, stage functions, `BenchmarkRunner` |
 
 ## Repair strategies
@@ -133,4 +136,6 @@ e.g. `CRYPTOAUDIT_SANDBOX=docker`, `CRYPTOAUDIT_SEMGREP_CONFIG=p/python`, `CRYPT
 - The benchmark currently has one case per category; extend `benchmark/` for statistical power.
 - Known analyzer precision issues (unchanged): CR5 flags `random.SystemRandom`, keyword matching on
   substrings (e.g. "auth" in "author"), and CR3/CR4 scope resolution by function name.
-- Not yet built: REST API, risk scoring, SARIF/HTML reports, git ingestion, dependency graphs.
+- Not yet built: risk scoring, SARIF/HTML reports, dependency graphs, a hosted deployment.
+- Website scans of user repositories cannot reach Verified: there are no security-property oracles for
+  arbitrary code, so V2/V3 are NOT_RUN and the code is never executed.

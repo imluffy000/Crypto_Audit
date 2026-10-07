@@ -1,6 +1,21 @@
 # CryptoAudit
 
-CryptoAudit is a frontend prototype for reviewing repositories for cryptographic security issues.
+CryptoAudit finds cryptographic misuse in Python repositories, generates candidate repairs and
+validates them independently, explaining why each repair was or was not accepted.
+
+## Website
+
+Sign in with GitHub, pick a repository, and CryptoAudit runs: fetch → parse → CR1–CR5 analysis →
+context → repair (S1–S4) → validation (V0–V3) → comparison and explanation → results.
+
+```sh
+cp .env.example .env                    # add your GitHub App credentials (see docs/development/website.md)
+pip install -e ".[web,scanners]"
+cryptoaudit serve                       # API on :8000
+cd frontend && npm install && npm run dev   # website on http://localhost:5173
+```
+
+Setup guide, GitHub App permissions and what the verdicts mean: [docs/development/website.md](docs/development/website.md).
 
 ## Research pipeline (Python)
 
@@ -22,7 +37,7 @@ python -m pytest
 
 Open the [CryptoAudit preview](https://imluffy000.github.io/Crypto_Audit/). GitHub Actions publishes the preview whenever changes are pushed to `main`.
 
-The current preview uses mock sign-in and repository data. GitHub and Google OAuth, private repository access, and the audit backend are not connected yet.
+The GitHub Pages preview is the static frontend only: it has no backend, so sign-in and scans need a locally running `cryptoaudit serve`.
 
 ## Run locally
 
