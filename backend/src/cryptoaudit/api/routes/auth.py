@@ -54,6 +54,9 @@ def github_callback(request: Request, code: str = "", state: str = "", services:
     except CryptoAuditError as exc:
         logger.warning("GitHub sign-in failed: %s", exc.code.value)
         return fail(exc.code.value.lower())
+    except Exception:  # never show a bare 500 page mid sign-in; details go to the server log
+        logger.exception("Unexpected error while completing GitHub sign-in")
+        return fail("server_error")
 
     session_id = services.store.create_session(user, token.access_token, services.settings.session_ttl_hours)
     response = RedirectResponse(_frontend(services, "/dashboard"), status_code=302)

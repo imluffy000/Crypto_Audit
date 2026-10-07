@@ -9,6 +9,8 @@ const ERROR_MESSAGES = {
   invalid_state: 'Sign-in expired or was started in another tab. Please try again.',
   authentication_error: 'GitHub did not accept the sign-in. Please try again.',
   not_configured: 'GitHub sign-in is not configured on this server.',
+  server_error: 'The server hit an unexpected error while signing you in. Check the backend log and try again.',
+  external_service_error: 'Could not reach GitHub to complete sign-in. Check your connection and try again.',
 };
 
 function GitHubMark() {

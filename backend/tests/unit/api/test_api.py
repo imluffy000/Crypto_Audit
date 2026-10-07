@@ -347,3 +347,15 @@ def test_security_headers(env):
     response = client.get("/api/health")
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["cache-control"] == "no-store"
+
+
+def test_unexpected_callback_error_redirects_to_login(env, monkeypatch):
+    client, services, *_ = env
+
+    def boom(code):
+        raise RuntimeError("broken TLS setup")
+
+    monkeypatch.setattr(services.auth, "exchange_code", boom)
+    response = sign_in(client)
+    assert response.status_code == 302
+    assert response.headers["location"].endswith("/#/login?error=server_error")
