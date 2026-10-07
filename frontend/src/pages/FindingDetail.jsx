@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { ArrowLeft, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import CodeCompare from '../components/CodeCompare';
 import ExplanationPanel from '../components/ExplanationPanel';
 import GateTable from '../components/GateTable';
 import VerdictBadge from '../components/VerdictBadge';
+import Button from '../components/ui/Button';
 import PageHeader, { SectionHeader } from '../components/ui/PageHeader';
 import Badge, { SeverityBadge } from '../components/ui/Badge';
 import Panel from '../components/ui/Panel';
@@ -12,7 +14,7 @@ import Tabs, { TabPanel } from '../components/ui/Tabs';
 import { Alert, ErrorState, LoadingState } from '../components/ui/States';
 import { useToast } from '../components/ui/toastContext';
 import { scanService } from '../services/scanService';
-import { humanize, RULE_NAMES } from '../utils/format';
+import { humanize, RULE_NAMES, SEVERITY_ORDER } from '../utils/format';
 
 const TABS_ID = 'strategy';
 
@@ -58,33 +60,74 @@ function ScannerComparison({ baseline, scannerResults }) {
   );
 }
 
+// Lets long dotted API names wrap at a dot instead of in the middle of a word.
+function breakAtDots(text) {
+  return String(text || '')
+    .split('.')
+    .map((part, index, parts) => (
+      <Fragment key={index}>
+        {part}
+        {index < parts.length - 1 ? (
+          <>
+            .<wbr />
+          </>
+        ) : null}
+      </Fragment>
+    ));
+}
+
 function FindingSummary({ finding }) {
-  const facts = [
-    ['Rule', <span key="r"><span className="mono">{finding.rule_id}</span> · {RULE_NAMES[finding.rule_id] || humanize(finding.category)}</span>],
-    ['Severity', <SeverityBadge key="s" severity={finding.severity} />],
-    ['Confidence', humanize(finding.confidence)],
-    ['Matched API', <span key="m" className="mono">{finding.matched_api}</span>],
-  ];
   return (
     <div className="finding-summary">
-      <dl className="definition-grid">
-        {facts.map(([term, value]) => (
-          <div key={term}>
-            <dt>{term}</dt>
-            <dd>{value}</dd>
-          </div>
-        ))}
-      </dl>
-      <div className="finding-text">
-        <p>{finding.explanation}</p>
+      <div className="finding-facts">
+        <SeverityBadge severity={finding.severity} />
+        <Badge tone="neutral">
+          <span className="mono">{finding.rule_id}</span> · {RULE_NAMES[finding.rule_id] || humanize(finding.category)}
+        </Badge>
+        <Badge tone="neutral">Confidence: {humanize(finding.confidence)}</Badge>
+      </div>
+
+      <p className="finding-lead">{finding.explanation}</p>
+
+      <figure className="evidence-block">
+        <figcaption>Line {finding.line}</figcaption>
         <pre className="evidence mono" aria-label="Evidence">
           {finding.evidence}
         </pre>
-        <p className="muted">
-          <strong className="text-strong">Guidance.</strong> {finding.remediation}
-        </p>
+      </figure>
+
+      <dl className="finding-api">
+        <dt>Matched API</dt>
+        <dd className="mono">{breakAtDots(finding.matched_api)}</dd>
+      </dl>
+
+      <div className="guidance">
+        <Lightbulb size={18} aria-hidden="true" />
+        <div>
+          <p className="guidance-title">How to fix</p>
+          <p className="guidance-text">{finding.remediation}</p>
+        </div>
       </div>
     </div>
+  );
+}
+
+// The finding's file on GitHub, at the scanned commit. A file inside a .zip links to the archive.
+function githubFileUrl(repository, ref, path, line) {
+  if (!repository || !ref || !path) return '';
+  const zipAt = path.toLowerCase().indexOf('.zip/');
+  const file = zipAt >= 0 ? path.slice(0, zipAt + 4) : path;
+  const encoded = file.split('/').map(encodeURIComponent).join('/');
+  return `https://github.com/${repository}/blob/${encodeURIComponent(ref)}/${encoded}${zipAt >= 0 ? '' : `#L${line}`}`;
+}
+
+// Same order as the scan's findings table: most severe first, then by file and line.
+function orderFindings(items) {
+  return [...items].sort(
+    (a, b) =>
+      (SEVERITY_ORDER[b.finding.severity] || 0) - (SEVERITY_ORDER[a.finding.severity] || 0) ||
+      a.finding.file.localeCompare(b.finding.file) ||
+      a.finding.line - b.finding.line,
   );
 }
 
@@ -95,7 +138,24 @@ function FindingDetail() {
   const [error, setError] = useState('');
 
   const [reloadKey, setReloadKey] = useState(0);
+  const [siblings, setSiblings] = useState([]);
+  const [scan, setScan] = useState(null);
   const notify = useToast();
+
+  // The scan (for the GitHub link) and its findings (for previous / next). Optional: the page works without them.
+  useEffect(() => {
+    let current = true;
+    Promise.all([scanService.getScan(scanId), scanService.getFindings(scanId)])
+      .then(([scanData, items]) => {
+        if (!current) return;
+        setScan(scanData);
+        setSiblings(orderFindings(items));
+      })
+      .catch(() => {});
+    return () => {
+      current = false;
+    };
+  }, [scanId]);
 
   useEffect(() => {
     let current = true;
@@ -150,6 +210,21 @@ function FindingDetail() {
   const run = detail.runs.find((r) => r.strategy_id === active);
   const findingLines = detail.file_findings.map((f) => f.line);
 
+  const position = siblings.findIndex((item) => item.finding_id === findingId);
+  const prev = position > 0 ? siblings[position - 1] : null;
+  const next = position >= 0 && position < siblings.length - 1 ? siblings[position + 1] : null;
+  const githubHref = githubFileUrl(detail.repository, scan?.commit || scan?.ref, detail.file_path, finding.line);
+
+  const copyLocation = async () => {
+    const location = `${detail.file_path}:${finding.line}`;
+    try {
+      await navigator.clipboard.writeText(location);
+      notify({ tone: 'success', title: 'Location copied', message: location });
+    } catch {
+      notify({ tone: 'warning', title: 'Could not copy', message: 'Your browser blocked clipboard access.' });
+    }
+  };
+
   return (
     <DashboardLayout width="wide">
       <PageHeader
@@ -169,9 +244,49 @@ function FindingDetail() {
             <span className="mono">{detail.repository}</span>
           </>
         }
+        actions={
+          <>
+            <Button icon={ArrowLeft} to={`/scans/${scanId}`}>
+              Back to scan
+            </Button>
+            {githubHref ? (
+              <Button icon={ExternalLink} href={githubHref} target="_blank" rel="noopener noreferrer">
+                View on GitHub
+              </Button>
+            ) : null}
+            {siblings.length > 1 && position >= 0 ? (
+              <div className="pager" role="group" aria-label="Findings in this scan">
+                <Button
+                  icon={ChevronLeft}
+                  to={prev ? `/scans/${scanId}/findings/${prev.finding_id}` : undefined}
+                  disabled={!prev}
+                  aria-label="Previous finding"
+                  title="Previous finding"
+                />
+                <span className="pager-count">
+                  {position + 1} of {siblings.length}
+                </span>
+                <Button
+                  icon={ChevronRight}
+                  to={next ? `/scans/${scanId}/findings/${next.finding_id}` : undefined}
+                  disabled={!next}
+                  aria-label="Next finding"
+                  title="Next finding"
+                />
+              </div>
+            ) : null}
+          </>
+        }
       />
 
-      <Panel title="What CryptoAudit found">
+      <Panel
+        title="What CryptoAudit found"
+        actions={
+          <Button size="sm" variant="ghost" icon={Copy} onClick={copyLocation}>
+            Copy location
+          </Button>
+        }
+      >
         <FindingSummary finding={finding} />
       </Panel>
 

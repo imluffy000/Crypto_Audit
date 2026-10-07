@@ -7,7 +7,7 @@ function AuthHero({ titleId, children }) {
           <h1 id={titleId} className="auth-card-title">
             Sign in
           </h1>
-          <p className="auth-card-lead">Use your GitHub account to scan your repositories for cryptographic misuse.</p>
+          <p className="auth-card-lead">Continue with GitHub to start scanning.</p>
         </div>
         {children}
       </div>

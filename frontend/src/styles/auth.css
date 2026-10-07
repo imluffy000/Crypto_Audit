@@ -1,4 +1,4 @@
-/* Sign-in page: one screen, the GitHub sign-in card beside the brand artwork (palette in brand.css). */
+/* Sign-in page: one screen, the GitHub sign-in card centred over the brand artwork (palette in brand.css). */
 /* ---------- Single-screen layout ---------- */
 .auth-main {
   width: 100%;
@@ -10,36 +10,46 @@
   display: grid;
 }
 
+/*
+ * The sign-in card sits in the middle of the screen and overlaps the left 30% of the artwork.
+ * The artwork is sized by the screen height, and shrinks if the space to the right of the card
+ * is too narrow, so it never runs off the page.
+ */
 .auth-grid {
+  --card-w: 420px;
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: 24px;
-  align-items: center;
+  place-items: center;
+  height: calc(100dvh - 2 * var(--page-pad));
 }
 
 .auth-hero {
-  grid-column: 1 / span 5;
+  position: relative;
+  z-index: 2;
+  width: min(100%, var(--card-w));
 }
 
-/* The artwork fills the viewport height, so the page never needs to scroll. */
 .auth-visual {
-  grid-column: 7 / span 6;
-  width: 100%;
-  height: calc(100dvh - 2 * var(--page-pad));
-  max-height: 780px;
-  aspect-ratio: auto;
+  --art-w: min(calc((100dvh - 2 * var(--page-pad)) * 0.875), 630px, calc((50% - var(--card-w) / 2) / 0.7));
+  position: absolute;
+  top: 50%;
+  left: calc(50% + var(--card-w) / 2 - 0.3 * var(--art-w));
+  z-index: 1;
+  width: var(--art-w);
+  aspect-ratio: 560 / 640;
+  translate: 0 -50%;
 }
 
 /* ---------- Sign-in card ---------- */
 .auth-card-head {
   display: grid;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .auth-card-title {
-  font-size: clamp(2rem, 3vw, 2.5rem);
-  font-weight: 800;
+  font-size: 1.75rem;
+  font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.035em;
   color: var(--brand-text);
@@ -53,12 +63,12 @@
 
 .auth-card {
   display: grid;
-  gap: 16px;
-  max-width: 460px;
-  padding: 32px;
+  gap: 18px;
+  padding: 36px 32px;
   background: var(--brand-surface);
   border: 1px solid var(--brand-border);
-  border-radius: 24px;
+  border-radius: 28px;
+  box-shadow: 0 24px 48px -28px rgba(23, 32, 29, 0.28);
   animation: brand-rise 600ms var(--ease) both 120ms;
 }
 
@@ -68,7 +78,7 @@
   justify-content: center;
   gap: 12px;
   width: 100%;
-  height: 54px;
+  height: 52px;
   padding: 0 24px;
   border: 0;
   border-radius: 14px;
@@ -113,7 +123,9 @@
   justify-content: center;
   gap: 8px;
   color: var(--brand-text-2);
+  margin-top: -6px;
   font-size: 0.8125rem;
+  text-wrap: balance;
   font-weight: 500;
 }
 
@@ -131,15 +143,62 @@
 }
 
 .auth-card-footer .link-button {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 }
 
 .auth-scope {
   color: var(--brand-text-2);
   font-size: 0.75rem;
+  text-wrap: balance;
   line-height: 1.5;
 }
 
+/* ---------- Corner decoration ---------- */
+.auth-page {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-corner {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  width: clamp(200px, 24vw, 340px);
+  pointer-events: none;
+}
+
+.auth-corner svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.auth-main {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Back to home ---------- */
+.auth-back {
+  position: absolute;
+  top: var(--page-pad);
+  left: var(--page-gutter);
+  z-index: 3;
+  color: var(--brand-text-2);
+}
+
+.auth-back:hover {
+  color: var(--brand-text);
+}
+
+.auth-back-arrow {
+  transition: transform 220ms var(--brand-ease);
+}
+
+.auth-back:hover .auth-back-arrow {
+  transform: translateX(-3px);
+}
 
 /* ---------- Artwork ---------- */
 /* The frame keeps the artwork's proportions inside whatever box the layout gives it. */
@@ -164,7 +223,7 @@
 }
 
 .login-art-silhouette {
-  filter: drop-shadow(0 18px 24px rgba(15, 118, 110, 0.1));
+  filter: drop-shadow(0 18px 28px rgba(15, 118, 110, 0.08));
 }
 
 .login-art-scan {
@@ -179,8 +238,8 @@
 
 .login-art-pill {
   position: absolute;
-  left: 30%;
-  bottom: 4%;
+  left: 38%;
+  bottom: 3%;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -212,55 +271,69 @@
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1180px) {
-  .auth-hero {
-    grid-column: 1 / span 6;
-  }
-
-  .auth-visual {
-    grid-column: 7 / span 6;
-  }
-}
-
-/* Stacked: the card at its natural height, the artwork takes whatever height is left. */
+/* Stacked: the artwork on top, the card overlapping its bottom 30%. */
 @media (max-width: 900px) {
+  .auth-grid,
+  .auth-visual {
+    --art-w: min(86vw, 400px, calc((100dvh - 2 * var(--page-pad) - 470px) / 0.7 * 0.875));
+  }
+
   .auth-grid {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 20px;
-    width: 100%;
-    max-width: 560px;
-    height: calc(100dvh - 2 * var(--page-pad));
-    margin: 0 auto;
-  }
-
-  .auth-card {
-    max-width: none;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    min-height: calc(100dvh - 2 * var(--page-pad));
   }
 
   .auth-visual {
-    flex: 1 1 0;
-    min-height: 0;
-    height: auto;
-    max-height: none;
+    position: relative;
+    top: auto;
+    left: auto;
+    order: -1;
+    translate: none;
+  }
+
+  .auth-hero {
+    width: min(100%, 440px);
+    margin-top: calc(var(--art-w) * 640 / 560 * -0.3);
+  }
+
+  .login-art-pill {
+    left: auto;
+    right: 4%;
+    bottom: auto;
+    top: 10%;
   }
 }
 
-/* Too short for the artwork next to the card: show the card alone. */
+/* Too short for the artwork above the card: show the card alone. */
 @media (max-width: 900px) and (max-height: 680px) {
   .auth-visual {
     display: none;
   }
 
-  .auth-grid {
-    justify-content: center;
+  .auth-hero {
+    margin-top: 0;
+  }
+}
+
+/* On phones the card spans the width; the corner shapes would only sit behind it. */
+@media (max-width: 600px) {
+  .auth-corner {
+    display: none;
   }
 }
 
 @media (max-width: 600px) {
   .auth-card {
-    padding: 20px;
-    border-radius: 20px;
+    gap: 16px;
+    padding: 28px 22px;
+    border-radius: 22px;
+  }
+
+  .auth-trust {
+    margin-top: -4px;
   }
 }

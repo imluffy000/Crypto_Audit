@@ -815,11 +815,11 @@
 .simple-table th {
   padding: 0 var(--space-4);
   height: 38px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-  color: var(--text-2);
+  background: var(--color-teal); /* #10B59F */
+  border-bottom: 1px solid var(--color-teal);
+  color: #17201d; /* near-black: 6:1 on the teal; white would be 2.6:1 */
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 650;
   text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.04em;

@@ -24,6 +24,7 @@ function Login() {
   const [health, setHealth] = useState(null);
   const [serverError, setServerError] = useState('');
   const [redirecting, setRedirecting] = useState(false);
+  const redirectingRef = useRef(false);
   const notify = useToast();
   const announced = useRef(new Set());
   const errorCode = searchParams.get('error');
@@ -58,6 +59,19 @@ function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errorCode]);
 
+  // Going Back from GitHub can restore this page from the browser's back-forward cache exactly as it
+  // was left, mid-redirect. Re-enable sign-in so the button is not stuck on "Redirecting to GitHub…".
+  useEffect(() => {
+    const onPageShow = (event) => {
+      if (!event.persisted || !redirectingRef.current) return;
+      redirectingRef.current = false;
+      setRedirecting(false);
+      notify({ tone: 'info', title: 'Sign-in cancelled', message: 'You can continue with GitHub again whenever you are ready.' });
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, [notify]);
+
   if (!authLoading && user) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -67,8 +81,8 @@ function Login() {
   const canSignIn = Boolean(health?.github_configured);
 
   const signIn = (selectAccount = false) => {
+    redirectingRef.current = true;
     setRedirecting(true);
-    notify({ tone: 'info', title: 'Redirecting to GitHub', message: selectAccount ? 'Choose the account to use on the next page.' : 'Approve access on the next page.' });
     loginWithGithub({ selectAccount });
   };
 
@@ -108,8 +122,8 @@ function Login() {
             </button>
             <p className="auth-scope">
               {health?.repo_access === 'public'
-                ? 'Requests access to your public profile and public repositories. Your token is revoked when you sign out.'
-                : 'GitHub will ask for the repo scope, needed to read private repositories. CryptoAudit only sends read requests, and your token is revoked when you sign out.'}
+                ? 'Public repositories only. Token revoked on sign-out.'
+                : 'Includes private repositories. Token revoked on sign-out.'}
             </p>
           </div>
         </AuthHero>
