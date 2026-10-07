@@ -3,7 +3,9 @@
 from contextlib import contextmanager
 from unittest import mock
 
-from cryptography.hazmat.primitives.ciphers import aead, modes
+from cryptography.hazmat.primitives import ciphers
+from cryptography.hazmat.primitives.ciphers import aead
+from cryptography.hazmat.primitives.ciphers import base as ciphers_base
 
 KEY = bytes(range(32))
 RUNS = 20
@@ -11,15 +13,21 @@ RUNS = 20
 
 @contextmanager
 def record_ivs():
-    """Record IVs/nonces passed to cipher modes and AEAD constructions."""
+    """
+    Record IVs/nonces used for encryption. Mode classes are never replaced (the native backend
+    resolves them by exact type); instead Cipher construction and AEAD encryption are observed.
+    """
     seen = []
+    real_cipher = ciphers.Cipher
 
-    def wrap_mode(cls):
-        def factory(value, *args, **kwargs):
-            seen.append(bytes(value))
-            return cls(value, *args, **kwargs)
-
-        return factory
+    class RecordingCipher(real_cipher):
+        def __init__(self, algorithm, mode, *args, **kwargs):
+            for attribute in ("initialization_vector", "nonce", "tweak"):
+                value = getattr(mode, attribute, None)
+                if value is not None:
+                    seen.append(bytes(value))
+                    break
+            super().__init__(algorithm, mode, *args, **kwargs)
 
     def wrap_aead(cls):
         # AEAD classes are native types that cannot be patched in place, so wrap them.
@@ -38,7 +46,7 @@ def record_ivs():
 
         return Recording
 
-    patches = [mock.patch.object(modes, name, wrap_mode(getattr(modes, name))) for name in ("CBC", "CTR", "GCM", "OFB", "CFB")]
+    patches = [mock.patch.object(ciphers, "Cipher", RecordingCipher), mock.patch.object(ciphers_base, "Cipher", RecordingCipher)]
     patches += [
         mock.patch.object(aead, name, wrap_aead(getattr(aead, name)))
         for name in ("AESGCM", "ChaCha20Poly1305", "AESCCM")

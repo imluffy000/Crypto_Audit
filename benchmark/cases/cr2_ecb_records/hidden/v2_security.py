@@ -2,18 +2,27 @@
 
 from unittest import mock
 
-from cryptography.hazmat.primitives.ciphers import modes
+from cryptography.hazmat.primitives import ciphers
+from cryptography.hazmat.primitives.ciphers import base as ciphers_base
 
 KEY = bytes(range(32))
 
 
 def check_encrypt_does_not_use_ecb(ctx):
-    def blocked(*args, **kwargs):
-        raise AssertionError("ECB mode used for new encryption")
+    # Observe Cipher construction; mode classes are never replaced because the native backend
+    # resolves them by exact type.
+    modes_used = []
+    real_cipher = ciphers.Cipher
 
-    with mock.patch.object(modes, "ECB", blocked):
+    class RecordingCipher(real_cipher):
+        def __init__(self, algorithm, mode, *args, **kwargs):
+            modes_used.append(type(mode).__name__)
+            super().__init__(algorithm, mode, *args, **kwargs)
+
+    with mock.patch.object(ciphers, "Cipher", RecordingCipher), mock.patch.object(ciphers_base, "Cipher", RecordingCipher):
         module = ctx.load_candidate()
         module.encrypt(KEY, b"record")
+    assert "ECB" not in modes_used, "ECB mode used for new encryption"
 
 
 def check_no_repeated_block_pattern(ctx):
