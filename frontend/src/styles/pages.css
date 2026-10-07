@@ -416,7 +416,7 @@ button.tree-row:disabled {
 }
 
 .location {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word; /* break long paths only when they cannot fit, never mid-name otherwise */
 }
 
 /* ---------- Finding detail ---------- */

@@ -9,7 +9,7 @@ import RepositoryDetails from './pages/RepositoryDetails';
 import ScanResults from './pages/ScanResults';
 import FindingDetail from './pages/FindingDetail';
 import Reports from './pages/Reports';
-import LatestFindings from './pages/LatestFindings';
+import Findings from './pages/Findings';
 
 function App() {
   return (
@@ -80,7 +80,7 @@ function App() {
             path="/findings"
             element={
               <ProtectedRoute>
-                <LatestFindings />
+                <Findings />
               </ProtectedRoute>
             }
           />

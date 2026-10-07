@@ -795,7 +795,9 @@
   background: var(--surface);
   overflow: hidden;
 }
+/* position: relative keeps visually-hidden (absolute) labels inside the scroll area instead of widening the page */
 .table-scroll {
+  position: relative;
   overflow-x: auto;
 }
 .table-scroll.bordered {
@@ -865,6 +867,9 @@
   min-width: 240px;
   max-width: 420px;
   color: var(--text-2);
+}
+.cell-nowrap {
+  white-space: nowrap;
 }
 .cell-strategy {
   width: 52px;

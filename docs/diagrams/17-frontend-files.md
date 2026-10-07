@@ -60,7 +60,7 @@ flowchart LR
         pg_scan["ScanResults.jsx<br/>polling progress, metrics, findings table,<br/>strategy outcomes, skipped files, report"]
         pg_find["FindingDetail.jsx<br/>finding, strategy tabs, code compare,<br/>why, gates, scanners vs validation"]
         pg_reports["Reports.jsx<br/>scan history with search, status filter, sort"]
-        pg_latest["LatestFindings.jsx<br/>redirect to newest completed scan"]
+        pg_latest["Findings.jsx<br/>all findings across repositories,<br/>search + filters"]
     end
 
     subgraph DOMAIN["components/ — domain"]

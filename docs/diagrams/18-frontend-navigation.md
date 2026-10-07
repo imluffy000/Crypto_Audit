@@ -14,7 +14,7 @@ The website uses hash routes (`frontend/src/App.jsx`). Every route except `/logi
 | `/scans/:scanId` | `ScanResults.jsx` | Progress, summary, findings table, strategy outcomes, report |
 | `/scans/:scanId/findings/:findingId` | `FindingDetail.jsx` | Original vs repaired code, why, gates, scanner comparison |
 | `/reports` | `Reports.jsx` | Scan history and Markdown reports |
-| `/findings` | `LatestFindings.jsx` | Shortcut to the newest completed scan |
+| `/findings` | `Findings.jsx` | Every finding from the latest completed scan of each repository, with search and filters |
 
 ## Diagram
 
@@ -31,7 +31,7 @@ flowchart LR
     scan["/scans/:scanId<br/>ScanResults.jsx"]
     finding["/scans/:scanId/findings/:findingId<br/>FindingDetail.jsx"]
     reports["/reports<br/>Reports.jsx"]
-    latest["/findings<br/>LatestFindings.jsx"]
+    latest["/findings<br/>Findings.jsx"]
 
     dash -- "New scan" --> repos
     dash -- "row" --> scan
@@ -39,7 +39,7 @@ flowchart LR
     review -- "Start scan" --> scan
     scan -- "row" --> finding
     reports -- "row" --> scan
-    latest -- "redirect to newest completed" --> scan
+    latest -- "row" --> finding
 
     dash -.-> e1[("GET /api/scans<br/>GET /api/scans/{id} (latest per repo)<br/>GET /api/health")]
     repos -.-> e2[("GET /api/repos<br/>GET /api/repos/{owner}/{name}/tree<br/>GET /api/health")]
@@ -47,7 +47,7 @@ flowchart LR
     scan -.-> e4[("GET /api/scans/{id} every 1.5 s<br/>GET /api/scans/{id}/findings<br/>GET /api/reports/{id}.md")]
     finding -.-> e5[("GET /api/scans/{id}/findings/{fid}<br/>POST …/candidates/{cid}/ai-explanation")]
     reports -.-> e6[("GET /api/scans<br/>GET /api/reports/{id}.md")]
-    latest -.-> e6
+    latest -.-> e8[("GET /api/scans<br/>GET /api/scans/{id}/findings (latest per repo)")]
     login -.-> e7[("GET /api/health<br/>GET /api/auth/me")]
 
     menu["Sidebar account menu"] -- "Switch account" --> sw[["POST /api/auth/logout →<br/>/api/auth/github/login?select_account=true"]]
@@ -56,5 +56,5 @@ flowchart LR
     classDef page fill:#ebf1fd,stroke:#2557d6,color:#0f2a6b
     classDef api fill:#eef2f7,stroke:#8a96a8,color:#1b2430
     class login,dash,repos,review,scan,finding,reports,latest page
-    class e1,e2,e3,e4,e5,e6,e7 api
+    class e1,e2,e3,e4,e5,e6,e7,e8 api
 ```

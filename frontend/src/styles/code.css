@@ -139,6 +139,7 @@
 }
 
 .code-body {
+  position: relative;
   max-height: 640px;
   overflow: auto;
   padding: var(--space-2) 0;
