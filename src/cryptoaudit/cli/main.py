@@ -192,6 +192,20 @@ def bench_report(
         console.print(text)
 
 
+@app.command(name="serve")
+def serve(
+    host: str = typer.Option("127.0.0.1", "--host", help="Interface to bind; keep 127.0.0.1 unless behind a proxy."),
+    port: int = typer.Option(8000, "--port"),
+    reload: bool = typer.Option(False, "--reload", help="Auto-reload on code changes (development)."),
+) -> None:
+    """Run the website backend (REST API under /api) with uvicorn."""
+    try:
+        import uvicorn
+    except ImportError:
+        console.print('[bold red]Install the web extra first:[/bold red] pip install -e ".[web]"')
+        raise typer.Exit(code=1)
+    uvicorn.run("cryptoaudit.api.app:create_app", factory=True, host=host, port=port, reload=reload)
+
 app.add_typer(bench_app, name="bench")
 
 
