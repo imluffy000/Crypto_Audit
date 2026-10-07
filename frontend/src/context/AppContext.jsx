@@ -53,7 +53,23 @@ export function CryptoAuditProvider({ children }) {
     }
   }, [selectedRepository]);
 
-  const loginWithGithub = useCallback(() => authService.loginWithGithub(), []);
+  const loginWithGithub = useCallback((options) => authService.loginWithGithub(options), []);
+
+  // End this session (revoking its token), forget the selected repository, then sign in again with
+  // GitHub's account picker. State is not reset first, so the page does not flash the login screen.
+  const switchAccount = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // the server also ends the old session when the new sign-in completes
+    }
+    try {
+      localStorage.removeItem(REPOSITORY_KEY);
+    } catch {
+      // storage unavailable
+    }
+    authService.loginWithGithub({ selectAccount: true });
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -65,8 +81,8 @@ export function CryptoAuditProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, authLoading, refreshUser, selectedRepository, setSelectedRepository, loginWithGithub, logout }),
-    [user, authLoading, refreshUser, selectedRepository, loginWithGithub, logout],
+    () => ({ user, authLoading, refreshUser, selectedRepository, setSelectedRepository, loginWithGithub, switchAccount, logout }),
+    [user, authLoading, refreshUser, selectedRepository, loginWithGithub, switchAccount, logout],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

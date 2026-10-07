@@ -228,6 +228,8 @@ def test_authorize_url_contains_scope_state_and_redirect():
         "allow_signup": ["false"],
     }
     assert auth.manage_access_url == "https://github.com/settings/connections/applications/Ov23abc"
+    switch = parse_qs(urlparse(auth.authorize_url("st4te", select_account=True)).query)
+    assert switch["prompt"] == ["select_account"] and switch["state"] == ["st4te"]
 
 
 def test_revoke_uses_app_credentials():

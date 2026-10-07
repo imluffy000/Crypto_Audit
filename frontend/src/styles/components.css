@@ -1266,3 +1266,21 @@
 .skipped-list li:last-child {
   border-bottom: 0;
 }
+
+/* ---------- Link button ---------- */
+.link-button {
+  align-self: center;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--accent-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.link-button:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.link-button:disabled {
+  color: var(--text-3);
+}

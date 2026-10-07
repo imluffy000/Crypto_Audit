@@ -136,6 +136,9 @@ strategies (S3/S4) are bounded by how fast the local model generates.
 - Sign-in uses the GitHub OAuth web flow with a single-use `state` bound to both the server and an
   HttpOnly browser cookie. Tokens are revoked at GitHub on logout (OAuth App tokens never expire on their own). Sessions are HttpOnly, SameSite=Lax cookies; set
   `CRYPTOAUDIT_COOKIE_SECURE=true` behind HTTPS.
+- **Switch account** (account menu, or "Use a different GitHub account" on the sign-in page) ends the
+  current session, revokes its token and signs in again with GitHub's account picker
+  (`prompt=select_account`). Completing any sign-in also ends a session still open in that browser.
 - Access tokens are encrypted at rest in `backend/data/web/cryptoaudit.sqlite`; session IDs are stored hashed.
 - Repository archives are size-limited and read in memory (only `.py` files, no symlinks, no path
   traversal). One active scan per user.

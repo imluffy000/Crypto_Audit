@@ -53,9 +53,9 @@ function Login() {
   const checking = !health && !serverError;
   const canSignIn = Boolean(health?.github_configured);
 
-  const signIn = () => {
+  const signIn = (selectAccount = false) => {
     setRedirecting(true);
-    loginWithGithub();
+    loginWithGithub({ selectAccount });
   };
 
   return (
@@ -89,10 +89,14 @@ function Login() {
             </Alert>
           ) : null}
 
-          <Button variant="primary" size="lg" block onClick={signIn} disabled={!canSignIn} loading={checking || redirecting}>
+          <Button variant="primary" size="lg" block onClick={() => signIn()} disabled={!canSignIn} loading={checking || redirecting}>
             {!checking && !redirecting ? <GitHubMark /> : null}
             {checking ? 'Checking server…' : redirecting ? 'Redirecting to GitHub…' : 'Continue with GitHub'}
           </Button>
+
+          <button type="button" className="link-button" onClick={() => signIn(true)} disabled={!canSignIn || redirecting}>
+            Use a different GitHub account
+          </button>
 
           <p className="login-scope">
             {health?.repo_access === 'public'

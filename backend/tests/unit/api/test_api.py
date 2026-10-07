@@ -176,6 +176,23 @@ def test_login_redirects_to_github_with_state_cookie(env):
     assert query["redirect_uri"] == ["http://localhost:5173/api/auth/github/callback"]
     cookie = response.headers["set-cookie"]
     assert STATE_COOKIE in cookie and "HttpOnly" in cookie and query["state"][0] in cookie
+    assert "prompt" not in query
+
+
+def test_switch_account_login_shows_github_account_picker(env):
+    client, _, github, _ = env
+    sign_in(client)
+    switched = client.get("/api/auth/github/login?select_account=true")
+    assert parse_qs(urlparse(switched.headers["location"]).query)["prompt"] == ["select_account"]
+    # Signing in as another account replaces the session and revokes the previous account's token.
+    alice_cookie = client.cookies.get(SESSION_COOKIE)
+    state = parse_qs(urlparse(switched.headers["location"]).query)["state"][0]
+    done = client.get(f"/api/auth/github/callback?code=code-bob&state={state}")
+    assert done.headers["location"].endswith("/#/dashboard")
+    assert client.get("/api/auth/me").json()["login"] == "bob"
+    assert len(github.revoked) == 1 and "ghu_alice" in github.revoked[0]
+    client.cookies.set(SESSION_COOKIE, alice_cookie)
+    assert client.get("/api/auth/me").status_code == 401  # the old session no longer works
 
 
 def test_callback_creates_http_only_session(env):

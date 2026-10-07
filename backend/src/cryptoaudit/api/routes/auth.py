@@ -1,6 +1,7 @@
 """GitHub OAuth App sign-in: redirect to GitHub, handle the callback, issue a session cookie, revoke on logout."""
 
 import logging
+from typing import Optional
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request, Response
@@ -21,11 +22,12 @@ def _frontend(services: Services, route: str) -> str:
 
 
 @router.get("/github/login")
-def github_login(services: Services = Depends(get_services)) -> RedirectResponse:
+def github_login(select_account: bool = False, services: Services = Depends(get_services)) -> RedirectResponse:
+    """Start sign-in. ``select_account=true`` asks GitHub to let the user pick a different account."""
     if services.auth is None:
         raise CryptoAuditError(ErrorCode.EXTERNAL_SERVICE_ERROR, "GitHub sign-in is not configured on this server")
     state = services.store.create_oauth_state()
-    response = RedirectResponse(services.auth.authorize_url(state), status_code=302)
+    response = RedirectResponse(services.auth.authorize_url(state, select_account=select_account), status_code=302)
     # Bind the state to this browser as well as to the server (login-CSRF protection).
     response.set_cookie(
         STATE_COOKIE, state, max_age=600, httponly=True, samesite="lax", secure=services.settings.cookie_secure, path="/api/auth"
@@ -58,6 +60,7 @@ def github_callback(request: Request, code: str = "", state: str = "", services:
         logger.exception("Unexpected error while completing GitHub sign-in")
         return fail("server_error")
 
+    _end_session(services, request.cookies.get(SESSION_COOKIE), keep_token=token.access_token)
     session_id = services.store.create_session(user, token.access_token, services.settings.session_ttl_hours)
     response = RedirectResponse(_frontend(services, "/dashboard"), status_code=302)
     response.delete_cookie(STATE_COOKIE, path="/api/auth")
@@ -73,6 +76,19 @@ def github_callback(request: Request, code: str = "", state: str = "", services:
     return response
 
 
+def _end_session(services: Services, session_id: Optional[str], keep_token: Optional[str] = None) -> None:
+    """Delete a session and revoke its GitHub token (best effort). Used on logout and when switching accounts."""
+    if not session_id:
+        return
+    session = services.store.get_session(session_id)
+    services.store.delete_session(session_id)
+    # OAuth App tokens never expire on their own: revoke this one at GitHub.
+    if session is None or services.auth is None or session.access_token == keep_token:
+        return
+    if not services.auth.revoke(session.access_token):
+        logger.warning("Could not revoke a GitHub token; the user can revoke it in GitHub settings")
+
+
 @router.get("/me", response_model=UserOut)
 def me(session: SessionInfo = Depends(current_session)) -> UserOut:
     return UserOut(**session.user.model_dump())
@@ -80,13 +96,7 @@ def me(session: SessionInfo = Depends(current_session)) -> UserOut:
 
 @router.post("/logout", status_code=204)
 def logout(request: Request, services: Services = Depends(get_services)) -> Response:
-    session_id = request.cookies.get(SESSION_COOKIE)
-    if session_id:
-        session = services.store.get_session(session_id)
-        services.store.delete_session(session_id)
-        # OAuth App tokens never expire on their own: revoke this one at GitHub (best effort).
-        if session is not None and services.auth is not None and not services.auth.revoke(session.access_token):
-            logger.warning("Could not revoke a GitHub token at logout; the user can revoke it in GitHub settings")
+    _end_session(services, request.cookies.get(SESSION_COOKIE))
     response = Response(status_code=204)
     response.delete_cookie(SESSION_COOKIE, path="/")
     return response

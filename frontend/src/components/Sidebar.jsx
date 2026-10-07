@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { ChevronsUpDown, FolderGit2, History, LayoutDashboard, LogOut, ShieldAlert, UserCircle2 } from 'lucide-react';
+import { ArrowLeftRight, ChevronsUpDown, FolderGit2, History, LayoutDashboard, LogOut, ShieldAlert, UserCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AppContext';
 import BrandMark from './BrandMark';
 import Dropdown from './ui/Dropdown';
@@ -13,7 +13,7 @@ const navItems = [
 
 /** Primary navigation. Rendered fixed on wide screens and inside a drawer on small ones. */
 function Sidebar({ onNavigate, pathname = '' }) {
-  const { user, logout } = useAuth();
+  const { user, logout, switchAccount } = useAuth();
 
   return (
     <div className="sidebar">
@@ -56,7 +56,10 @@ function Sidebar({ onNavigate, pathname = '' }) {
               <ChevronsUpDown size={14} aria-hidden="true" className="account-chevron" />
             </span>
           }
-          items={[{ label: 'Sign out', icon: LogOut, onSelect: logout }]}
+          items={[
+            { label: 'Switch account', icon: ArrowLeftRight, onSelect: switchAccount },
+            { label: 'Sign out', icon: LogOut, onSelect: logout },
+          ]}
         />
       </div>
     </div>
