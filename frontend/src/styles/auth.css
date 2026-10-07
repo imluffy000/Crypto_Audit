@@ -141,32 +141,72 @@
 }
 
 
-/* ---------- Artwork fragments ---------- */
-.auth-visual .card-algorithm {
-  top: 8%;
-  left: 7%;
-  width: min(44%, 210px);
-  --rise-delay: 250ms;
+/* ---------- Artwork ---------- */
+/* The frame keeps the artwork's proportions inside whatever box the layout gives it. */
+.login-art {
+  display: grid;
+  place-items: center;
+  container-type: size;
 }
 
-.auth-visual .card-scan {
-  top: 37%;
-  right: 7%;
-  width: min(54%, 250px);
-  --rise-delay: 400ms;
-  --float-delay: -2.5s;
+.login-art-frame {
+  position: relative;
+  width: min(100cqw, 100cqh * 560 / 640);
+  aspect-ratio: 560 / 640;
 }
 
-.auth-visual .card-warning {
-  bottom: 7%;
-  left: 7%;
-  width: min(52%, 248px);
-  --rise-delay: 550ms;
-  --float-delay: -5s;
+.login-art-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  overflow: visible;
+}
+
+.login-art-silhouette {
+  filter: drop-shadow(0 18px 24px rgba(15, 118, 110, 0.1));
+}
+
+.login-art-scan {
+  transform-box: view-box;
+  transform-origin: 296px 214px;
+  animation: brand-spin 20s linear infinite;
+}
+
+.login-art-drift {
+  animation: brand-drift 8s ease-in-out infinite alternate;
+}
+
+.login-art-pill {
+  position: absolute;
+  left: 30%;
+  bottom: 4%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px 0 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px -12px rgba(23, 32, 29, 0.3);
+  color: var(--brand-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  animation:
+    brand-rise 700ms var(--brand-ease) both 400ms,
+    brand-float 6s ease-in-out infinite alternate;
+}
+
+.login-art-pill svg {
+  color: var(--brand-success);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth-card {
+  .auth-card,
+  .login-art-scan,
+  .login-art-drift,
+  .login-art-pill {
     animation: none;
   }
 }
@@ -179,14 +219,6 @@
 
   .auth-visual {
     grid-column: 7 / span 6;
-  }
-
-  .card-scan {
-    width: min(62%, 250px);
-  }
-
-  .card-warning {
-    width: min(64%, 248px);
   }
 }
 
@@ -212,21 +244,6 @@
     min-height: 0;
     height: auto;
     max-height: none;
-    border-radius: 32px;
-  }
-
-  .auth-visual .art-secondary,
-  .auth-visual .card-algorithm,
-  .auth-visual .card-warning {
-    display: none;
-  }
-
-  .auth-visual .card-scan {
-    top: auto;
-    left: auto;
-    right: 6%;
-    bottom: 8%;
-    width: min(70%, 250px);
   }
 }
 

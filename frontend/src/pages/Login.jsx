@@ -4,8 +4,7 @@ import { LockKeyhole } from 'lucide-react';
 import AuthLayout from '../layouts/AuthLayout';
 import AuthHero from '../components/auth/AuthHero';
 import GithubAuthButton from '../components/auth/GithubAuthButton';
-import AnalysisCard from '../components/brand/AnalysisCard';
-import CryptoAuditGraphic from '../components/brand/CryptoAuditGraphic';
+import LoginArtwork from '../components/auth/LoginArtwork';
 import { Alert } from '../components/ui/States';
 import { useToast } from '../components/ui/toastContext';
 import { useAuth } from '../context/AppContext';
@@ -115,25 +114,7 @@ function Login() {
           </div>
         </AuthHero>
 
-        <CryptoAuditGraphic className="auth-visual">
-          <AnalysisCard className="graphic-float card-algorithm" eyebrow="Algorithm" title="AES-256-GCM" status={{ tone: 'success', label: 'Recommended' }} />
-          <AnalysisCard
-            className="graphic-float card-scan"
-            eyebrow="Cryptographic scan"
-            rows={[
-              ['127', 'files analyzed'],
-              ['23', 'crypto operations'],
-            ]}
-            status={{ tone: 'live', caption: 'Status', label: 'Analysis complete' }}
-          />
-          <AnalysisCard
-            className="graphic-float card-warning"
-            eyebrow="CR5 · Static analysis"
-            title="Weak RNG"
-            detail="random.randint() · tokens.py:42"
-            status={{ tone: 'warning', label: 'Review required' }}
-          />
-        </CryptoAuditGraphic>
+        <LoginArtwork className="auth-visual" />
       </div>
     </AuthLayout>
   );
