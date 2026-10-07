@@ -46,6 +46,7 @@ export const repositoryService = {
       visibility: repo.private ? 'Private' : 'Public',
       language: repo.language,
       lastUpdated: relativeTime(repo.updated_at),
+      updatedAt: repo.updated_at,
       size: repo.size_kb / 1024,
     }));
   },
@@ -60,6 +61,7 @@ export const repositoryService = {
       branch: result.ref,
       files: result.files,
       pythonFiles: result.python_files,
+      archives: result.archives || 0,
       totalSize: result.total_size,
       truncated: result.truncated,
       source: 'GitHub',

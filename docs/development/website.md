@@ -62,7 +62,7 @@ cryptoaudit serve                      # API on http://127.0.0.1:8000 (run from 
 cd frontend && npm install && npm run dev   # website on http://localhost:5173 (proxies /api to :8000)
 ```
 
-Optional local LLM (enables S3/S4 and the “Explain in plain language (AI)” button):
+Optional local LLM (enables S3/S4 and the “Summarise in plain language” button on a finding):
 
 ```sh
 ollama pull qwen2.5-coder:7b       # or set CRYPTOAUDIT_LLM_MODEL to another code model
@@ -118,6 +118,8 @@ All limits are settings in `backend/.env` (defaults shown):
 | `CRYPTOAUDIT_MAX_UNPACKED_MB` | 4096 | Everything in the archive, including non-Python files. |
 | `CRYPTOAUDIT_MAX_PYTHON_FILES` | 5000 | Files beyond the limit are listed as skipped. |
 | `CRYPTOAUDIT_MAX_FILE_KB` | 1024 | Larger `.py` files (usually generated code) are skipped and listed. |
+| `CRYPTOAUDIT_SCAN_ARCHIVES` | true | Also scan `.py` files inside `.zip` archives committed to the repository. They are read in memory, one level deep (nested archives are listed as skipped), count towards the unpacked and file-count limits, and their findings are reported as `archive.zip/path/file.py`. |
+| `CRYPTOAUDIT_MAX_ARCHIVE_MB` | 100 | Larger `.zip` archives are skipped and listed. |
 | `CRYPTOAUDIT_SCAN_PARALLELISM` | 4 | Files repaired and validated concurrently within one scan. |
 | `CRYPTOAUDIT_SCAN_WORKERS` | 2 | Scans running at the same time. |
 | `CRYPTOAUDIT_LLM_NUM_CTX` | 8192 | Context window for S3/S4 (prompt + complete repaired file). Files that do not fit are recorded as `NO_REPAIR` (`LIMIT_EXCEEDED`), never truncated. Larger values need more GPU memory. |
@@ -134,6 +136,9 @@ strategies (S3/S4) are bounded by how fast the local model generates.
 - Sign-in uses the GitHub OAuth web flow with a single-use `state` bound to both the server and an
   HttpOnly browser cookie. Tokens are revoked at GitHub on logout (OAuth App tokens never expire on their own). Sessions are HttpOnly, SameSite=Lax cookies; set
   `CRYPTOAUDIT_COOKIE_SECURE=true` behind HTTPS.
+- **Switch account** (account menu, or "Use a different GitHub account" on the sign-in page) ends the
+  current session, revokes its token and signs in again with GitHub's account picker
+  (`prompt=select_account`). Completing any sign-in also ends a session still open in that browser.
 - Access tokens are encrypted at rest in `backend/data/web/cryptoaudit.sqlite`; session IDs are stored hashed.
 - Repository archives are size-limited and read in memory (only `.py` files, no symlinks, no path
   traversal). One active scan per user.

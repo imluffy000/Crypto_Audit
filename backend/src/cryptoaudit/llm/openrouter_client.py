@@ -6,6 +6,7 @@ to OpenRouter and the model provider it routes to. It is only used when explicit
 """
 
 import json
+import logging
 import socket
 import time
 import urllib.error
@@ -18,6 +19,28 @@ from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 DEFAULT_OPENROUTER_URL = "https://openrouter.ai/api/v1"
 DEFAULT_OPENROUTER_MODEL = "qwen/qwen-2.5-coder-32b-instruct"
 MODELS_CACHE_SECONDS = 300
+logger = logging.getLogger("cryptoaudit.llm.openrouter")
+
+
+def _provider_message(detail: str) -> str:
+    """Pull the human-readable reason out of an OpenRouter error body (which may nest the provider's error)."""
+    try:
+        error = json.loads(detail).get("error") or {}
+    except (ValueError, AttributeError):
+        return detail.strip()[:200]
+    message = str(error.get("message") or "").strip()
+    raw = (error.get("metadata") or {}).get("raw")
+    inner = ""
+    if isinstance(raw, str):
+        try:
+            parsed = json.loads(raw)
+            errors = parsed.get("errors") if isinstance(parsed, dict) else None
+            inner = str((errors[0] or {}).get("message", "")) if errors else str(parsed.get("message", "") or "")
+        except (ValueError, AttributeError, IndexError, TypeError):
+            inner = raw
+    inner = inner.split(" (", 1)[0].strip()  # drop trailing request ids
+    text = f"{message}: {inner}" if message and inner else message or inner
+    return text[:200]
 
 
 class OpenRouterClient:
@@ -46,10 +69,12 @@ class OpenRouterClient:
             "model": request.model,
             "messages": [{"role": "system", "content": request.system}, {"role": "user", "content": request.prompt}],
             "temperature": request.temperature,
-            "seed": request.seed,
             "max_tokens": request.max_tokens,
             "stream": False,
         }
+        # Several upstream providers reject seed values below 1, so the default seed 0 is not sent.
+        if request.seed >= 1:
+            payload["seed"] = request.seed
         started = time.perf_counter()
         data = self._request("POST", "/chat/completions", payload)
         try:
@@ -89,9 +114,11 @@ class OpenRouterClient:
         except (socket.timeout, TimeoutError) as exc:
             raise CryptoAuditError(ErrorCode.TIMEOUT, f"OpenRouter request timed out after {timeout or self.timeout}s") from exc
         except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")[:300]
+            detail = exc.read().decode("utf-8", errors="replace")[:2000]
+            logger.warning("OpenRouter HTTP %s: %s", exc.code, detail)
             reasons = {401: "invalid API key", 402: "insufficient OpenRouter credits", 429: "rate limited"}
-            raise CryptoAuditError(ErrorCode.LLM_ERROR, f"OpenRouter HTTP {exc.code} ({reasons.get(exc.code, 'error')}): {detail}") from exc
+            reason = reasons.get(exc.code) or _provider_message(detail) or "request rejected"
+            raise CryptoAuditError(ErrorCode.LLM_ERROR, f"OpenRouter error (HTTP {exc.code}): {reason}") from exc
         except urllib.error.URLError as exc:
             if isinstance(exc.reason, (socket.timeout, TimeoutError)):
                 raise CryptoAuditError(ErrorCode.TIMEOUT, "OpenRouter request timed out") from exc

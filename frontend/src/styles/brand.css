@@ -1,0 +1,500 @@
+/*
+ * CryptoAudit brand layer for public pages (home, sign-in). Scoped to .brand-page so the
+ * signed-in app keeps its own tokens. Shared components (Alert, links, focus ring) pick the
+ * palette up through the overridden variables.
+ *
+ *   Background #F3F6F2   Surface #FFFFFF    Warm   #FEF7E5   Border  #D9E2DC
+ *   Primary    #0F766E   Secondary #14B8A6  Accent #D9F99D
+ *   Text       #17201D   Secondary text #66736D
+ *   Warning    #D99A28   Danger #DC4C4C     Success #269A6B
+ *
+ * Contrast: white on #0F766E is 5.5:1, #0F766E on the background 5.0:1, #66736D on the
+ * background 4.5:1. #14B8A6, #D9F99D and #D99A28 are fills and icons only, never body text.
+ */
+.brand-page {
+  --brand-bg: #f3f6f2;
+  --brand-surface: #ffffff;
+  --brand-warm: #fef7e5;
+  --brand-primary: #0f766e;
+  --brand-primary-hover: #0b5d56;
+  --brand-secondary: #14b8a6;
+  --brand-accent: #d9f99d;
+  --brand-text: #17201d;
+  --brand-text-2: #66736d;
+  --brand-border: #d9e2dc;
+  --brand-border-strong: #c3d0c7;
+  --brand-warning: #d99a28;
+  --brand-danger: #dc4c4c;
+  --brand-success: #269a6b;
+  --brand-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --brand-shadow: 0 12px 28px -18px rgba(23, 32, 29, 0.35);
+
+  /* Map onto the shared tokens used by Alert, links and the focus ring. */
+  --bg: var(--brand-bg);
+  --surface: var(--brand-surface);
+  --surface-2: var(--brand-warm);
+  --border: var(--brand-border);
+  --text: var(--brand-text);
+  --text-2: var(--brand-text-2);
+  --text-3: var(--brand-text-2);
+  --accent: var(--brand-primary);
+  --accent-hover: var(--brand-primary-hover);
+  --accent-text: var(--brand-text);
+  --warning: #9a6a12; /* text tone of the warning colour, darkened for 4.5:1 */
+  --danger: #b93a3a;
+  --success: var(--brand-success);
+  --focus-ring: 0 0 0 2px var(--brand-bg), 0 0 0 4px var(--brand-primary);
+
+  --page-gutter: clamp(16px, 4vw, 56px);
+  --page-pad: clamp(16px, 4vh, 40px);
+
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: 'Inter', var(--font-sans);
+}
+
+/* ---------- Logo ---------- */
+.ca-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--brand-primary);
+}
+
+.ca-logo-mark {
+  flex-shrink: 0;
+}
+
+.ca-logo-word {
+  color: var(--brand-text);
+  font-size: 1.0625rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+/* ---------- Buttons ---------- */
+.brand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color 200ms var(--brand-ease),
+    border-color 200ms var(--brand-ease),
+    color 200ms var(--brand-ease),
+    transform 200ms var(--brand-ease);
+}
+
+.brand-btn:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.brand-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.brand-btn:focus-visible {
+  border-radius: 14px;
+}
+
+.brand-btn-sm {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+
+.brand-btn-lg {
+  height: 56px;
+  padding: 0 28px;
+  font-size: 1rem;
+}
+
+.brand-btn-primary {
+  background: var(--brand-primary);
+  color: #ffffff;
+}
+
+.brand-btn-primary:hover {
+  background: var(--brand-primary-hover);
+  color: #ffffff;
+}
+
+.brand-btn-secondary {
+  background: var(--brand-surface);
+  border-color: var(--brand-border);
+  color: var(--brand-text);
+}
+
+.brand-btn-secondary:hover {
+  border-color: var(--brand-border-strong);
+  color: var(--brand-text);
+}
+
+.brand-btn-ghost {
+  background: transparent;
+  color: var(--brand-text);
+}
+
+.brand-btn-ghost:hover {
+  background: rgba(15, 118, 110, 0.07);
+  color: var(--brand-text);
+  transform: none;
+}
+
+.brand-btn .btn-arrow {
+  transition: transform 220ms var(--brand-ease);
+}
+
+.brand-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ---------- Card hover ---------- */
+.hover-lift {
+  transition:
+    transform 220ms var(--brand-ease),
+    border-color 220ms var(--brand-ease),
+    box-shadow 220ms var(--brand-ease);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-border-strong);
+  box-shadow: var(--brand-shadow);
+}
+
+/* ---------- Abstract graphic ---------- */
+.crypto-graphic {
+  position: relative;
+  aspect-ratio: 560 / 620;
+  overflow: hidden;
+  border-radius: 48px;
+  background: #e8efe9;
+  isolation: isolate;
+}
+
+.crypto-graphic-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+.art-hex {
+  fill: #ffffff;
+  fill-opacity: 0.16;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  letter-spacing: 0.12em;
+}
+
+.art-scan {
+  transform-box: view-box;
+  transform-origin: 214px 262px;
+  animation: brand-spin 18s linear infinite;
+}
+
+.art-blob {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: brand-breathe 14s ease-in-out infinite alternate;
+}
+
+.art-orbit {
+  animation: brand-drift 8s ease-in-out infinite alternate;
+}
+
+.crypto-graphic.is-compact .art-secondary {
+  display: none;
+}
+
+/* Overlay fragments float gently, each on its own phase. */
+.graphic-float {
+  position: absolute;
+  animation:
+    brand-rise 700ms var(--brand-ease) both,
+    brand-float 6s ease-in-out infinite alternate;
+  animation-delay: var(--rise-delay, 200ms), var(--float-delay, 0s);
+}
+
+/* ---------- Analysis card (product-UI fragment) ---------- */
+.analysis-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--brand-surface, #ffffff);
+  border: 1px solid var(--brand-border, #d9e2dc);
+  border-radius: 18px;
+  box-shadow: var(--brand-shadow);
+  color: var(--brand-text, #17201d);
+  font-size: 0.8125rem;
+}
+
+.analysis-card-eyebrow,
+.analysis-card-caption {
+  color: var(--brand-text-2, #66736d);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.analysis-card-title {
+  font-size: 1.0625rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.analysis-card-detail {
+  color: var(--brand-text-2, #66736d);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+.analysis-card-rows {
+  display: grid;
+  gap: 2px;
+  margin: 2px 0 4px;
+}
+
+.analysis-card-rows div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.analysis-card-rows dd {
+  order: -1;
+  margin: 0;
+  min-width: 2.2em;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.analysis-card-rows dt {
+  color: var(--brand-text-2, #66736d);
+}
+
+.analysis-card-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--brand-border, #d9e2dc);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.analysis-card-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tone-success .analysis-card-state svg,
+.tone-live .live-dot {
+  color: var(--brand-success, #269a6b);
+}
+
+.tone-warning .analysis-card-state svg {
+  color: var(--brand-warning, #d99a28);
+}
+
+.live-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.live-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+  animation: brand-ping 2.4s var(--brand-ease) infinite;
+}
+
+/* A scanning bar: a short segment sweeping across a track. */
+.scan-track {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #e6efe9;
+}
+
+.scan-track::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 34%;
+  border-radius: 6px;
+  background: var(--brand-secondary, #14b8a6);
+  animation: brand-sweep 4.5s ease-in-out infinite alternate;
+}
+
+/* ---------- Algorithm badge ---------- */
+.algo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 14px 0 16px;
+  background: var(--brand-surface, #ffffff);
+  border: 1px solid var(--brand-border, #d9e2dc);
+  border-radius: 999px;
+  box-shadow: var(--brand-shadow);
+  color: var(--brand-text, #17201d);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.algo-badge svg {
+  flex-shrink: 0;
+}
+
+.algo-badge.tone-success svg {
+  color: var(--brand-success, #269a6b);
+}
+
+.algo-badge.tone-warning {
+  background: #fff8e8;
+  border-color: #f0dcae;
+}
+
+.algo-badge.tone-warning svg {
+  color: var(--brand-warning, #d99a28);
+}
+
+/* ---------- Motion ---------- */
+@keyframes brand-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes brand-float {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -4px;
+  }
+}
+
+@keyframes brand-drift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -6px 8px;
+  }
+}
+
+@keyframes brand-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes brand-breathe {
+  to {
+    transform: scale(1.03) rotate(2deg);
+  }
+}
+
+@keyframes brand-sweep {
+  from {
+    transform: translateX(-10%);
+  }
+  to {
+    transform: translateX(205%);
+  }
+}
+
+@keyframes brand-ping {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.6);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graphic-float,
+  .art-scan,
+  .art-blob,
+  .art-orbit,
+  .scan-track::after,
+  .live-dot::after {
+    animation: none !important;
+  }
+
+  .brand-btn:hover,
+  .hover-lift:hover {
+    transform: none;
+  }
+}
+
+/* ---------- Route transitions ---------- */
+/* Only page content moves, so fixed chrome (the app sidebar, the home navbar) stays put. */
+.route-stage .page-anim {
+  animation: page-in 380ms var(--brand-ease, ease) backwards;
+}
+
+.route-stage.is-leaving .page-anim {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity 160ms ease-in,
+    transform 160ms ease-in;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-stage .page-anim {
+    animation: none;
+  }
+
+  .route-stage.is-leaving .page-anim {
+    transform: none;
+  }
+}

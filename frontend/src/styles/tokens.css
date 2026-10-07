@@ -1,0 +1,119 @@
+/*
+ * CryptoAudit design tokens — light, muted palette.
+ *
+ *   Primary background  #EEF4EE   Secondary cream  #F7F1DE   Cards    #FFFFFF
+ *   Primary teal        #10B59F   Hover teal       #079681   Borders  #DCE4DE
+ *   Primary text        #343936   Secondary text   #68716C   Highlight yellow #FFF2B8
+ *
+ * Teal is reserved for CTAs, active states, icons and important accents. Text on teal uses the
+ * primary text colour (4.5:1); teal is never used for body text on light backgrounds (too low
+ * contrast), so links and active labels stay dark with a teal underline, icon or indicator.
+ * Semantic colours are muted to sit inside the palette; only VERIFIED uses the success colour.
+ */
+:root {
+  --font-sans: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+
+  --content-max: 1200px;
+  --sidebar-width: 232px;
+  --topbar-height: 56px;
+
+  --duration: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Palette */
+  --color-bg: #eef4ee;
+  --color-cream: #f7f1de;
+  --color-teal: #10b59f;
+  --color-teal-hover: #079681;
+  --color-text: #343936;
+  --color-text-2: #68716c;
+  --color-card: #ffffff;
+  --color-border: #dce4de;
+  --color-highlight: #fff2b8;
+
+  /* Surfaces and text */
+  --bg: var(--color-bg);
+  --surface: var(--color-card);
+  --surface-2: var(--color-cream); /* table headers, code headers, quiet panels */
+  --surface-3: #e5ede6; /* hover on light surfaces: the background, one step deeper */
+  --border: var(--color-border);
+  --border-strong: #c8d3cb;
+  --text: var(--color-text);
+  --text-2: var(--color-text-2);
+  --text-3: var(--color-text-2);
+  --overlay: rgba(52, 57, 54, 0.32);
+  --shadow-sm: 0 1px 2px rgba(52, 57, 54, 0.05);
+  --shadow-md: 0 6px 20px rgba(52, 57, 54, 0.08);
+
+  /* Accent (teal) */
+  --accent: var(--color-teal);
+  --accent-hover: var(--color-teal-hover);
+  --accent-subtle: #e2f4ef; /* teal tint for active backgrounds */
+  --accent-text: var(--color-text); /* text that needs emphasis stays dark; teal goes on the indicator */
+  --on-accent: var(--color-text);
+  --on-accent-hover: #ffffff;
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--color-teal);
+
+  /* Semantic (muted) */
+  --success: #2b7a57;
+  --success-subtle: #e3f1e8;
+  --success-border: #bddbc9;
+  --warning: #85600a;
+  --warning-subtle: var(--color-highlight);
+  --warning-border: #ecd77f;
+  --danger: #b0442f;
+  --danger-subtle: #fbebe6;
+  --danger-border: #eec4b9;
+  --info: #3f6a86;
+  --info-subtle: #e6eef2;
+  --info-border: #c6d6e0;
+  --neutral-subtle: #f1f4f1;
+  --neutral-border: var(--color-border);
+
+  /* Code */
+  --code-bg: #fcfdfb;
+  --code-gutter: #f6f8f5;
+  --code-line-number: #8a938d;
+  --code-added: #e3f1e8;
+  --code-added-strong: #c9e5d4;
+  --code-removed: #fbebe6;
+  --code-removed-strong: #f3d2c8;
+  --code-flagged: var(--color-highlight);
+  --syn-keyword: #0b7d6d;
+  --syn-string: #5d6b1f;
+  --syn-comment: #858e88;
+  --syn-number: #9a5b12;
+  --syn-builtin: #7a4a8c;
+  --syn-decorator: #9a5b12;
+
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration: 0ms;
+  }
+}

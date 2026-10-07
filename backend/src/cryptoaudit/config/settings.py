@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     max_unpacked_mb: int = 4096  # total size of everything in the archive, including non-Python files
     max_python_files: int = 5000
     max_file_kb: int = 1024  # larger .py files (usually generated code) are skipped and listed
+    scan_archives: bool = True  # also scan .py files inside .zip archives committed to the repository
+    max_archive_mb: int = 100  # larger .zip archives are skipped and listed
 
     @property
     def github_configured(self) -> bool:

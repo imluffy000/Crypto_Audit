@@ -13,8 +13,9 @@ function toUser(profile) {
 
 export const authService = {
   // Full-page redirect: GitHub sign-in is handled by the backend, which sets an HttpOnly session cookie.
-  loginWithGithub: () => {
-    window.location.assign(api.url('/auth/github/login'));
+  // selectAccount asks GitHub to show its account picker instead of reusing the account signed in to github.com.
+  loginWithGithub: ({ selectAccount = false } = {}) => {
+    window.location.assign(api.url(`/auth/github/login${selectAccount ? '?select_account=true' : ''}`));
   },
 
   currentUser: async () => toUser(await api.get('/auth/me')),

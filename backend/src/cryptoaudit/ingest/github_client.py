@@ -215,17 +215,18 @@ class GitHubOAuth:
         """Where a user reviews or revokes this app's access (and requests organisation approval)."""
         return f"{self.web_url}/settings/connections/applications/{self.client_id}"
 
-    def authorize_url(self, state: str) -> str:
-        query = urlencode(
-            {
-                "client_id": self.client_id,
-                "redirect_uri": self.redirect_uri,
-                "scope": " ".join(self.scopes),
-                "state": state,
-                "allow_signup": "false",
-            }
-        )
-        return f"{self.web_url}/login/oauth/authorize?{query}"
+    def authorize_url(self, state: str, select_account: bool = False) -> str:
+        params = {
+            "client_id": self.client_id,
+            "redirect_uri": self.redirect_uri,
+            "scope": " ".join(self.scopes),
+            "state": state,
+            "allow_signup": "false",
+        }
+        if select_account:
+            # Show GitHub's account picker instead of silently reusing the account signed in to github.com.
+            params["prompt"] = "select_account"
+        return f"{self.web_url}/login/oauth/authorize?{urlencode(params)}"
 
     def exchange_code(self, code: str) -> OAuthToken:
         try:

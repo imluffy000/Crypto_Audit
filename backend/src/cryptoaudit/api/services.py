@@ -85,5 +85,7 @@ def default_services(settings: Optional[Settings] = None, github_transport: Opti
             max_unpacked_bytes=settings.max_unpacked_mb * 1024 * 1024,
             max_python_files=settings.max_python_files,
             max_file_bytes=settings.max_file_kb * 1024,
+            scan_archives=settings.scan_archives,
+            max_archive_bytes=settings.max_archive_mb * 1024 * 1024,
         ),
     )
