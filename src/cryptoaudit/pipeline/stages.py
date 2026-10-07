@@ -22,7 +22,10 @@ from cryptoaudit.validation.runner import ValidationPipeline
 def analysis_stage(analyzer: AnalyzerEngine, module: ModuleInput) -> List[Finding]:
     """Run the deterministic Analyzer; finding paths are normalised to the module name."""
     with tempfile.TemporaryDirectory(prefix="cryptoaudit-in-") as tmp:
-        path = Path(tmp) / module.module_name
+        path = (Path(tmp) / module.module_name).resolve()
+        if Path(tmp).resolve() not in path.parents:
+            raise CryptoAuditError(ErrorCode.INVALID_INPUT, f"Module name escapes the workspace: {module.module_name}")
+        path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8", newline="") as handle:
             handle.write(module.source)
         try:

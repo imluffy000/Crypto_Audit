@@ -5,28 +5,11 @@ nothing from the archive is written to disk and nothing is executed.
 
 import io
 import tarfile
-from typing import List, Optional
-
-from pydantic import BaseModel, Field
 
 from cryptoaudit.ingest.filters import SnapshotLimits, is_excluded, safe_relative_path
 from cryptoaudit.ingest.github_client import GitHubClient
-from cryptoaudit.models.scan import ModuleInput
+from cryptoaudit.models.scan import ModuleInput, RepositorySnapshot, SkippedFile
 from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
-
-
-class SkippedFile(BaseModel):
-    path: str
-    reason: str
-
-
-class RepositorySnapshot(BaseModel):
-    full_name: str
-    ref: str
-    commit: Optional[str] = None
-    modules: List[ModuleInput] = Field(default_factory=list)
-    skipped: List[SkippedFile] = Field(default_factory=list)
-    archive_bytes: int = 0
 
 
 def read_python_modules(archive: bytes, limits: SnapshotLimits) -> RepositorySnapshot:

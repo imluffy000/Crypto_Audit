@@ -6,11 +6,10 @@ finding, the diff, gate results, scanner results and the verdict); nothing is ge
 import ast
 from typing import List, Optional, Sequence, Set
 
-from pydantic import BaseModel, Field
-
 from cryptoaudit.analysis.call_analyzer import extract_calls
 from cryptoaudit.analysis.import_analyzer import extract_imports
 from cryptoaudit.models.experiment import CaseOutcome, Verdict
+from cryptoaudit.models.explanation import Explanation, ExplanationSection
 from cryptoaudit.models.finding import Finding, finding_id
 from cryptoaudit.models.repair import Candidate
 from cryptoaudit.models.validation import GateId, GateStatus, ValidationReport
@@ -27,17 +26,8 @@ NO_ORACLE_LIMITATION = (
 )
 
 
-class ExplanationSection(BaseModel):
-    title: str
-    points: List[str] = Field(default_factory=list)
 
 
-class Explanation(BaseModel):
-    source: str = "evidence"
-    verdict: Verdict
-    headline: str
-    sections: List[ExplanationSection] = Field(default_factory=list)
-    limitations: List[str] = Field(default_factory=list)
 
 
 def resolved_calls(source: str) -> Set[str]:
