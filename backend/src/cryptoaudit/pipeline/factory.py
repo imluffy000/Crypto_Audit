@@ -61,7 +61,14 @@ def build_strategies(
             llm = llm or OllamaClient(settings.llm_base_url, timeout=settings.llm_timeout)
             cls = LLMRepairStrategy if sid is StrategyId.S3 else MigrationAwareRepairStrategy
             strategies.append(
-                cls(llm, model=settings.llm_model, temperature=settings.llm_temperature, seed=settings.llm_seed)
+                cls(
+                    llm,
+                    model=settings.llm_model,
+                    temperature=settings.llm_temperature,
+                    seed=settings.llm_seed,
+                    max_tokens=settings.llm_max_tokens,
+                    num_ctx=settings.llm_num_ctx,
+                )
             )
     return strategies
 

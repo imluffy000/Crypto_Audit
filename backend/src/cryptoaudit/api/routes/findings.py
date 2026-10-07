@@ -79,6 +79,8 @@ def ai_explanation(
             raise CryptoAuditError(
                 ErrorCode.LLM_ERROR, f"AI explanations need a local Ollama server with '{services.settings.llm_model}' pulled"
             )
-        explanation = generate_ai_explanation(services.llm, services.settings.llm_model, run.explanation, run.diff)
+        explanation = generate_ai_explanation(
+            services.llm, services.settings.llm_model, run.explanation, run.diff, num_ctx=services.settings.llm_num_ctx
+        )
         services.store.save_ai_explanation(scan_id, candidate_id, explanation.model_dump_json())
     return AIExplanationOut(candidate_id=candidate_id, **explanation.model_dump(exclude={"prompt_hash"}))

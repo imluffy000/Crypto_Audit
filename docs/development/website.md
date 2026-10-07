@@ -65,7 +65,7 @@ cd frontend && npm install && npm run dev   # website on http://localhost:5173 (
 Optional local LLM (enables S3/S4 and the “Explain in plain language (AI)” button):
 
 ```sh
-ollama pull codellama:7b-instruct       # or set CRYPTOAUDIT_LLM_MODEL to another code model
+ollama pull qwen2.5-coder:7b       # or set CRYPTOAUDIT_LLM_MODEL to another code model
 ```
 
 Without it, scans run S1 and S2 and the results page says S3/S4 were skipped.
@@ -102,6 +102,8 @@ All limits are settings in `backend/.env` (defaults shown):
 | `CRYPTOAUDIT_MAX_FILE_KB` | 1024 | Larger `.py` files (usually generated code) are skipped and listed. |
 | `CRYPTOAUDIT_SCAN_PARALLELISM` | 4 | Files repaired and validated concurrently within one scan. |
 | `CRYPTOAUDIT_SCAN_WORKERS` | 2 | Scans running at the same time. |
+| `CRYPTOAUDIT_LLM_NUM_CTX` | 8192 | Context window for S3/S4 (prompt + complete repaired file). Files that do not fit are recorded as `NO_REPAIR` (`LIMIT_EXCEEDED`), never truncated. Larger values need more GPU memory. |
+| `CRYPTOAUDIT_LLM_TIMEOUT` | 600 | Seconds allowed for one generation. |
 
 The archive is buffered in a temporary file (not memory) and read without extracting it. Analysis
 covers every Python file and is fast; time is spent on files **with findings**, where each repair

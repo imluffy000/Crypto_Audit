@@ -5,6 +5,7 @@ it never decides or changes the verdict, and its output is always labelled as su
 
 from datetime import datetime, timezone
 from string import Template
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -30,7 +31,7 @@ class AIExplanation(BaseModel):
 
 
 def generate_ai_explanation(
-    client: LLMClient, model: str, explanation: Explanation, diff: str, seed: int = 0
+    client: LLMClient, model: str, explanation: Explanation, diff: str, seed: int = 0, num_ctx: Optional[int] = None
 ) -> AIExplanation:
     """Single-shot narrative. Raises CryptoAuditError(LLM_ERROR | TIMEOUT) when the model is unavailable."""
     spec = load_prompt("explanation", PROMPT_ID)
@@ -40,7 +41,7 @@ def generate_ai_explanation(
         diff=(diff or "(no code change)")[:MAX_DIFF_CHARS],
     )
     response = client.generate(
-        LLMRequest(model=model, system=spec.system, prompt=prompt, temperature=0.0, seed=seed, max_tokens=700)
+        LLMRequest(model=model, system=spec.system, prompt=prompt, temperature=0.0, seed=seed, max_tokens=700, num_ctx=num_ctx)
     )
     return AIExplanation(
         text=response.text.strip()[:MAX_OUTPUT_CHARS],

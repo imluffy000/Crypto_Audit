@@ -1,5 +1,6 @@
 """S3: single-shot local LLM repair strategy."""
 
+from cryptoaudit.llm.budget import module_budget
 from cryptoaudit.llm.client import DEFAULT_MODEL, LLMClient
 from cryptoaudit.llm.schemas import LLMRequest
 from cryptoaudit.models.finding import finding_id
@@ -13,7 +14,7 @@ from cryptoaudit.models.repair import (
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.parser import DEFAULT_MAX_CODE_CHARS, OutputParseError, parse_llm_output
 from cryptoaudit.repair.prompt_builder import render_prompt
-from cryptoaudit.utils.errors import CryptoAuditError
+from cryptoaudit.utils.errors import CryptoAuditError, ErrorCode
 
 
 class LLMRepairStrategy(RepairStrategy):
@@ -31,8 +32,9 @@ class LLMRepairStrategy(RepairStrategy):
         model: str = DEFAULT_MODEL,
         temperature: float = 0.0,
         seed: int = 0,
-        max_tokens: int = 4096,
+        max_tokens: int = 8192,
         max_code_chars: int = DEFAULT_MAX_CODE_CHARS,
+        num_ctx: int = 8192,
     ) -> None:
         self.client = client
         self.model = model
@@ -40,24 +42,37 @@ class LLMRepairStrategy(RepairStrategy):
         self.seed = seed
         self.max_tokens = max_tokens
         self.max_code_chars = max_code_chars
+        self.num_ctx = num_ctx
 
     def _repair(self, request: RepairRequest) -> RepairResult:
         prompt = render_prompt(request, self.prompt_id)
+        budget = module_budget(f"{prompt.system}\n{prompt.user}", request.source, self.num_ctx)
         metadata = GenerationMetadata(
             model=self.model,
             prompt_version=prompt.version,
             prompt_hash=prompt.prompt_hash,
             temperature=self.temperature,
             seed=self.seed,
-            max_tokens=self.max_tokens,
+            max_tokens=budget.num_predict(self.max_tokens),
+            num_ctx=self.num_ctx,
         )
+        if not budget.fits:
+            # Never send a prompt the model server would silently truncate.
+            return self.failure(
+                RepairStatus.NO_REPAIR,
+                f"File too large for the model context: about {budget.prompt_tokens} prompt + {budget.answer_tokens} "
+                f"answer tokens exceed num_ctx={self.num_ctx} (raise CRYPTOAUDIT_LLM_NUM_CTX if GPU memory allows)",
+                ErrorCode.LIMIT_EXCEEDED,
+                generation=metadata,
+            )
         llm_request = LLMRequest(
             model=self.model,
             system=prompt.system,
             prompt=prompt.user,
             temperature=self.temperature,
             seed=self.seed,
-            max_tokens=self.max_tokens,
+            max_tokens=metadata.max_tokens,
+            num_ctx=self.num_ctx,
         )
         try:
             response = self.client.generate(llm_request)

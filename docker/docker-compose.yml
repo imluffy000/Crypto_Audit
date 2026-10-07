@@ -1,7 +1,7 @@
 # Local CryptoAudit stack:  docker compose -f docker/docker-compose.yml up --build
 # Website: http://localhost:5173   (same origin as the dev server, so one OAuth App callback URL serves both)
 # With a local LLM for S3/S4:  docker compose -f docker/docker-compose.yml --profile llm up --build
-#   then: docker compose -f docker/docker-compose.yml exec ollama ollama pull codellama:7b-instruct
+#   then: docker compose -f docker/docker-compose.yml exec ollama ollama pull qwen2.5-coder:7b
 services:
   api:
     build:

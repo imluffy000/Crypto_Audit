@@ -16,10 +16,12 @@ class Settings(BaseSettings):
 
     # Repair / LLM (S3, S4)
     llm_base_url: str = "http://localhost:11434"
-    llm_model: str = "codellama:7b-instruct"
+    llm_model: str = "qwen2.5-coder:7b"
     llm_temperature: float = 0.0
     llm_seed: int = 0
-    llm_timeout: float = 300.0
+    llm_timeout: float = 600.0  # one complete generation; 7B models on small GPUs are slow
+    llm_num_ctx: int = 8192  # context window (prompt + answer); larger needs more GPU memory
+    llm_max_tokens: int = 8192  # upper bound on generated tokens
     prompts_dir: Optional[Path] = None
 
     # Validation

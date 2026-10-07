@@ -4,7 +4,7 @@ from typing import Protocol
 
 from cryptoaudit.llm.schemas import LLMRequest, LLMResponse
 
-DEFAULT_MODEL = "codellama:7b-instruct"
+DEFAULT_MODEL = "qwen2.5-coder:7b"
 
 
 class LLMClient(Protocol):

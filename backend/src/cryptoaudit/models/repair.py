@@ -65,6 +65,7 @@ class GenerationMetadata(BaseModel):
     temperature: float
     seed: int
     max_tokens: int
+    num_ctx: Optional[int] = None
     raw_output: Optional[str] = None
     model_digest: Optional[str] = None
 

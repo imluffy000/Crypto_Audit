@@ -34,6 +34,9 @@ class OllamaClient:
             "stream": False,
             "options": {"temperature": request.temperature, "seed": request.seed, "num_predict": request.max_tokens},
         }
+        if request.num_ctx is not None:
+            # Ollama's default context is small and it silently drops the start of longer prompts.
+            payload["options"]["num_ctx"] = request.num_ctx
         started = time.perf_counter()
         data = self._post("/api/generate", payload)
         text = data.get("response")

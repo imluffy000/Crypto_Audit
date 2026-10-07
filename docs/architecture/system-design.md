@@ -118,7 +118,7 @@ From `backend/`:
 pip install -e ".[dev,web,scanners]"
 uv tool install semgrep==1.163.0                              # isolated: conflicts with web deps
 docker build -t cryptoaudit-sandbox:latest ../docker/sandbox  # isolated validation runtime
-ollama pull codellama:7b-instruct                             # for S3/S4 (CRYPTOAUDIT_LLM_MODEL to change)
+ollama pull qwen2.5-coder:7b                             # for S3/S4 (CRYPTOAUDIT_LLM_MODEL to change)
 
 cryptoaudit analyze path/to/file.py
 cryptoaudit repair path/to/file.py -s S1,S2,S3,S4 --show-code
