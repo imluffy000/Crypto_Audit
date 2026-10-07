@@ -715,6 +715,8 @@ html.home-snap {
 }
 
 .home-nav-brand {
+  display: inline-flex;
+  align-items: center;
   border-radius: 10px;
 }
 

@@ -1,3 +1,5 @@
+<p><img src="docs/brand/cryptoaudit-logo.svg" alt="CryptoAudit" height="40"></p>
+
 # CryptoAudit
 
 CryptoAudit finds cryptographic misuse in Python code, proposes repairs and validates each repair
@@ -379,6 +381,7 @@ CI runs the backend tests on Python 3.11 and 3.12. Tests run with isolated setti
 | Document | Contents |
 |---|---|
 | [docs/diagrams/](docs/diagrams/README.md) | Illustrated explanations: architecture, scan flow, sign-in, ingestion, analyzer, strategies, validation, data model, every backend and frontend file |
+| [docs/brand/](docs/brand/README.md) | The CryptoAudit logo: symbol, wordmark, dark and white versions, app icon, usage |
 | [docs/development/website.md](docs/development/website.md) | Website setup, OAuth scopes, LLM options, large repositories, security notes |
 | [docs/architecture/system-design.md](docs/architecture/system-design.md) | Components, strategies, gates, reproducibility |
 | [docs/architecture/data-flow.md](docs/architecture/data-flow.md) | How data moves between stages and across the hidden-oracle boundary |

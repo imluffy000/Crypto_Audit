@@ -60,7 +60,6 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: var(--brand-primary);
 }
 
 .ca-logo-mark {
@@ -68,10 +67,14 @@
 }
 
 .ca-logo-word {
-  color: var(--brand-text);
+  color: var(--brand-text, #17201d);
   font-size: 1.0625rem;
-  font-weight: 750;
-  letter-spacing: -0.025em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.ca-logo-white .ca-logo-word {
+  color: #ffffff;
 }
 
 /* ---------- Buttons ---------- */
