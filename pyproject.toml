@@ -38,7 +38,7 @@ cryptoaudit = "cryptoaudit.cli.main:app"
 where = ["src"]
 
 [tool.setuptools.package-data]
-cryptoaudit = ["repair/prompts/*.md"]
+cryptoaudit = ["repair/prompting/templates/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

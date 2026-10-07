@@ -25,7 +25,7 @@ Rules:
 ## Check file format
 
 Check files define `check_*(ctx)` functions. They run inside the validation sandbox through
-`cryptoaudit.validation.harness` and use:
+`cryptoaudit.validation.sandbox.harness` and use:
 
 - `ctx.load_candidate()` — import a fresh copy of the candidate module
 - `ctx.load_json(name)` / `ctx.artifact(name)` — read files from `hidden/artifacts/`

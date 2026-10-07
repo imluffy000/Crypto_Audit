@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
-from cryptoaudit.validation import harness
+from cryptoaudit.validation.sandbox import harness
 from cryptoaudit.validation.models import CheckResult, GateStatus
 
 HARNESS_SOURCE = Path(harness.__file__)

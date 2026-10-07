@@ -9,17 +9,20 @@ from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.llm.client import LLMClient, OllamaClient
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.models import StrategyId
-from cryptoaudit.repair.s1_tool_guided import ToolGuidedRepairStrategy
-from cryptoaudit.repair.s2_template import TemplateRepairStrategy
-from cryptoaudit.repair.s3_llm import LLMRepairStrategy, MigrationAwareRepairStrategy
+from cryptoaudit.pipeline.orchestrator import RepairPipeline
+from cryptoaudit.repair.strategies import (
+    LLMRepairStrategy,
+    MigrationAwareRepairStrategy,
+    TemplateRepairStrategy,
+    ToolGuidedRepairStrategy,
+)
 from cryptoaudit.scanners.bandit import BanditScanner
 from cryptoaudit.scanners.models import Scanner
 from cryptoaudit.scanners.semgrep import SemgrepScanner
 from cryptoaudit.storage.experiment_store import ExperimentStore
+from cryptoaudit.validation.gates import ScannerValidator
 from cryptoaudit.validation.pipeline import ValidationPipeline
 from cryptoaudit.validation.sandbox import DockerSandbox, LocalProcessSandbox, Sandbox
-from cryptoaudit.validation.v0_scanner import ScannerValidator
-from cryptoaudit.pipeline.orchestrator import RepairPipeline
 
 
 def parse_strategy_ids(values: Sequence[str]) -> List[StrategyId]:

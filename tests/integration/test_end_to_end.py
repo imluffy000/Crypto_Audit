@@ -16,9 +16,12 @@ from cryptoaudit.ingest import ModuleInput
 from cryptoaudit.llm import LLMRequest, LLMResponse
 from cryptoaudit.pipeline import BenchmarkRunner, RepairPipeline
 from cryptoaudit.repair import RepairStatus, StrategyId
-from cryptoaudit.repair.s1_tool_guided import ToolGuidedRepairStrategy
-from cryptoaudit.repair.s2_template import TemplateRepairStrategy
-from cryptoaudit.repair.s3_llm import LLMRepairStrategy, MigrationAwareRepairStrategy
+from cryptoaudit.repair.strategies import (
+    LLMRepairStrategy,
+    MigrationAwareRepairStrategy,
+    TemplateRepairStrategy,
+    ToolGuidedRepairStrategy,
+)
 from cryptoaudit.scanners import ScannerIssue, ScanReport
 from cryptoaudit.storage import ExperimentStore
 from cryptoaudit.validation import GateId, GateStatus, LocalProcessSandbox, ScannerValidator, ValidationPipeline

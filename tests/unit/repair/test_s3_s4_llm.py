@@ -11,9 +11,8 @@ from cryptoaudit.analyzer.engine import AnalyzerEngine
 from cryptoaudit.core.errors import CryptoAuditError, ErrorCode
 from cryptoaudit.llm import LLMRequest, LLMResponse, OllamaClient
 from cryptoaudit.repair import RepairConstraints, RepairStatus, StrategyId, build_repair_request
-from cryptoaudit.repair.parser import OutputParseError, parse_llm_output
-from cryptoaudit.repair.prompting import render_prompt
-from cryptoaudit.repair.s3_llm import LLMRepairStrategy, MigrationAwareRepairStrategy
+from cryptoaudit.repair.prompting import OutputParseError, parse_llm_output, render_prompt
+from cryptoaudit.repair.strategies import LLMRepairStrategy, MigrationAwareRepairStrategy
 
 FIXTURE = Path("tests/fixtures/cr5/vulnerable.py")
 GOOD_OUTPUT = "Here you go:\n```python\nimport secrets\n\ndef f():\n    return secrets.token_hex(16)\n```\n"

@@ -8,7 +8,7 @@ from typing import List
 from cryptoaudit.core.identity import stable_hash
 from cryptoaudit.repair.models import RepairRequest
 
-PROMPT_DIR = Path(__file__).parent / "prompts"
+PROMPT_DIR = Path(__file__).parent / "templates"
 
 
 @dataclass(frozen=True)

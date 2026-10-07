@@ -26,6 +26,44 @@ results (V0) are recorded and analysed but never decide acceptance.
 | 9 | User interface / output | `cryptoaudit.cli`, `cryptoaudit.reporting` | `cryptoaudit repair`, `cryptoaudit bench …` |
 | – | Orchestration | `cryptoaudit.pipeline` | `RepairPipeline`, `BenchmarkRunner` |
 
+## Repository layout
+
+```
+.github/workflows/     CI: frontend Pages deploy, Python tests
+benchmark/cases/<id>/  public/ (vulnerable module, case.yaml) · hidden/ (oracles, legacy artifacts)
+configs/rules/         CR1–CR5 rule configuration (YAML)
+docker/sandbox/        Isolated validation runtime image
+docs/                  Architecture and implementation notes
+frontend/              React/Vite UI
+src/cryptoaudit/
+├── core/              Shared contracts: models, enums, config, errors, identity
+├── ingest/            Input loading (files, directories, benchmark cases)
+├── analyzer/          Deterministic CR1–CR5 detection (rules/ holds one module per rule)
+├── context/           Bounded repair context and public-interface extraction
+├── repair/            Repair contract (models, base, registry, request, edits)
+│   ├── strategies/    s1_tool_guided · s2_template · s3_llm · s4_migration
+│   └── prompting/     Prompt renderer, strict output parser, templates/*.md
+├── llm/               Local LLM client (Ollama)
+├── scanners/          Bandit / Semgrep wrappers (S1 hints, V0 only)
+├── candidate/         Candidate model and integrity checks
+├── benchmark/         Public case access; oracle.py is validation-only
+├── validation/        V0–V3 pipeline and result models
+│   ├── gates/         v0_scanner · executable (V1–V3, interface check)
+│   └── sandbox/       Docker/local runners and the in-sandbox harness
+├── aggregation/       Verdicts and strategy comparison
+├── storage/           Append-only experiment database
+├── evaluation/        Research analysis and Markdown report
+├── pipeline/          Orchestrator, benchmark runner, component factory
+├── reporting/         Console/JSON rendering
+└── cli/               Typer commands (analyze, repair, bench)
+tests/
+├── unit/<package>/    Mirrors src/cryptoaudit packages
+├── integration/       Oracle validity and end-to-end pipeline
+└── fixtures/          Analyzer fixtures, context fixtures, reference repairs (tests only)
+```
+
+Runtime output (`data/`, e.g. the experiment database) is git-ignored.
+
 ## Repair strategies
 
 | Id | Strategy | Behaviour |

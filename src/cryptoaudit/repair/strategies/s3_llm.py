@@ -1,12 +1,11 @@
-"""S3 (local LLM) and S4 (migration-aware LLM) single-shot repair strategies."""
+"""S3: single-shot local LLM repair strategy."""
 
 from cryptoaudit.core.errors import CryptoAuditError
 from cryptoaudit.core.identity import finding_id
 from cryptoaudit.llm.client import DEFAULT_MODEL, LLMClient, LLMRequest
 from cryptoaudit.repair.base import RepairStrategy
 from cryptoaudit.repair.models import GenerationMetadata, RepairRequest, RepairResult, RepairStatus, StrategyId
-from cryptoaudit.repair.parser import DEFAULT_MAX_CODE_CHARS, OutputParseError, parse_llm_output
-from cryptoaudit.repair.prompting import render_prompt
+from cryptoaudit.repair.prompting import DEFAULT_MAX_CODE_CHARS, OutputParseError, parse_llm_output, render_prompt
 
 
 class LLMRepairStrategy(RepairStrategy):
@@ -74,10 +73,3 @@ class LLMRepairStrategy(RepairStrategy):
             notes=["LLM output is an unvalidated candidate; repaired_finding_ids are the targeted findings"],
             generation=metadata,
         )
-
-
-class MigrationAwareRepairStrategy(LLMRepairStrategy):
-    """S4: identical generation mechanism to S3 plus generic migration-awareness instructions."""
-
-    strategy_id = StrategyId.S4
-    template_name = "s4_v1"
