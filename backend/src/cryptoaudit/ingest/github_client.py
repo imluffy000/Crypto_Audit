@@ -14,6 +14,15 @@ GITHUB_API_URL = "https://api.github.com"
 GITHUB_WEB_URL = "https://github.com"
 API_VERSION = "2022-11-28"
 MAX_PAGES = 10
+CONNECT_RETRIES = 2  # extra attempts when a connection to GitHub cannot be opened
+
+
+def _transport(transport: Optional[httpx.BaseTransport]) -> httpx.BaseTransport:
+    """
+    The given transport (tests), or the default one with retries. httpx only retries when the
+    connection itself fails (connect error or timeout), so nothing was sent and a retry is always safe.
+    """
+    return transport if transport is not None else httpx.HTTPTransport(retries=CONNECT_RETRIES)
 
 
 class GitHubUser(BaseModel):
@@ -101,7 +110,7 @@ class GitHubClient:
     ) -> None:
         self._http = httpx.Client(
             base_url=api_url,
-            transport=transport,
+            transport=_transport(transport),
             timeout=timeout,
             follow_redirects=True,
             headers={
@@ -230,7 +239,7 @@ class GitHubOAuth:
 
     def exchange_code(self, code: str) -> OAuthToken:
         try:
-            with httpx.Client(transport=self._transport, timeout=30.0) as http:
+            with httpx.Client(transport=_transport(self._transport), timeout=30.0) as http:
                 response = http.post(
                     f"{self.web_url}/login/oauth/access_token",
                     data={
@@ -255,7 +264,7 @@ class GitHubOAuth:
         Best effort: returns False instead of raising when GitHub cannot be reached.
         """
         try:
-            with httpx.Client(transport=self._transport, timeout=15.0) as http:
+            with httpx.Client(transport=_transport(self._transport), timeout=15.0) as http:
                 response = http.request(
                     "DELETE",
                     f"{self.api_url}/applications/{self.client_id}/token",

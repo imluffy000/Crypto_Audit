@@ -274,3 +274,14 @@ def test_code_exchange_error():
 def test_json_helper_unused_guard():
     # Ensures the mock transport serialises JSON bodies like GitHub does.
     assert json.loads(json.dumps(REPO_JSON))["owner"]["login"] == "alice"
+
+
+def test_github_connections_retry_by_default_but_tests_keep_their_transport():
+    import httpx
+
+    from cryptoaudit.ingest.github_client import _transport
+
+    default = _transport(None)
+    assert isinstance(default, httpx.HTTPTransport)  # httpx retries failed connection attempts on this transport
+    mock = httpx.MockTransport(lambda request: httpx.Response(200))
+    assert _transport(mock) is mock
